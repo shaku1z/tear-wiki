@@ -1,259 +1,293 @@
 <script>
   import { selectedAbilities } from '../../stores/loadout.js';
-  import { simulate, BASE_CONFIG, BASE_MODS } from '../../lib/simulate.js';
-
+  import { simulate, BASE_CONFIG } from '../../lib/simulate.js';
   import SynergyPanel from './SynergyPanel.svelte';
 
-  // We want to calculate the step-by-step damage multipliers.
-  // Damage scale is affected by CONFIG.blade.damageScale.
-  // Other multipliers are added in combat:
-  // - AirBonus (mods.airBonus)
-  // - AerialRave (mods.aerialRave)
-  // - GlassCannon (multiplies damageScale)
-
-  // Reactive simulation of the full loadout
   $: sim = simulate($selectedAbilities);
+  $: c = sim.config;
+  $: m = sim.mods;
+  $: p = sim.player;
+
+  // 1. Calculate Theoretical Max Damage (Perfect Hit)
+  // Max Swing Speed allowed by config
+  $: maxSwingVelocity = c.blade.maxSpeed;
+  $: rawSwingBase = (maxSwingVelocity - c.blade.minHitSpeed) * c.blade.damageScale;
+  $: cappedSwingBase = Math.min(rawSwingBase, c.blade.maxDamage);
   
-  // Calculate the damage breakdown
-  $: damageBreakdown = getDamageBreakdown($selectedAbilities);
-
-  function getDamageBreakdown(abilities) {
-    let steps = [];
-    let currentDmgScale = BASE_CONFIG.blade.damageScale;
-    let base = currentDmgScale;
-
-    // To get the exact step-by-step, we can run a micro-simulation
-    let tempSim = simulate([]); // get clean base state
+  // Power Slam Math
+  $: maxPowerSlam = cappedSwingBase 
+    * c.blade.slamMultiplier 
+    * (1 + c.blade.slamPowerBonus) 
+    * (1 + m.airBonus) 
+    * (1 + m.aerialRave)
+    * (m.stormMult || 1) // max trick
+    * (m.sunderHit ? 1.3 : 1) // Sunder mark
+    * (c.player.dmgTakenMult > 1 ? 1.3 : 1); // Glass cannon is applied to dmgTakenMult or damageScale? Wait, Glass cannon applies to damageScale. We already used it via damageScale.
     
-    // Group stackables so we show "Keen Edge x2" rather than two lines
-    const grouped = [];
-    abilities.forEach(a => {
-      const existing = grouped.find(g => g.id === a.id && g.tier === a.tier);
-      if (existing) existing.count++;
-      else grouped.push({ ...a, count: 1 });
-    });
+  // Updraft Launch Power (Knockback)
+  $: maxLaunchSpeed = c.blade.launchPower * (1 + c.blade.risingLaunchBonus);
 
-    for (const group of grouped) {
-      const beforeScale = tempSim.config.blade.damageScale;
-      const beforeAir = tempSim.mods.airBonus;
-      const beforeRave = tempSim.mods.aerialRave;
-      
-      // Apply it N times
-      for(let i=0; i<group.count; i++) {
-        if (group.apply) group.apply(tempSim);
-      }
+  // Throw Kinematics
+  $: throwReleaseMax = c.blade.throw.speed + (c.blade.throw.speedFromSwing * c.blade.maxSpeed);
+  $: cappedThrowSpeed = Math.min(throwReleaseMax, c.blade.throw.maxSpeed);
+  $: maxThrowDmg = (c.blade.throw.damage + (cappedThrowSpeed * c.blade.throw.damageFromSpeed)) * c.blade.throw.hiMult;
 
-      const afterScale = tempSim.config.blade.damageScale;
-      const afterAir = tempSim.mods.airBonus;
-      const afterRave = tempSim.mods.aerialRave;
-
-      let desc = '';
-      let mult = 1.0;
-
-      if (afterScale !== beforeScale) {
-        mult = afterScale / beforeScale;
-        desc = `Scale \u00D7${mult.toFixed(3)}`;
-      } else if (afterAir !== beforeAir) {
-        mult = 1 + (afterAir - beforeAir);
-        desc = `Air \u00D7${mult.toFixed(2)}`;
-      } else if (afterRave !== beforeRave) {
-        mult = 1 + (afterRave - beforeRave);
-        desc = `Air Cap \u00D7${mult.toFixed(2)}`;
-      }
-
-      if (mult !== 1.0) {
-        let name = group.name;
-        if (group.tier) name += ` T${group.tier}`;
-        if (group.count > 1) name += ` \u00D7${group.count}`;
-        steps.push({ name, desc, mult });
-      }
-    }
-
-    let finalMult = (tempSim.config.blade.damageScale / base) 
-                    * (1 + tempSim.mods.airBonus)
-                    * (1 + tempSim.mods.aerialRave);
-
-    const hitCap = tempSim.config.blade.damageScale >= BASE_CONFIG.blade.maxDamage * 2; // approximation for warning
-
-    return { steps, finalMult, hitCap, maxDamage: tempSim.config.blade.maxDamage };
+  // 2. Archetype Profiling (0 - 100 scales relative to base)
+  function calcScore(current, base, maxFactor = 2) {
+    let ratio = current / base;
+    if (ratio < 1) ratio = 1 - ((1 - ratio) / 2); // dimish penalties slightly
+    return Math.min(100, Math.max(0, (ratio / maxFactor) * 100));
   }
 
-  // Helpers to extract booleans/values for the UI
-  $: m = sim.mods;
-  $: c = sim.config;
-  
-  $: statuses = [
-    { name: 'Bleed', active: m.bleedHit > 0 || m.bleedDetonate || m.bleedNova, 
-      desc: `${m.bleedHit ? `Applies ${m.bleedHit} stacks on hit.` : ''} ${m.bleedDetonate ? 'Detonates on slam/recall.' : ''}` },
-    { name: 'Mark', active: m.sunderHit || m.backlashMark, 
-      desc: `${m.sunderHit ? 'Applied on hit (+30% dmg).' : ''} ${m.backlashMark ? 'Applied in AoE on parry.' : ''}` },
-    { name: 'Stun', active: m.razorStun || m.concStun || m.parryStun, 
-      desc: 'Can stun enemies.' },
-    { name: 'Slow', active: m.cinderSlow, 
-      desc: 'Cinder trail slows enemies.' }
-  ].filter(s => s.active);
+  // Agility: Move speed, dash distance, dash charges
+  $: agilityScore = calcScore(c.player.moveSpeed * p.maxDashCharges, BASE_CONFIG.player.moveSpeed * 1, 3.5);
+  // Lethality: Damage scale, air bonuses, max damage
+  $: lethalityScore = calcScore(cappedSwingBase * (1 + m.airBonus), (BASE_CONFIG.blade.maxSpeed - BASE_CONFIG.blade.minHitSpeed) * BASE_CONFIG.blade.damageScale, 2.5);
+  // Control: Knockback, Stuns, Sling length
+  $: controlScore = Math.min(100, 40 + (m.cinderSlow ? 15 : 0) + (m.razorStun || m.concStun || m.parryStun ? 25 : 0) + (m.sunderHit ? 20 : 0));
+  // Sustain: Lifesteal, Wave heal, Defenses
+  $: sustainScore = Math.min(100, 20 + (m.lifesteal * 15) + (m.bloodrite ? 20 : 0) + (p.maxShield * 15) + (m.parryGuard ? 15 : 0));
 
-  $: sustains = [
-    { name: 'Vampiric Edge', active: m.lifesteal > 0, desc: `+${m.lifesteal} HP per swing` },
-    { name: 'Bloodrite', active: m.bloodrite, desc: 'Heals on SKILL kill' },
-    { name: 'Flow Guard Regen', active: m.flowRegen, desc: 'Passive heal at high trick rank' },
-    { name: 'Bulwark', active: m.waveHeal > 0, desc: `+${m.waveHeal} HP per wave clear` }
-  ].filter(s => s.active);
-
-  $: defenses = [
-    { name: 'Riposte', active: m.parryGuard, desc: 'Invuln/DR after perfect parry' },
-    { name: 'Aegis', active: m.aegisParry || sim.player.maxShield > 0, desc: 'Absorbs hits' },
-    { name: 'Flow Guard', active: m.flowGuard, desc: 'DR at high trick rank' },
-    { name: 'Slipstream', active: m.slipstream, desc: 'Damage window post-dash' }
-  ].filter(s => s.active);
 </script>
 
-<div class="stat-panel">
-  <h2>Stat Output</h2>
-
-  <div class="section math-chain">
-    <h4>Damage Multiplier Breakdown</h4>
-    <div class="chain">
-      <div class="row"><span>Base damage scale:</span> <span>&times;1.00</span></div>
-      {#each damageBreakdown.steps as step}
-        <div class="row">
-          <span class="muted">+ {step.name}:</span> 
-          <span class="highlight">{step.desc}</span>
-        </div>
-      {/each}
-      <hr/>
-      <div class="row final">
-        <span>Final Multiplier:</span> 
-        <span class="highlight">&times;{damageBreakdown.finalMult.toFixed(2)}</span>
+<div class="dashboard-wrapper">
+  
+  <header class="dash-header">
+    <h2>Theorycrafting Engine</h2>
+    <div class="archetype-radar">
+      <div class="bar-group">
+        <label>Agility</label>
+        <div class="bar-track"><div class="bar-fill" style="width: {agilityScore}%; background: #3b82f6;"></div></div>
+      </div>
+      <div class="bar-group">
+        <label>Lethality</label>
+        <div class="bar-track"><div class="bar-fill" style="width: {lethalityScore}%; background: #ef4444;"></div></div>
+      </div>
+      <div class="bar-group">
+        <label>Control</label>
+        <div class="bar-track"><div class="bar-fill" style="width: {controlScore}%; background: #a855f7;"></div></div>
+      </div>
+      <div class="bar-group">
+        <label>Sustain</label>
+        <div class="bar-track"><div class="bar-fill" style="width: {sustainScore}%; background: #10b981;"></div></div>
       </div>
     </div>
-    
-    {#if damageBreakdown.hitCap}
-      <div class="warning">
-        <strong>&#9888; maxDamage cap REACHED</strong>
-        <p>Additional damage multipliers beyond this point yield zero returns. Current cap: {damageBreakdown.maxDamage}</p>
+  </header>
+
+  <div class="metrics-grid">
+    <!-- Peak Potential -->
+    <div class="metric-card highlight-card">
+      <div class="icon-title">
+        <span class="ico">⚔️</span>
+        <h4>Perfect Swing</h4>
       </div>
-    {/if}
-  </div>
+      <div class="big-num">{cappedSwingBase.toFixed(0)} <span class="unit">dmg</span></div>
+      <p class="desc">Absolute max damage on a flat ground swing hitting {c.blade.maxSpeed} px/s.</p>
+    </div>
 
-  <div class="section">
-    <h4>Active Status Effects</h4>
-    {#if statuses.length === 0}<p class="muted">None</p>{/if}
-    <ul class="clean-list">
-      {#each statuses as s}
-        <li><strong>{s.name}:</strong> <span class="muted">{s.desc}</span></li>
-      {/each}
-    </ul>
-  </div>
+    <div class="metric-card highlight-card">
+      <div class="icon-title">
+        <span class="ico">☄️</span>
+        <h4>Power Slam Max</h4>
+      </div>
+      <div class="big-num">{maxPowerSlam.toFixed(0)} <span class="unit">dmg</span></div>
+      <p class="desc">Perfect downward slam on a marked target at max trick tier.</p>
+    </div>
 
-  <div class="section">
-    <h4>Sustain Sources</h4>
-    {#if sustains.length === 0}<p class="muted">None (Base heal only)</p>{/if}
-    <ul class="clean-list">
-      {#each sustains as s}
-        <li><strong>{s.name}:</strong> <span class="muted">{s.desc}</span></li>
-      {/each}
-    </ul>
-  </div>
+    <div class="metric-card highlight-card">
+      <div class="icon-title">
+        <span class="ico">🌪️</span>
+        <h4>Updraft Force</h4>
+      </div>
+      <div class="big-num">{maxLaunchSpeed.toFixed(0)} <span class="unit">px/s</span></div>
+      <p class="desc">Upward knockback velocity when hitting a rising launch swing.</p>
+    </div>
 
-  <div class="section">
-    <h4>Defensive Windows</h4>
-    {#if defenses.length === 0}<p class="muted">None (Base iframe only)</p>{/if}
-    <ul class="clean-list">
-      {#each defenses as s}
-        <li><strong>{s.name}:</strong> <span class="muted">{s.desc}</span></li>
-      {/each}
-    </ul>
-  </div>
+    <!-- Kinematics -->
+    <div class="metric-card physics-card">
+      <h4>Kinematics</h4>
+      <div class="phys-row">
+        <span>Sprint Speed</span>
+        <strong>{c.player.moveSpeed.toFixed(0)} px/s</strong>
+      </div>
+      <div class="phys-row">
+        <span>Dash Burst</span>
+        <strong>{c.dash.speed.toFixed(0)} px/s</strong>
+      </div>
+      <div class="phys-row">
+        <span>Throw Speed</span>
+        <strong>{cappedThrowSpeed.toFixed(0)} px/s</strong>
+      </div>
+      <div class="phys-row">
+        <span>Return Speed</span>
+        <strong>{c.blade.throw.returnSpeed.toFixed(0)} px/s</strong>
+      </div>
+      <div class="phys-row">
+        <span>Tether Max</span>
+        <strong>{c.blade.maxReach.toFixed(0)} px</strong>
+      </div>
+    </div>
 
-  <div class="section">
-    <h4>Dash Behavior</h4>
-    <ul class="clean-list">
-      <li><strong>Charges:</strong> <span class="highlight">{sim.player.maxDashCharges}</span></li>
-      <li><strong>Cooldown:</strong> <span class="highlight">{(c.dash.cooldown).toFixed(2)}s</span></li>
-      {#if m.phantomRefund || m.concRefund || $selectedAbilities.find(a => a.id === 'adrenaline')}
-        <li>
-          <strong>Refunds on:</strong> 
-          <span class="muted">
-            {[
-              m.phantomRefund ? 'Phase Slice Kill' : null,
-              m.concRefund ? 'Shockwave Hit' : null,
-              $selectedAbilities.find(a => a.id === 'adrenaline') ? 'Any Kill' : null
-            ].filter(Boolean).join(', ')}
-          </span>
-        </li>
-      {/if}
-    </ul>
+    <!-- Modifiers & Procs -->
+    <div class="metric-card physics-card">
+      <h4>Combat Modifiers</h4>
+      <div class="phys-row">
+        <span>Aerial Bonus</span>
+        <strong class:buff={m.airBonus > 0}>+{Math.round(m.airBonus * 100)}%</strong>
+      </div>
+      <div class="phys-row">
+        <span>Parry Slowmo</span>
+        <strong>{c.parrySlowScale.toFixed(2)}x time</strong>
+      </div>
+      <div class="phys-row">
+        <span>Lifesteal</span>
+        <strong class:buff={m.lifesteal > 0}>+{m.lifesteal} HP/swing</strong>
+      </div>
+      <div class="phys-row">
+        <span>Dash Charges</span>
+        <strong class:buff={p.maxDashCharges > 1}>{p.maxDashCharges}</strong>
+      </div>
+      <div class="phys-row">
+        <span>Damage Taken</span>
+        <strong class:nerf={c.player.dmgTakenMult > 1} class:buff={c.player.dmgTakenMult < 1}>x{c.player.dmgTakenMult.toFixed(2)}</strong>
+      </div>
+    </div>
   </div>
 
   <SynergyPanel />
 </div>
 
 <style>
-  .stat-panel h2 {
+  .dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: var(--sl-color-black);
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--sl-color-hairline);
+  }
+
+  .dash-header h2 {
     margin-top: 0;
     margin-bottom: 20px;
-    font-size: 1.5rem;
     color: var(--sl-color-white);
-  }
-
-  .section {
-    margin-bottom: 24px;
-  }
-  .section h4 {
-    margin-bottom: 12px;
-    font-size: 1rem;
-    color: var(--sl-color-gray-2);
+    font-size: 1.5rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--sl-color-hairline);
-    padding-bottom: 4px;
+    letter-spacing: 1px;
   }
 
-  .chain {
-    background: var(--sl-color-black);
-    padding: 12px;
-    border-radius: 6px;
-    font-family: monospace;
-    font-size: 0.9rem;
+  .archetype-radar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
   }
-  .row {
+  @media (max-width: 768px) {
+    .archetype-radar { grid-template-columns: 1fr; }
+  }
+
+  .bar-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--sl-color-gray-2);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .bar-track {
+    width: 100%;
+    height: 8px;
+    background: var(--sl-color-gray-5);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .metric-card {
+    background: var(--sl-color-gray-6);
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .highlight-card {
+    background: linear-gradient(145deg, var(--sl-color-gray-6), var(--sl-color-black));
+    border-color: var(--sl-color-gray-4);
+  }
+
+  .icon-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .icon-title h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--sl-color-white);
+    text-transform: uppercase;
+  }
+  .ico { font-size: 1.2rem; }
+
+  .big-num {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--sl-color-white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .unit {
+    font-size: 1rem;
+    font-weight: normal;
+    color: var(--sl-color-gray-3);
+  }
+
+  .desc {
+    font-size: 0.85rem;
+    color: var(--sl-color-gray-3);
+    margin: 0;
+    line-height: 1.4;
+    margin-top: auto;
+  }
+
+  .physics-card h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: var(--sl-color-white);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--sl-color-hairline);
+    padding-bottom: 8px;
+  }
+  .phys-row {
     display: flex;
     justify-content: space-between;
-    padding: 2px 0;
-  }
-  .row.final {
-    font-weight: bold;
-    font-size: 1rem;
-    color: var(--sl-color-white);
-  }
-  .highlight { color: var(--sl-color-accent); }
-  .muted { color: var(--sl-color-gray-3); }
-
-  hr {
-    border: none;
-    border-top: 1px dashed var(--sl-color-gray-4);
-    margin: 8px 0;
-  }
-
-  .warning {
-    margin-top: 12px;
-    padding: 12px;
-    background: rgba(239, 68, 68, 0.1);
-    border-left: 4px solid #ef4444;
-    border-radius: 4px;
-  }
-  .warning strong { color: #ef4444; display: block; margin-bottom: 4px; }
-  .warning p { margin: 0; font-size: 0.85rem; color: var(--sl-color-text); }
-
-  .clean-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .clean-list li {
-    padding: 4px 0;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--sl-color-hairline);
     font-size: 0.9rem;
-    color: var(--sl-color-white);
   }
+  .phys-row:last-child {
+    border-bottom: none;
+  }
+  .phys-row span { color: var(--sl-color-gray-3); }
+  .phys-row strong { color: var(--sl-color-white); font-family: monospace; }
+  .buff { color: #10b981 !important; }
+  .nerf { color: #ef4444 !important; }
+
 </style>
