@@ -159,8 +159,11 @@ export function initModelViewer(canvas, modelName, variant) {
     const dy = isHovered ? (mouseY - cy) : 0;
     
     // Update player mock to track mouse loosely, so bosses attack it
-    window.player.x = dx * 1.5;
-    window.player.y = dy * 1.5 - 50;
+    const simX = CONFIG.view.w / 2;
+    const simY = CONFIG.view.h / 2;
+    
+    window.player.x = simX + dx * 1.5;
+    window.player.y = simY + dy * 1.5 - 50;
     
     // Fake the ground
     enemyInstance.onGround = !enemyInstance.cfg.hoverY;
@@ -183,11 +186,11 @@ export function initModelViewer(canvas, modelName, variant) {
 
     // Simulate engine
     enemyInstance.update(dt, window.platforms, window.player, window.projectiles);
-    // Bind position to origin for viewer
-    enemyInstance.x = 0;
-    enemyInstance.y = 0;
+    // Bind position to center of sim for viewer
+    enemyInstance.x = simX;
+    enemyInstance.y = simY;
 
-    // Simulate Projectiles
+    // Simulate Projectiles natively
     window.projectiles = window.projectiles.filter(p => !p.dead && p.life > 0);
     window.projectiles.forEach(p => p.update(dt));
 
@@ -197,6 +200,7 @@ export function initModelViewer(canvas, modelName, variant) {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(1.5, 1.5);
+    ctx.translate(-simX, -simY); // offset so simX,simY draws at center of canvas
     
     // Draw all natively
     window.projectiles.forEach(p => {
@@ -215,8 +219,8 @@ export function initModelViewer(canvas, modelName, variant) {
       let cueColor = "#15c2c2";
       if (enemyInstance.color && enemyInstance.color !== "#000") cueColor = enemyInstance.color;
       
-      drawAnnotation(enemyInstance.hw, -enemyInstance.hh, 50, -50, `[STATE: ${state.toUpperCase()}]`, cueColor);
-      drawAnnotation(-enemyInstance.hw, -enemyInstance.hh, -50, -50, `[HP: ${enemyInstance.hp}]`, "#fff");
+      drawAnnotation(enemyInstance.x + enemyInstance.hw, enemyInstance.y - enemyInstance.hh, simX + 50, simY - 50, `[STATE: ${state.toUpperCase()}]`, cueColor);
+      drawAnnotation(enemyInstance.x - enemyInstance.hw, enemyInstance.y - enemyInstance.hh, simX - 50, simY - 50, `[HP: ${Math.floor(enemyInstance.hp)}]`, "#fff");
       ctx.globalAlpha = 1;
     }
 
