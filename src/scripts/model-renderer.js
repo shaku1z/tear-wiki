@@ -52,6 +52,17 @@ export function initModelViewer(canvas, modelName, variant) {
     dim: "rgba(255,255,255,0.3)"
   };
 
+  const PHYSICS = {
+    charger: { speed: 760, time: 0.5 },
+    ranged: { speed: 800, cd: 2.3 },
+    marksman: { speed: 1900, windup: 1.4 },
+    flyer: { speed: 700, cd: 3.3 },
+    bomber: { speed: 540, cd: 2.4 },
+    warden: { speed: 700, lunge: 1500 },
+    colossus: { sweep: 540 },
+    source: { cd: 2.5 }
+  };
+
   function drawGrid(w, h, ox, oy, distort) {
     ctx.save();
     ctx.translate(w/2 + ox, h/2 + oy);
@@ -164,7 +175,6 @@ export function initModelViewer(canvas, modelName, variant) {
     const modelY = cy + floatY + dy * 10;
     const modelX = cx + dx * 10;
 
-    // Shadow
     ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.beginPath();
     ctx.ellipse(cx + dx*2, cy + Math.abs(floatY) + 50, 20 + floatY, 5, 0, 0, Math.PI * 2);
@@ -184,7 +194,8 @@ export function initModelViewer(canvas, modelName, variant) {
       const hw = 18, hh = 18;
       ctx.fillStyle = COLORS.charger;
       
-      const lungeX = hoverK > 0 && Math.sin(time*6) > 0.5 ? faceDir * hoverK * 30 : 0;
+      const tCycle = time % 1.7; // chargeCd + chargeTime = ~1.7s
+      const lungeX = hoverK > 0 && tCycle > 1.2 ? faceDir * hoverK * 30 : 0;
       ctx.translate(lungeX, 0);
       
       ctx.fillRect(-hw, -hh, hw*2, hh*2);
@@ -222,9 +233,9 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.strokeStyle = COLORS.charger; ctx.globalAlpha = 0.35 + 0.45 * hoverK; ctx.lineWidth = 5; ctx.setLineDash([7, 5]);
         ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 100, 0); ctx.stroke();
         ctx.setLineDash([]); ctx.globalAlpha = 1;
-        drawAnnotation(0, -hh, faceDir * 40, -hh - 30, "[ARMED CHARGE]", COLORS.charger);
+        drawAnnotation(0, -hh, faceDir * 40, -hh - 30, `[ARMED CHARGE: ${PHYSICS.charger.speed}px/s]`, COLORS.charger);
       } else if (lungeX) {
-        drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[LUNGE VELOCITY: HIGH]", COLORS.charger);
+        drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, `[LUNGE VEL: ${PHYSICS.charger.speed}px/s]`, COLORS.charger);
       }
       
       ctx.fillStyle = "#fff";
@@ -255,25 +266,33 @@ export function initModelViewer(canvas, modelName, variant) {
       if (hoverK > 0) {
         ctx.fillStyle = COLORS.ranged;
         if (variant === "marksman") {
+           const tCycle = time % (PHYSICS.marksman.windup + 0.5);
            ctx.globalAlpha = 0.4 + 0.5 * hoverK;
            ctx.beginPath(); ctx.arc(0, 0, 4 + hoverK * 8, 0, Math.PI * 2); ctx.fill();
            ctx.globalAlpha = 1;
-           drawAnnotation(0, -r, faceDir * 40, -r - 30, "[SEEKER SIGHT]", COLORS.ranged);
+           if (tCycle > PHYSICS.marksman.windup) {
+              ctx.lineWidth = 4; ctx.strokeStyle = COLORS.eye; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(faceDir*150, 0); ctx.stroke();
+           }
+           drawAnnotation(0, -r, faceDir * 40, -r - 30, `[VELOCITY: ${PHYSICS.marksman.speed}px/s]`, COLORS.ranged);
         } else if (variant === "sentinel") {
+           const tCycle = time % PHYSICS.ranged.cd;
            ctx.lineWidth = 1.2; ctx.strokeStyle = ink; ctx.globalAlpha = 0.5 + 0.4 * hoverK;
            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 100, hoverK * 30); ctx.stroke();
            ctx.globalAlpha = 1;
            ctx.fillStyle = COLORS.ranged;
-           ctx.beginPath(); ctx.arc(faceDir * (30 + (time*300)%60), hoverK * 30, 5, 0, Math.PI * 2); ctx.fill();
-           drawAnnotation(0, -r, -faceDir * 40, -r - 30, "[PROJECTILE TRAJECTORY]", COLORS.ranged);
+           const pDist = Math.min((tCycle * PHYSICS.ranged.speed) * 0.1, 100);
+           ctx.beginPath(); ctx.arc(faceDir * (10 + pDist), hoverK * 30, 5, 0, Math.PI * 2); ctx.fill();
+           drawAnnotation(0, -r, -faceDir * 40, -r - 30, `[CD: ${PHYSICS.ranged.cd}s]`, COLORS.ranged);
         } else {
+           const tCycle = time % PHYSICS.ranged.cd;
            ctx.beginPath();
-           const px = faceDir * (r + 10 + (time*400)%60);
+           const pDist = Math.min((tCycle * PHYSICS.ranged.speed) * 0.1, 100);
+           const px = faceDir * (r + 10 + pDist);
            ctx.moveTo(px + faceDir * 6, 0);
            ctx.lineTo(px, -3); ctx.lineTo(px - faceDir * 6, 0); ctx.lineTo(px, 3);
            ctx.fill();
            ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
-           drawAnnotation(0, -r, -faceDir * 40, -r - 30, "[RAPID FIRE]", COLORS.ranged);
+           drawAnnotation(0, -r, -faceDir * 40, -r - 30, `[SPEED: ${PHYSICS.ranged.speed}px/s]`, COLORS.ranged);
         }
       }
       
@@ -311,13 +330,15 @@ export function initModelViewer(canvas, modelName, variant) {
       
       if (hoverK > 0) {
         if (variant === "divebomber") {
+           const tCycle = time % PHYSICS.flyer.cd;
+           const yDist = Math.min((tCycle * PHYSICS.flyer.speed) * 0.1, 80);
            ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.5 * hoverK; ctx.lineWidth = 3;
-           ctx.beginPath(); ctx.arc(faceDir * 20, 50, (time*150)%30, 0, Math.PI * 2); ctx.stroke();
-           ctx.beginPath(); ctx.moveTo(faceDir * 20, hh); ctx.setLineDash([4, 8]); ctx.lineTo(faceDir * 20, 50); ctx.stroke();
+           ctx.beginPath(); ctx.arc(faceDir * 20, 10 + yDist, 6, 0, Math.PI * 2); ctx.stroke();
+           ctx.beginPath(); ctx.moveTo(faceDir * 20, hh); ctx.setLineDash([4, 8]); ctx.lineTo(faceDir * 20, 80); ctx.stroke();
            ctx.setLineDash([]); ctx.globalAlpha = 1;
-           drawAnnotation(faceDir * 20, hh, -faceDir * 40, hh + 30, "[AERIAL BOMBARDMENT]", COLORS.slam);
+           drawAnnotation(faceDir * 20, hh, -faceDir * 40, hh + 30, `[BOMBARD: ${PHYSICS.flyer.speed}px/s]`, COLORS.slam);
         } else {
-           drawAnnotation(faceDir * r, 0, faceDir * 60, -30, "[EVASIVE MANEUVERS]", COLORS.flyer);
+           drawAnnotation(faceDir * r, 0, faceDir * 60, -30, `[SWOOP: ${PHYSICS.flyer.speed}px/s]`, COLORS.flyer);
         }
       }
       drawDimensions(0, 0, r*2, hh*2, 46, 36);
@@ -339,7 +360,7 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillStyle = ink; ctx.fillRect(-2, -hh - 8, 4, 8);
       
       if (hoverK > 0) {
-        const tCycle = (time * 1.5) % 1;
+        const tCycle = (time % PHYSICS.bomber.cd) / PHYSICS.bomber.cd;
         const px = faceDir * tCycle * 60, py = -hh - 10 - tCycle * 40 + tCycle*tCycle * 60;
         
         if (variant === "trapper") {
@@ -353,7 +374,7 @@ export function initModelViewer(canvas, modelName, variant) {
           const wob = Math.sin(time*12) * 1.4;
           ctx.fillStyle = COLORS.sludge; ctx.beginPath(); ctx.ellipse(px, py, 6 + wob, 6 - wob, 0, 0, Math.PI*2); ctx.fill();
           ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
-          drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[CAUSTIC SLUDGE]", COLORS.sludge);
+          drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, `[SLUDGE CD: ${PHYSICS.bomber.cd}s]`, COLORS.sludge);
         } else if (variant === "geomancer") {
           ctx.fillStyle = COLORS.sludge; ctx.globalAlpha = hoverK * 0.7;
           ctx.fillRect(faceDir * 40 - 15, 45 - hoverK * 30, 30, hoverK * 30);
@@ -365,7 +386,7 @@ export function initModelViewer(canvas, modelName, variant) {
           ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
           ctx.fillStyle = Math.floor(time * 8) % 2 === 0 ? "#fff" : COLORS.bomber;
           ctx.fillRect(px - 1, py - 9, 2, 3);
-          drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[HIGH EXPLOSIVE]", COLORS.bomber);
+          drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, `[LOB VEL: ${PHYSICS.bomber.speed}px/s]`, COLORS.bomber);
         }
       }
       drawDimensions(0, 0, hw*2, hw*2, 44, 44);
@@ -391,8 +412,10 @@ export function initModelViewer(canvas, modelName, variant) {
          ctx.fillRect(gx - 10, -hh - 16, 20, hh*2 + 32);
          ctx.globalAlpha = 1;
          
-         ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = (0.35 + 0.5 * hoverK) * hoverK; ctx.lineWidth = 3 + hoverK * 3;
-         ctx.beginPath(); ctx.moveTo(-(40 + 60 * hoverK), hh + 2); ctx.lineTo((40 + 60 * hoverK), hh + 2); ctx.stroke();
+         const tCycle = (time % 3) / 3;
+         const r = tCycle * 80;
+         ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = hoverK * (1 - tCycle); ctx.lineWidth = 4;
+         ctx.beginPath(); ctx.ellipse(0, hh + 2, r, r * 0.3, 0, 0, Math.PI*2); ctx.stroke();
          ctx.globalAlpha = 1;
          
          drawAnnotation(gx, 0, faceDir * 70, -30, "[DEFLECTION BARRIER]", COLORS.armoredShield);
@@ -416,9 +439,9 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.fillStyle = "#fff"; ctx.fillRect(-2, haloY - 7, 4, 14); ctx.fillRect(-6, haloY - 3, 12, 4);
         
         if (hoverK > 0) {
-           const pulse = (time * 120) % 120;
-           ctx.strokeStyle = COLORS.priest; ctx.globalAlpha = 0.6 * (1 - pulse/120); ctx.lineWidth = 3;
-           ctx.beginPath(); ctx.arc(0, 0, pulse, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+           const pulse = (time % 2) / 2;
+           ctx.strokeStyle = COLORS.priest; ctx.globalAlpha = 0.6 * (1 - pulse); ctx.lineWidth = 3;
+           ctx.beginPath(); ctx.arc(0, 0, pulse * 80, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
            drawAnnotation(0, -hh, faceDir * 50, -hh - 30, "[INVULNERABILITY AURA]", COLORS.priest);
         }
       } else if (t === "herald") {
@@ -428,9 +451,9 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.fillStyle = body; ctx.fillRect(hw * 0.55 + 3, -hh + wave, 16, 12); ctx.strokeRect(hw * 0.55 + 3, -hh + wave, 16, 12); // flag
         ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.moveTo(hw * 0.55 + 6, -hh + 3 + wave); ctx.lineTo(hw * 0.55 + 12, -hh + 6 + wave); ctx.lineTo(hw * 0.55 + 6, -hh + 9 + wave); ctx.fill();
         if (hoverK > 0) {
-           const pulse = (time * 120) % 120;
-           ctx.strokeStyle = COLORS.herald; ctx.globalAlpha = 0.6 * (1 - pulse/120); ctx.lineWidth = 3;
-           ctx.beginPath(); ctx.arc(0, 0, pulse, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+           const pulse = (time % 2) / 2;
+           ctx.strokeStyle = COLORS.herald; ctx.globalAlpha = 0.6 * (1 - pulse); ctx.lineWidth = 3;
+           ctx.beginPath(); ctx.arc(0, 0, pulse * 80, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
            drawAnnotation(hw * 0.55 + 10, -hh, faceDir * 60, -hh - 20, "[HASTE BANNER]", COLORS.herald);
         }
       } else if (t === "mender") {
@@ -554,12 +577,13 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.restore();
       
       if (hoverK > 0) {
-        const slamR = (time * 250) % 200;
-        ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.8 * (1 - slamR/200); ctx.lineWidth = 4;
+        const tCycle = (time % 1.5) / 1.5;
+        const slamR = tCycle * PHYSICS.warden.speed * 0.2;
+        ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = hoverK * (1 - tCycle); ctx.lineWidth = 4;
         ctx.beginPath(); ctx.ellipse(0, hh + 20, slamR, slamR * 0.3, 0, 0, Math.PI*2); ctx.stroke();
         ctx.globalAlpha = 1;
         drawAnnotation(-hw, -hh, -60, -hh - 30, "[SECTOR LOCKDOWN]", COLORS.warden);
-        drawAnnotation(0, hh, faceDir * 80, hh + 20, "[SEISMIC SHOCKWAVE]", COLORS.slam);
+        drawAnnotation(0, hh, faceDir * 80, hh + 20, `[VEL: ${PHYSICS.warden.speed}px/s]`, COLORS.slam);
       }
       
       drawDimensions(0, 0, hw*2, hh*2, 60, 60);
@@ -621,12 +645,16 @@ export function initModelViewer(canvas, modelName, variant) {
       const core = COLORS.perfect;
       ctx.shadowBlur = 0;
       
+      const cycleTime = PHYSICS.source.cd;
+      const tCycle = (time % cycleTime) / cycleTime;
+      const cyclePhase = Math.floor(time / cycleTime) % 3;
+      
       ctx.save();
       ctx.globalAlpha = 0.22 + 0.1 * Math.sin(time*1.5); ctx.fillStyle = ink;
       ctx.beginPath(); ctx.ellipse(0, 0, w * 1.45, h * 1.45, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       
-      const ticks = Math.floor(time * (1 + hoverK * 3));
+      const ticks = Math.floor(time);
       const spin = ticks * (Math.PI / 5);
       
       ctx.rotate(spin);
@@ -647,7 +675,24 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.restore();
       
       if (hoverK > 0) {
-        drawAnnotation(w, 0, 80, -50, "[CRITICAL OVERLOAD]", core);
+        if (cyclePhase === 0) { // Warden shockwave
+           const r = tCycle * PHYSICS.warden.speed * 0.2; 
+           ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = hoverK * (1 - tCycle); ctx.lineWidth = 4;
+           ctx.beginPath(); ctx.ellipse(0, 30, r, r * 0.3, 0, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+           drawAnnotation(w, 0, 80, -50, `[MIMICRY: SEISMIC ${PHYSICS.warden.speed}px/s]`, COLORS.slam);
+        } else if (cyclePhase === 1) { // Colossus sweeper
+           const cx = (tCycle - 0.5) * PHYSICS.colossus.sweep * 0.4;
+           ctx.fillStyle = COLORS.armoredShield; ctx.globalAlpha = hoverK;
+           ctx.fillRect(cx - 5, -50, 10, 100); ctx.globalAlpha = 1;
+           drawAnnotation(w, 0, 80, -50, `[MIMICRY: SWEEPER ${PHYSICS.colossus.sweep}px/s]`, COLORS.armoredShield);
+        } else if (cyclePhase === 2) { // Echo split
+           ctx.globalAlpha = hoverK * 0.5; ctx.fillStyle = COLORS.eye;
+           const sx = tCycle * 80;
+           ctx.beginPath(); ctx.arc(-sx, 0, 10, 0, Math.PI*2); ctx.fill();
+           ctx.beginPath(); ctx.arc(sx, 0, 10, 0, Math.PI*2); ctx.fill();
+           ctx.globalAlpha = 1;
+           drawAnnotation(w, 0, 80, -50, `[MIMICRY: ANOMALY CLONE]`, COLORS.eye);
+        }
       }
       
       drawDimensions(0, 0, w*2.9, h*2.9, 116, 116);
