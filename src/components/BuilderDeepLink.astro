@@ -1,0 +1,93 @@
+---
+// BuilderDeepLink.astro
+// Accepts a partial loadout object: { specials: {id: tier}, uniques: ['id'], stackables: {id: count} }
+// Generates a deep link to the Builder with this loadout.
+export interface Props {
+  loadout: {
+    specials?: Record<string, number>;
+    uniques?: string[];
+    stackables?: Record<string, number>;
+  };
+  label?: string;
+}
+
+const { loadout, label = "Test this Build in the Engine →" } = Astro.props;
+
+// Ensure defaults
+const safeLoadout = {
+  specials: loadout.specials || {},
+  uniques: loadout.uniques || [],
+  stackables: loadout.stackables || {}
+};
+
+// Filter out 0s
+const cleanSpecials = {};
+for (const [k, v] of Object.entries(safeLoadout.specials)) {
+  if (v > 0) cleanSpecials[k] = v;
+}
+const cleanStackables = {};
+for (const [k, v] of Object.entries(safeLoadout.stackables)) {
+  if (v > 0) cleanStackables[k] = v;
+}
+
+const payload = {
+  v: 1,
+  specials: cleanSpecials,
+  uniques: safeLoadout.uniques,
+  stackables: cleanStackables
+};
+
+// Encode for URL safely (Node.js Buffer for SSR)
+const jsonStr = JSON.stringify(payload);
+const b64 = Buffer.from(jsonStr).toString('base64');
+const href = `/builder?b=${b64}`;
+---
+
+<a href={href} class="builder-deep-link" target="_blank" rel="noopener noreferrer">
+  <span class="ico">⚙️</span>
+  <span class="lbl">{label}</span>
+</a>
+
+<style>
+  .builder-deep-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--sl-color-black);
+    border: 1px solid var(--sl-color-hairline);
+    border-left: 6px solid #13c4d6;
+    color: var(--sl-color-white);
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    margin: 32px 0;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    transition: transform 0.1s, box-shadow 0.1s;
+    /* Touch-friendly constraints for mobile */
+    min-height: 56px;
+    touch-action: manipulation;
+  }
+  .builder-deep-link:hover {
+    background: var(--sl-color-gray-6);
+  }
+  .builder-deep-link:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  }
+  .ico { font-size: 1.4rem; }
+  .lbl { letter-spacing: 1px; }
+
+  @media (max-width: 768px) {
+    .builder-deep-link {
+      font-size: 0.9rem;
+      padding: 12px 16px;
+      flex-direction: column;
+      gap: 6px;
+    }
+  }
+</style>

@@ -53,6 +53,10 @@ export default defineConfig({
 			],
 			sidebar: [
 				{
+					label: '🛠️ Theorycraft Engine',
+					link: '/builder',
+				},
+				{
 					label: '🗡️ Getting Started',
 					items: [
 						{ label: 'What is Tear?', slug: 'getting-started/overview' },
