@@ -1,0 +1,294 @@
+---
+// HeroCanvas.astro
+// The Tear biome backdrop as a live homepage hero.
+// Ported from js/backdrop.js BIOME_ART["The Tear"] + Backdrop.baseSky()
+// No glow/shadowBlur — just the shapes themselves.
+---
+
+<div class="tear-hero">
+  <canvas id="tear-hero-canvas" aria-hidden="true"></canvas>
+
+  <div class="tear-hero-content">
+    <p class="tear-hero-eyebrow">// OFFICIAL WIKI</p>
+    <h1 class="tear-hero-wordmark">T&thinsp;E&thinsp;A&thinsp;R</h1>
+    <p class="tear-hero-tagline">
+      The definitive manual for skill-based blade combat.<br/>
+      Stats, mechanics, enemies — nothing held back.
+    </p>
+    <div class="tear-hero-actions">
+      <a href="/getting-started/overview" class="tear-btn tear-btn-primary">Enter the Arena →</a>
+      <a href="/mechanics/the-blade" class="tear-btn tear-btn-ghost">Master the Blade</a>
+    </div>
+  </div>
+
+  <div class="tear-hero-scroll-hint" aria-hidden="true">SCROLL</div>
+</div>
+
+<style>
+.tear-hero {
+  position: relative;
+  width: 100%;
+  height: 88vh;
+  min-height: 480px;
+  max-height: 820px;
+  overflow: hidden;
+  background: #0e0b1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tear-hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tear-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.tear-hero-eyebrow {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.70rem;
+  letter-spacing: 0.22em;
+  color: rgba(19,196,214,0.55);
+  text-transform: uppercase;
+  margin: 0 0 1.2rem;
+  line-height: 1;
+}
+
+.tear-hero-wordmark {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: clamp(3.5rem, 12vw, 8rem);
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #ffffff;
+  line-height: 0.9;
+  text-transform: uppercase;
+  margin: 0 0 1.5rem;
+  /* Override h1 global uppercase — it's already uppercase */
+}
+
+.tear-hero-tagline {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: clamp(0.78rem, 1.6vw, 0.95rem);
+  color: rgba(201,196,224,0.60);
+  max-width: 46ch;
+  line-height: 1.7;
+  margin: 0 0 2.5rem;
+}
+
+.tear-hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tear-btn {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.80rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.7rem 1.6rem;
+  border: 1.5px solid currentColor;
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+  line-height: 1;
+  display: inline-block;
+}
+
+.tear-btn-primary {
+  background: #c9c4e0;
+  color: #0e0b1a;
+  border-color: #c9c4e0;
+}
+.tear-btn-primary:hover {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #0e0b1a;
+}
+
+.tear-btn-ghost {
+  background: transparent;
+  color: rgba(201,196,224,0.65);
+  border-color: rgba(201,196,224,0.25);
+}
+.tear-btn-ghost:hover {
+  border-color: rgba(201,196,224,0.7);
+  color: #c9c4e0;
+}
+
+.tear-hero-scroll-hint {
+  position: absolute;
+  bottom: 1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.60rem;
+  letter-spacing: 0.28em;
+  color: rgba(201,196,224,0.28);
+  animation: hero-scroll-pulse 2.2s ease-in-out infinite;
+}
+@keyframes hero-scroll-pulse {
+  0%, 100% { opacity: 0.28; transform: translateX(-50%) translateY(0); }
+  50%       { opacity: 0.55; transform: translateX(-50%) translateY(5px); }
+}
+</style>
+
+<script>
+(function () {
+  const canvas = document.getElementById('tear-hero-canvas');
+  if (!(canvas instanceof HTMLCanvasElement)) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  // Seeded RNG (matches backdrop.js _rng)
+  function rng(seed) {
+    let s = (seed >>> 0) || 1;
+    return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+
+  // Mote system (starfield, from BIOME_ART["The Tear"].motes)
+  const r = rng(1337);
+  const motes = Array.from({ length: 50 }, () => ({
+    x: r(),
+    y: r(),
+    z: 0.3 + r() * 0.9,
+    rad: 0.4 + r() * 1.6,
+    phase: r() * Math.PI * 2,
+    speed: 3 + r() * 10,
+  }));
+
+  let W = 0, H = 0;
+  let t = 0, lastT = 0, rafId = 0;
+  let scrollY = 0;
+  let mobile = false;
+
+  function resize() {
+    W = canvas.offsetWidth;
+    H = canvas.offsetHeight;
+    canvas.width = W;
+    canvas.height = H;
+    mobile = W < 700;
+  }
+
+  window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
+
+  // ── baseSky (void gradient, faithful to Backdrop.baseSky) ───
+  function drawSky() {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0,    '#080615');
+    g.addColorStop(0.55, '#0e0b1a');
+    g.addColorStop(1,    '#130e22');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // ── The Tear rift (BIOME_ART["The Tear"].sky) ────────────────
+  // No shadowBlur — pure shape + alpha gradients only.
+  function drawRift(t) {
+    const cx  = W * 0.5;
+    const cyc = H * 0.42;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 1.2);
+    const riftH = H * 0.52;
+    const riftW = 9 + 4 * pulse;
+
+    // Wide soft aura (very faint)
+    const aura = ctx.createRadialGradient(cx, cyc, 0, cx, cyc, riftH * 0.62);
+    aura.addColorStop(0,   `rgba(19,196,214,${0.06 + 0.04 * pulse})`);
+    aura.addColorStop(0.5, `rgba(19,196,214,${0.02 + 0.01 * pulse})`);
+    aura.addColorStop(1,    'rgba(19,196,214,0)');
+    ctx.fillStyle = aura;
+    ctx.fillRect(0, 0, W, H);
+
+    // Rift body — vertical gradient ellipse
+    const grd = ctx.createLinearGradient(0, cyc - riftH / 2, 0, cyc + riftH / 2);
+    grd.addColorStop(0,    'rgba(19,196,214,0)');
+    grd.addColorStop(0.3,  `rgba(170,235,255,${0.50 + 0.18 * pulse})`);
+    grd.addColorStop(0.5,  `rgba(205,248,255,${0.68 + 0.20 * pulse})`);
+    grd.addColorStop(0.7,  `rgba(170,235,255,${0.50 + 0.18 * pulse})`);
+    grd.addColorStop(1,    'rgba(19,196,214,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.ellipse(cx, cyc, riftW, riftH / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ── Floating broken geometry (BIOME_ART["The Tear"].far) ─────
+  function drawGeometry(t, scrollY) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(200,210,240,0.55)';
+    ctx.lineWidth = 1;
+    const parallax = scrollY * 0.05;
+    for (let i = 0; i < 6; i++) {
+      const x = (((i * 270 - parallax * 20) % W) + W) % W;
+      const y = 80 + ((i * 160) % (H * 0.55)) + Math.sin(t * 0.5 + i) * 8;
+      const s = 24 + i * 5;
+      ctx.globalAlpha = 0.12 + 0.04 * Math.sin(t * 0.4 + i);
+      ctx.strokeRect(x, y - parallax * 0.3 * ((i % 3) + 1), s, s * 0.55);
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  // ── Motes / starfield ─────────────────────────────────────────
+  function drawMotes(t, scrollY) {
+    const limit = mobile ? 22 : motes.length;
+    const parallax = scrollY * 0.04;
+    ctx.save();
+    for (let i = 0; i < limit; i++) {
+      const m = motes[i];
+      const py  = ((m.y * H + t * m.speed) % (H + 60) + (H + 60)) % (H + 60) - 30;
+      const px  = m.x * W + Math.sin(t * 0.3 + m.phase) * 6;
+      const twinkle = 0.25 + 0.75 * Math.abs(Math.sin(t * 1.4 + m.phase));
+      ctx.globalAlpha = 0.45 * m.z * twinkle;
+      ctx.fillStyle = 'rgba(190,230,255,1)';
+      ctx.beginPath();
+      ctx.arc(px, py - parallax * m.z, m.rad * m.z, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function frame(now) {
+    const dt = Math.min((now - lastT) / 1000, 0.05);
+    lastT = now;
+    t += dt;
+
+    // Mobile: ~30fps by skipping every other frame
+    if (!mobile || (Math.floor(now / 33) & 1) === 0) {
+      drawSky();
+      drawGeometry(t, scrollY);
+      drawRift(t);
+      drawMotes(t, scrollY);
+    }
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  const ro = new ResizeObserver(resize);
+  ro.observe(canvas);
+  resize();
+  lastT = performance.now();
+  rafId = requestAnimationFrame(frame);
+
+  // Clean up on Astro page transitions
+  document.addEventListener('astro:before-swap', () => {
+    cancelAnimationFrame(rafId);
+    ro.disconnect();
+  });
+})();
+</script>

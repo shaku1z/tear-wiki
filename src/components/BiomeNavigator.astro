@@ -1,0 +1,302 @@
+---
+// BiomeNavigator.astro
+// Five interactive panels — one per stage — each with a live canvas
+// mini-backdrop ported from backdrop.js. Click to enter that stage's wiki section.
+---
+
+<section class="biome-nav" aria-label="Navigate by stage">
+  <p class="biome-nav-label">// STAGES</p>
+  <div class="biome-nav-grid">
+    <a href="/stages/the-grounds"       class="biome-panel" data-biome="grounds"
+       style="--panel-bg:#f5f4f0;--panel-ink:#111111;--panel-accent:#e23b3b">
+      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
+      <div class="biome-panel-content">
+        <span class="biome-panel-name">The Grounds</span>
+        <span class="biome-panel-blurb">Where order is kept.</span>
+      </div>
+    </a>
+    <a href="/stages/the-undercroft"    class="biome-panel" data-biome="undercroft"
+       style="--panel-bg:#dbe0e6;--panel-ink:#2a2f37;--panel-accent:#15c2c2">
+      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
+      <div class="biome-panel-content">
+        <span class="biome-panel-name">The Undercroft</span>
+        <span class="biome-panel-blurb">Gray industry, deep below.</span>
+      </div>
+    </a>
+    <a href="/stages/the-crimson-fields" class="biome-panel" data-biome="crimson"
+       style="--panel-bg:#f7e3e3;--panel-ink:#5a1320;--panel-accent:#e23b3b">
+      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
+      <div class="biome-panel-content">
+        <span class="biome-panel-name">The Crimson Fields</span>
+        <span class="biome-panel-blurb">Red and gold, and old rage.</span>
+      </div>
+    </a>
+    <a href="/stages/the-voidspire"     class="biome-panel" data-biome="voidspire"
+       style="--panel-bg:#e7e3f3;--panel-ink:#382c54;--panel-accent:#8b3bd6">
+      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
+      <div class="biome-panel-content">
+        <span class="biome-panel-name">The Voidspire</span>
+        <span class="biome-panel-blurb">Where the rules thin out.</span>
+      </div>
+    </a>
+    <a href="/stages/the-tear"          class="biome-panel" data-biome="tear"
+       style="--panel-bg:#0e0b1a;--panel-ink:#c9c4e0;--panel-accent:#13c4d6">
+      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
+      <div class="biome-panel-content">
+        <span class="biome-panel-name">The Tear</span>
+        <span class="biome-panel-blurb">Everything, all at once.</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<script>
+(function () {
+  // Seeded RNG
+  function rng(seed) {
+    let s = (seed >>> 0) || 1;
+    return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function hexToRgb(hex) {
+    hex = (hex || '#000').replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+  }
+  function lighten(hex, t) {
+    const [r,g,b] = hexToRgb(hex);
+    return `rgb(${Math.round(lerp(r,255,t))},${Math.round(lerp(g,255,t))},${Math.round(lerp(b,255,t))})`;
+  }
+  function darken(hex, t) {
+    const [r,g,b] = hexToRgb(hex);
+    return `rgb(${Math.round(lerp(r,0,t))},${Math.round(lerp(g,0,t))},${Math.round(lerp(b,0,t))})`;
+  }
+  function rgba(hex, a) {
+    const [r,g,b] = hexToRgb(hex);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // Per-biome draw functions (ported from backdrop.js BIOME_ART)
+  const PAINTERS = {
+    grounds(ctx, W, H, t, bg, accent) {
+      // Dawn white sky
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, lighten(bg, 0.06));
+      g.addColorStop(0.6, bg);
+      g.addColorStop(1, darken(bg, 0.06));
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      // Warm golden overhead haze
+      const sg = ctx.createRadialGradient(W*0.78, H*0.2, 5, W*0.78, H*0.2, W*0.55);
+      sg.addColorStop(0, 'rgba(255,238,200,0.30)');
+      sg.addColorStop(1, 'rgba(255,238,200,0)');
+      ctx.fillStyle = sg; ctx.fillRect(0,0,W,H);
+      // Colonnade (from BIOME_ART["The Grounds"].far)
+      ctx.save(); ctx.globalAlpha = 0.4; ctx.fillStyle = darken(bg, 0.10);
+      const off = (t * 12) % 88;
+      for (let x = -88; x < W + 88; x += 88) {
+        const cx = x + off; const cw = 13; const ch = H * 0.6; const top = H - ch;
+        ctx.fillRect(cx, top, cw, ch);
+        ctx.fillRect(cx - 3, top - 5, cw + 6, 6);
+      }
+      ctx.restore();
+    },
+    undercroft(ctx, W, H, t, bg, accent) {
+      // Steel grey sky
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, lighten(bg, 0.07));
+      g.addColorStop(0.6, bg);
+      g.addColorStop(1, darken(bg, 0.12));
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      // Furnace orange glow
+      const fg = ctx.createRadialGradient(W*0.16, H*0.85, 3, W*0.16, H*0.85, W*0.55);
+      fg.addColorStop(0, 'rgba(255,150,60,0.20)');
+      fg.addColorStop(1, 'rgba(255,150,60,0)');
+      ctx.fillStyle = fg; ctx.fillRect(0,0,W,H);
+      // Girder silhouettes
+      ctx.save(); ctx.globalAlpha = 0.45; ctx.fillStyle = darken(bg, 0.22);
+      const off = (t * 15) % 130;
+      for (let x = -130; x < W + 130; x += 130) {
+        const cx = x + off;
+        ctx.fillRect(cx, H*0.3, 35, H*0.7);
+        ctx.fillRect(cx - 15, H*0.6, 75, 9);
+      }
+      // Slow-turning gear
+      ctx.translate(W*0.82, H*0.38);
+      ctx.rotate(t * 0.2);
+      ctx.fillStyle = darken(bg, 0.28);
+      const R = 26;
+      for (let i = 0; i < 8; i++) {
+        ctx.rotate(Math.PI * 2 / 8);
+        ctx.fillRect(-4, R - 6, 8, 10);
+      }
+      ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = lighten(bg, 0.08);
+      ctx.beginPath(); ctx.arc(0,0,R*0.4,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    },
+    crimson(ctx, W, H, t, bg, accent) {
+      // Golden-hour battlefield sky
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, 'rgba(255,206,150,0.55)');
+      g.addColorStop(0.5, bg);
+      g.addColorStop(1, darken(bg, 0.06));
+      ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      // Rolling crimson ridge
+      ctx.save(); ctx.globalAlpha = 0.55; ctx.fillStyle = 'rgba(90,30,38,0.60)';
+      ctx.beginPath(); ctx.moveTo(-10, H);
+      for (let x = -10; x <= W+10; x += 40) {
+        ctx.lineTo(x, H*0.55 + 18*Math.sin(x*0.007 + t*0.3));
+      }
+      ctx.lineTo(W+10, H); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      // Waving banners
+      ctx.save();
+      const off = (t * 18) % 150;
+      for (let i = -1; i < 5; i++) {
+        const bx = i * 150 + off, ph = i * 1.7;
+        const flick = 0.8 + 0.2 * Math.sin(t * 3 + ph);
+        ctx.strokeStyle = 'rgba(30,12,16,0.6)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(bx, H); ctx.lineTo(bx, H*0.35); ctx.stroke();
+        ctx.fillStyle = `rgba(210,60,44,${0.55*flick})`;
+        ctx.beginPath();
+        ctx.moveTo(bx, H*0.35);
+        ctx.lineTo(bx + 25 + 6*Math.sin(t*2+ph), H*0.38);
+        ctx.lineTo(bx + 22, H*0.44);
+        ctx.lineTo(bx, H*0.44);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    },
+    voidspire(ctx, W, H, t, bg, accent) {
+      // Lavender base
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, lighten(bg, 0.10));
+      g.addColorStop(0.55, bg);
+      g.addColorStop(1, darken(bg, 0.08));
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      // Aurora bands
+      const cols = ['rgba(139,59,214,0.10)','rgba(214,77,214,0.07)','rgba(80,120,240,0.07)'];
+      ctx.save();
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = cols[i];
+        const yb = H*0.2 + i*H*0.1, amp = H*0.07 + i*H*0.03;
+        ctx.beginPath(); ctx.moveTo(-10, yb);
+        for (let x = -10; x <= W+10; x += 30)
+          ctx.lineTo(x, yb + Math.sin(x*0.008 + t*0.4 + i) * amp);
+        ctx.lineTo(W+10, 0); ctx.lineTo(-10, 0); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+      // Floating fractured shards
+      ctx.save(); ctx.globalAlpha = 0.32; ctx.fillStyle = darken(bg, 0.14);
+      for (let i = 0; i < 5; i++) {
+        const x = ((i * 140 + t * 8) % (W + 80) + (W + 80)) % (W + 80) - 40;
+        const y = H*0.25 + ((i*90)%(H*0.5)) + Math.sin(t*0.5+i)*8;
+        const s = 18 + (i%3)*10;
+        ctx.save(); ctx.translate(x,y); ctx.rotate(0.3*Math.sin(t*0.3+i));
+        ctx.fillRect(-s/2,-4,s,8); ctx.restore();
+      }
+      ctx.restore();
+    },
+    tear(ctx, W, H, t, bg, accent) {
+      // Void sky
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, '#080615');
+      g.addColorStop(0.55, bg);
+      g.addColorStop(1, '#130e22');
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      // Mini rift
+      const cx = W*0.5, cy = H*0.42, pulse = 0.5+0.5*Math.sin(t*1.2);
+      const aura = ctx.createRadialGradient(cx,cy,0,cx,cy,H*0.4);
+      aura.addColorStop(0, `rgba(19,196,214,${0.05+0.03*pulse})`);
+      aura.addColorStop(1, 'rgba(19,196,214,0)');
+      ctx.fillStyle = aura; ctx.fillRect(0,0,W,H);
+      const riftH = H*0.5, riftW = 5+2.5*pulse;
+      const grd = ctx.createLinearGradient(0,cy-riftH/2,0,cy+riftH/2);
+      grd.addColorStop(0, 'rgba(19,196,214,0)');
+      grd.addColorStop(0.5, `rgba(200,248,255,${0.65+0.2*pulse})`);
+      grd.addColorStop(1, 'rgba(19,196,214,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath(); ctx.ellipse(cx,cy,riftW,riftH/2,0,0,Math.PI*2); ctx.fill();
+      // Star motes
+      const r = rng(999);
+      ctx.save();
+      for (let i = 0; i < 20; i++) {
+        const mx = r()*W, my = r()*H, mz = 0.4+r()*0.8;
+        const tw = 0.3+0.7*Math.abs(Math.sin(t*1.4+i));
+        ctx.globalAlpha = 0.45*mz*tw;
+        ctx.fillStyle = 'rgba(190,230,255,1)';
+        ctx.beginPath(); ctx.arc(mx, my, (0.5+r()*1.2)*mz, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+    },
+  };
+
+  // Boot all panels
+  const panels = document.querySelectorAll('.biome-panel');
+  const animStates = [];
+
+  panels.forEach((panel, idx) => {
+    const biome = panel.dataset.biome;
+    const canvas = panel.querySelector('.biome-panel-canvas');
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+    const ctx2 = canvas.getContext('2d');
+    if (!ctx2) return;
+
+    const bg     = getComputedStyle(panel).getPropertyValue('--panel-bg').trim();
+    const accent = getComputedStyle(panel).getPropertyValue('--panel-accent').trim();
+
+    const state = { ctx: ctx2, canvas, biome, bg, accent, t: 0, lastT: 0, active: false, rafId: 0 };
+    animStates.push(state);
+
+    // Resize canvas to match element
+    function resize() {
+      state.canvas.width  = state.canvas.offsetWidth;
+      state.canvas.height = state.canvas.offsetHeight;
+    }
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+    resize();
+
+    // Animate on hover, idle single frame otherwise
+    function drawFrame(now) {
+      const dt = Math.min((now - state.lastT) / 1000, 0.05);
+      state.lastT = now;
+      state.t += dt;
+      const W = state.canvas.width, H = state.canvas.height;
+      const painter = PAINTERS[state.biome];
+      if (painter) painter(state.ctx, W, H, state.t, state.bg, state.accent);
+      if (state.active) state.rafId = requestAnimationFrame(drawFrame);
+    }
+
+    // Draw one static frame on load
+    requestAnimationFrame((now) => { state.lastT = now; drawFrame(now); });
+
+    panel.addEventListener('mouseenter', () => {
+      state.active = true;
+      state.rafId = requestAnimationFrame(function loop(now) {
+        const dt = Math.min((now - state.lastT) / 1000, 0.05);
+        state.lastT = now;
+        state.t += dt;
+        const W = state.canvas.width, H = state.canvas.height;
+        const painter = PAINTERS[state.biome];
+        if (painter) painter(state.ctx, W, H, state.t, state.bg, state.accent);
+        if (state.active) state.rafId = requestAnimationFrame(loop);
+      });
+    });
+
+    panel.addEventListener('mouseleave', () => {
+      state.active = false;
+      cancelAnimationFrame(state.rafId);
+    });
+
+    document.addEventListener('astro:before-swap', () => {
+      state.active = false;
+      cancelAnimationFrame(state.rafId);
+      ro.disconnect();
+    });
+  });
+})();
+</script>

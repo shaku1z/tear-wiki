@@ -1,12 +1,32 @@
-/* =============================================================
-   T E A R  Wiki — Custom Theme
-   Pulls directly from the game's CONFIG.colors and design system
-   ============================================================= */
+﻿/* ================================================================
+   T E A R  Wiki � Design System
+   Faithful to the game's own design language.
 
-/* ---- Dark-mode overrides (Tear's void aesthetic) ----------- */
-:root[data-theme='dark'],
+   LIGHT (default) = The Grounds � warm off-white, black ink, red accent
+   DARK            = The Tear    � void dark, pale ink, cyan accent
+
+   Source: js/DESIGN_SYSTEM.md, js/stages.js, js/backdrop.js
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap');
+
+/* -- Biome palette tokens (faithful to stages.js) - */
 :root {
-  /* Semantic colours derived from game palette */
+  --biome-grounds-bg:        #f5f4f0;
+  --biome-grounds-ink:       #111111;
+  --biome-grounds-accent:    #e23b3b;
+  --biome-undercroft-bg:     #dbe0e6;
+  --biome-undercroft-ink:    #2a2f37;
+  --biome-undercroft-accent: #15c2c2;
+  --biome-crimson-bg:        #f7e3e3;
+  --biome-crimson-ink:       #5a1320;
+  --biome-crimson-accent:    #e23b3b;
+  --biome-voidspire-bg:      #e7e3f3;
+  --biome-voidspire-ink:     #382c54;
+  --biome-voidspire-accent:  #8b3bd6;
+  --biome-tear-bg:           #0e0b1a;
+  --biome-tear-ink:          #c9c4e0;
+  --biome-tear-accent:       #13c4d6;
   --tear-red:    #e23b3b;
   --tear-cyan:   #13c4d6;
   --tear-purple: #8b3bd6;
@@ -14,258 +34,379 @@
   --tear-green:  #1faf5a;
   --tear-gold:   #e0a326;
   --tear-slate:  #3a4654;
-
-  /* Starlight accent tokens - Stark Monochrome (Anti-neon) */
-  --sl-color-accent-low:    rgba(255, 255, 255, 0.05);
-  --sl-color-accent:        #ffffff;
-  --sl-color-accent-high:   #ffffff;
-
-  /* Backgrounds — The Tear void */
-  --sl-color-bg:            #0a0b10;
-  --sl-color-bg-nav:        #0a0b10;
-  --sl-color-bg-sidebar:    #0a0b10;
-  --sl-color-bg-inline-code:rgba(255,255,255,0.08);
-
-  /* Text — Pure white with alpha hierarchy from DESIGN_SYSTEM.md */
-  --sl-color-text:          rgba(255, 255, 255, 0.7); /* soft */
-  --sl-color-text-accent:   #ffffff;
-  --sl-color-gray-1:        rgba(255, 255, 255, 1.0); /* full */
-  --sl-color-gray-2:        rgba(255, 255, 255, 0.7); /* soft */
-  --sl-color-gray-3:        rgba(255, 255, 255, 0.55); /* muted */
-  --sl-color-gray-4:        rgba(255, 255, 255, 0.4); /* faint */
-  --sl-color-gray-5:        rgba(255, 255, 255, 0.25); /* ghost */
-  --sl-color-gray-6:        rgba(255, 255, 255, 0.1); 
-  --sl-color-black:         #0a0b10;
-  --sl-color-white:         #ffffff;
-
-  /* Hairlines */
-  --sl-color-hairline-light: rgba(255,255,255,0.15);
-  --sl-color-hairline-shade: rgba(255,255,255,0.15);
 }
 
-/* Light mode - The Grounds (Stark Monochrome) */
+/* -- LIGHT = The Grounds (default) --------------- */
+:root,
 :root[data-theme='light'] {
-  --sl-color-accent-low:    rgba(0, 0, 0, 0.05);
-  --sl-color-accent:        #000000;
-  --sl-color-accent-high:   #000000;
-  --sl-color-bg:            #ffffff;
-  --sl-color-bg-nav:        #ffffff;
-  --sl-color-bg-sidebar:    #ffffff;
-  --sl-color-text:          rgba(0, 0, 0, 0.7);
-  --sl-color-text-accent:   #000000;
-  
-  --sl-color-gray-1:        rgba(0, 0, 0, 1.0);
-  --sl-color-gray-2:        rgba(0, 0, 0, 0.7);
-  --sl-color-gray-3:        rgba(0, 0, 0, 0.55);
-  --sl-color-gray-4:        rgba(0, 0, 0, 0.4);
-  --sl-color-gray-5:        rgba(0, 0, 0, 0.25);
-  --sl-color-gray-6:        rgba(0, 0, 0, 0.1);
-  --sl-color-black:         #ffffff;
-  --sl-color-white:         #000000;
-  
-  --sl-color-hairline-light: rgba(0,0,0,0.15);
-  --sl-color-hairline-shade: rgba(0,0,0,0.15);
+  --sl-color-bg:             #f5f4f0;
+  --sl-color-bg-nav:         #f5f4f0;
+  --sl-color-bg-sidebar:     #f5f4f0;
+  --sl-color-bg-inline-code: rgba(17,17,17,0.07);
+  --sl-color-text:           rgba(17,17,17,0.72);
+  --sl-color-text-accent:    #111111;
+  --sl-color-white:          #111111;
+  --sl-color-black:          #f5f4f0;
+  --sl-color-gray-1:         rgba(17,17,17,1.00);
+  --sl-color-gray-2:         rgba(17,17,17,0.72);
+  --sl-color-gray-3:         rgba(17,17,17,0.52);
+  --sl-color-gray-4:         rgba(17,17,17,0.38);
+  --sl-color-gray-5:         rgba(17,17,17,0.22);
+  --sl-color-gray-6:         rgba(17,17,17,0.07);
+  --sl-color-accent-low:     rgba(226,59,59,0.09);
+  --sl-color-accent:         #e23b3b;
+  --sl-color-accent-high:    #8b0010;
+  --sl-color-hairline-light: rgba(17,17,17,0.10);
+  --sl-color-hairline-shade: rgba(17,17,17,0.10);
+  --sl-color-hairline:       rgba(17,17,17,0.10);
 }
 
-/* ---- Typography -------------------------------------------- */
+/* -- DARK = The Tear (the void) ------------------- */
+:root[data-theme='dark'] {
+  --sl-color-bg:             #0e0b1a;
+  --sl-color-bg-nav:         #0e0b1a;
+  --sl-color-bg-sidebar:     #0e0b1a;
+  --sl-color-bg-inline-code: rgba(201,196,224,0.07);
+  --sl-color-text:           rgba(201,196,224,0.72);
+  --sl-color-text-accent:    #c9c4e0;
+  --sl-color-white:          #c9c4e0;
+  --sl-color-black:          #0e0b1a;
+  --sl-color-gray-1:         rgba(201,196,224,1.00);
+  --sl-color-gray-2:         rgba(201,196,224,0.72);
+  --sl-color-gray-3:         rgba(201,196,224,0.52);
+  --sl-color-gray-4:         rgba(201,196,224,0.38);
+  --sl-color-gray-5:         rgba(201,196,224,0.22);
+  --sl-color-gray-6:         rgba(201,196,224,0.07);
+  --sl-color-accent-low:     rgba(19,196,214,0.10);
+  --sl-color-accent:         #13c4d6;
+  --sl-color-accent-high:    #72eeff;
+  --sl-color-hairline-light: rgba(201,196,224,0.14);
+  --sl-color-hairline-shade: rgba(201,196,224,0.14);
+  --sl-color-hairline:       rgba(201,196,224,0.14);
+}
+
+/* -- Typography ----------------------------------- */
 :root {
-  --sl-font-mono:    'JetBrains Mono', 'Courier New', monospace;
-  --sl-font:         var(--sl-font-mono);
-  --sl-text-h1:      2.5rem;
-  --sl-text-h2:      2rem;
-  --sl-text-h3:      1.5rem;
-  --sl-text-body:    1.05rem;
-  --sl-text-code:    0.9rem;
-  --sl-line-height:  1.7;
+  --sl-font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --sl-font:      var(--sl-font-mono);
+  --sl-line-height: 1.72;
 }
 
-/* Global resets for the stark aesthetic */
+/* -- Hard resets ----------------------------------- */
 * {
-  border-radius: 0 !important; /* NO rounded corners */
+  border-radius: 0 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
 }
 
-/* Minimalist HUD Panels and Borders */
+/* -- Cursor � spring-physics blade reticle -------- */
+body { cursor: none; }
+a, button, [role='button'], input, select, label,
+[tabindex]:not([tabindex='-1']) { cursor: none; }
 
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--sl-font-mono);
-  letter-spacing: -0.02em;
-  font-weight: 800;
-  text-transform: uppercase;
+#tear-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--sl-color-white);
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.12s, height 0.12s, border-color 0.12s, opacity 0.3s;
+  will-change: transform;
+  opacity: 0;
 }
-
-/* Sharp code blocks */
-.expressive-code {
-  border: 1px solid var(--sl-color-gray-5);
-  margin: 1.5rem 0;
+#tear-cursor.visible { opacity: 1; }
+#tear-cursor.on-link {
+  width: 26px; height: 26px;
+  border-color: var(--sl-color-accent);
 }
-
-body {
-  text-shadow: none;
+#tear-cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 3px; height: 3px;
+  background: var(--sl-color-accent);
+  pointer-events: none;
+  z-index: 100000;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
+#tear-cursor-dot.visible { opacity: 1; }
 
-/* ---- Site title / logo ------------------------------------ */
+/* -- Site title ----------------------------------- */
 .site-title {
   font-family: var(--sl-font-mono);
-  font-size: 1.1rem;
-  letter-spacing: 0.25em;
+  font-size: 1rem;
+  letter-spacing: 0.26em;
   font-weight: 700;
-  color: var(--sl-color-white) !important;
   text-transform: uppercase;
-}
-:root[data-theme='light'] .site-title {
-  color: var(--sl-color-accent) !important;
+  color: var(--sl-color-white) !important;
 }
 
-/* ---- Navigation bar --------------------------------------- */
+/* -- Navigation bar ------------------------------- */
 header.header {
-  border-bottom: 1px solid var(--sl-color-hairline-light) !important;
+  border-bottom: 1px solid var(--sl-color-hairline) !important;
   backdrop-filter: none !important;
   background: var(--sl-color-bg) !important;
 }
 
-/* ---- Sidebar --------------------------------------------- */
+/* -- Sidebar --------------------------------------- */
 .sidebar-content {
-  border-right: 1px solid var(--sl-color-hairline-light) !important;
+  border-right: 1px solid var(--sl-color-hairline) !important;
 }
-
-/* Sidebar group labels — emoji + spaced caps */
 .group-label span {
   font-family: var(--sl-font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--sl-color-gray-3);
 }
-
-/* Active sidebar link gets left-border highlight */
 a[aria-current='page'] {
-  border-left: 2px solid var(--sl-color-white);
-  background: var(--sl-color-accent-low);
-  color: var(--sl-color-white) !important;
+  border-left: 2px solid var(--sl-color-accent) !important;
+  background: var(--sl-color-accent-low) !important;
+  color: var(--sl-color-accent) !important;
 }
+a:hover { color: var(--sl-color-white); }
 
-a:hover {
-  color: var(--sl-color-white);
-}
-
-/* ---- Content area ---------------------------------------- */
-
-
-/* Headings — monospace feel like the in-game UI */
-h1, h2, h3, h4, h5 {
+/* -- Headings ------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--sl-font-mono);
-  letter-spacing: 0.03em;
-  font-weight: 700;
-}
-
-h1 { color: var(--sl-color-white); }
-h2 { 
-  color: var(--sl-color-white);
-  border-bottom: 1px solid var(--sl-color-hairline-light);
-  padding-bottom: 0.35em;
+  font-weight: 800;
   text-transform: uppercase;
 }
-h3 { color: var(--sl-color-gray-1); text-transform: uppercase; }
+h1 { color: var(--sl-color-white); font-size: 2rem; letter-spacing: 0.02em; }
+h2 {
+  color: var(--sl-color-white);
+  border-bottom: 1px solid var(--sl-color-hairline);
+  padding-bottom: 0.3em;
+  margin-top: 2.5rem;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+}
+h3 { color: var(--sl-color-gray-1); font-size: 1rem; letter-spacing: 0.08em; }
 
-/* ---- Callouts / asides ------------------------------------ */
-/* Override Starlight's default aside colours to match game UI */
+/* -- Callouts / asides ----------------------------- */
 .starlight-aside {
-  border: 1px solid var(--sl-color-hairline-light) !important;
-  border-left: 4px solid var(--sl-color-asides-text-accent) !important;
-  background: rgba(255,255,255,0.02) !important;
+  border: 1px solid var(--sl-color-hairline) !important;
+  border-left: 3px solid var(--sl-color-asides-text-accent) !important;
+  background: rgba(0,0,0,0.025) !important;
 }
-.starlight-aside--note { --sl-color-asides-text-accent: var(--tear-cyan); }
+:root[data-theme='dark'] .starlight-aside {
+  background: rgba(255,255,255,0.025) !important;
+}
+.starlight-aside--note    { --sl-color-asides-text-accent: var(--tear-cyan);   }
 .starlight-aside--caution { --sl-color-asides-text-accent: var(--tear-orange); }
-.starlight-aside--danger { --sl-color-asides-text-accent: var(--tear-red); }
-.starlight-aside--tip { --sl-color-asides-text-accent: var(--tear-green); }
+.starlight-aside--danger  { --sl-color-asides-text-accent: var(--tear-red);    }
+.starlight-aside--tip     { --sl-color-asides-text-accent: var(--tear-green);  }
 
-/* ---- Tables ----------------------------------------------- */
-table {
-  font-size: 0.9rem;
-  border-collapse: collapse;
-  width: 100%;
-}
-thead {
-  background: var(--sl-color-gray-6);
-  border-bottom: 1px solid var(--sl-color-hairline-light);
-}
+/* -- Tables --------------------------------------- */
+table { font-size: 0.875rem; border-collapse: collapse; width: 100%; }
+thead { background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); }
 th {
   font-family: var(--sl-font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  font-size: 0.70rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--sl-color-gray-2);
-  padding: 0.6rem 0.8rem;
+  color: var(--sl-color-gray-3);
+  padding: 0.55rem 0.8rem;
   text-align: left;
 }
 td {
   padding: 0.5rem 0.8rem;
-  border-bottom: 1px solid var(--sl-color-hairline-light);
+  border-bottom: 1px solid var(--sl-color-hairline);
   color: var(--sl-color-text);
 }
-tr:hover td {
-  background: var(--sl-color-gray-6);
-  color: var(--sl-color-white);
-}
+tr:hover td { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
 
-/* ---- Code blocks ------------------------------------------ */
-pre {
-  border: 1px solid var(--sl-color-hairline-light);
-  border-radius: 0 !important;
-}
+/* -- Code blocks ----------------------------------- */
+.expressive-code { border: 1px solid var(--sl-color-gray-5); margin: 1.5rem 0; }
+pre { border: 1px solid var(--sl-color-hairline); }
+site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-color-gray-6); }
 
-/* ---- Search bar ------------------------------------------ */
-site-search kbd {
-  border-color: var(--sl-color-hairline-light);
-  background: var(--sl-color-gray-6);
-  border-radius: 0;
-}
-
-/* ---- "Edit this page" / "Last updated" footer ------------ */
-.meta { font-size: 0.8rem; opacity: 0.55; }
-
-/* ---- Scrollbar ------------------------------------------- */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--sl-color-bg); }
-::-webkit-scrollbar-thumb { background: var(--sl-color-hairline-light); }
+/* -- Scrollbar ------------------------------------- */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sl-color-gray-5); }
 ::-webkit-scrollbar-thumb:hover { background: var(--sl-color-gray-4); }
 
-/* ---- Scroll Reveal Experience -------------------------------- */
-@keyframes tear-fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(12px);
+/* -- Native scroll-reveal -------------------------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .sl-markdown-content > *,
+    .sl-markdown-content > section > * {
+      animation: tear-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+}
+@keyframes tear-reveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-main {
-  animation: tear-fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* -- Page-level fade-in ---------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  main { animation: tear-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+}
+@keyframes tear-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ---- Kill Neon Effects --------------------------------------- */
-/* User despises neon glow. Starlight's splash page adds a huge neon orb. */
-:root {
-  --sl-color-text-shadow: none !important;
-}
+/* -- Hero overrides -------------------------------- */
+[data-has-hero] .hero { display: none !important; }
+[data-has-hero] main { padding: 0 !important; }
+[data-has-hero] .content-panel:first-of-type { padding: 0 !important; border: none !important; }
 
-[data-has-hero] .hero > img,
-[data-has-hero] .sl-markdown-content,
-.hero-bg, 
-.hero,
-[data-has-hero] .page,
-[data-has-hero] main {
-  background-image: none !important;
-  box-shadow: none !important;
-  filter: none !important;
+/* -- Biome navigator ------------------------------- */
+.biome-nav { margin: 2rem 0; }
+.biome-nav-label {
+  font-family: var(--sl-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sl-color-gray-3);
+  border: none !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0.6rem !important;
+  margin-top: 0 !important;
 }
+.biome-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+}
+@media (max-width: 900px) { .biome-nav-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 580px) { .biome-nav-grid { grid-template-columns: 1fr 1fr; } }
+.biome-panel {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+  height: 150px;
+  background: var(--panel-bg, #f5f4f0);
+}
+.biome-panel-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.biome-panel-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  padding: 0.65rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 65%);
+}
+.biome-panel-name {
+  font-family: var(--sl-font-mono);
+  font-size: 0.70rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #fff;
+  line-height: 1.2;
+}
+.biome-panel-blurb {
+  font-family: var(--sl-font-mono);
+  font-size: 0.60rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 0.2rem;
+  line-height: 1.3;
+}
+.biome-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  transition: border-color 0.12s;
+  z-index: 3;
+  pointer-events: none;
+}
+.biome-panel:hover::after { border-color: var(--panel-accent, #e23b3b); }
 
-/* Ensure no text-shadow anywhere */
-* {
-  text-shadow: none !important;
-  box-shadow: none !important;
+/* -- Wiki cards (homepage) ------------------------- */
+.tear-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 2px;
+  margin: 2rem 0;
 }
+.tear-card {
+  display: block;
+  padding: 1.2rem;
+  border: 1px solid var(--sl-color-hairline);
+  text-decoration: none;
+  color: var(--sl-color-text);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.12s, color 0.12s;
+}
+.tear-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: var(--card-accent, var(--sl-color-accent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tear-card:hover::before { transform: scaleX(1); }
+.tear-card:hover { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
+.tear-card-title {
+  font-family: var(--sl-font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-color-white);
+  margin-bottom: 0.45rem;
+  display: block;
+}
+.tear-card-desc { font-size: 0.82rem; color: var(--sl-color-gray-3); line-height: 1.55; display: block; }
+
+/* -- Lore typewriter ------------------------------- */
+.tear-lore { margin: 1.5rem 0; border-left: 3px solid var(--sl-color-hairline); padding-left: 1.25rem; }
+.tear-lore-text {
+  font-family: var(--sl-font-mono);
+  font-size: 0.875rem;
+  color: var(--sl-color-gray-2);
+  line-height: 1.8;
+  font-style: italic;
+  white-space: pre-wrap;
+  min-height: 1.8em;
+}
+.tear-lore-cursor {
+  display: inline-block;
+  width: 2px; height: 1em;
+  background: var(--sl-color-accent);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: tear-blink 0.9s step-end infinite;
+}
+@keyframes tear-blink { 50% { opacity: 0; } }
+
+/* -- Stat blocks ----------------------------------- */
+.tear-stat-block { border: 1px solid var(--sl-color-hairline); margin: 1.5rem 0; overflow: hidden; transition: border-color 0.15s; }
+.tear-stat-block:hover { border-color: var(--stat-accent, var(--sl-color-accent)); }
+.tear-stat-block-header {
+  padding: 0.55rem 0.85rem;
+  background: var(--sl-color-gray-6);
+  border-bottom: 1px solid var(--sl-color-hairline);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.tear-stat-accent-dot { width: 8px; height: 8px; background: var(--stat-accent, var(--sl-color-accent)); flex-shrink: 0; }
+.tear-stat-block-name { font-family: var(--sl-font-mono); font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--sl-color-white); }
+.tear-stat-rows { padding: 0.4rem 0; }
+.tear-stat-row { display: grid; grid-template-columns: 1fr auto; gap: 1rem; padding: 0.32rem 0.85rem; border-bottom: 1px solid var(--sl-color-hairline); font-size: 0.85rem; }
+.tear-stat-row:last-child { border-bottom: none; }
+.tear-stat-label { font-size: 0.70rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sl-color-gray-3); }
+.tear-stat-value { font-family: var(--sl-font-mono); font-weight: 700; color: var(--sl-color-white); text-align: right; }
+.tear-hp-bar-wrap { padding: 0.45rem 0.85rem 0.65rem; }
+.tear-hp-bar-track { height: 3px; background: var(--sl-color-gray-6); position: relative; overflow: hidden; }
+.tear-hp-bar-fill { height: 100%; background: var(--stat-accent, var(--sl-color-accent)); width: 0%; transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1); }

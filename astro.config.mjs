@@ -33,6 +33,45 @@ export default defineConfig({
 					tag: 'meta',
 					attrs: { property: 'og:image', content: '/og-cover.png' },
 				},
+				{
+					tag: 'script',
+					content: `(function(){
+  const ring=document.createElement('div');ring.id='tear-cursor';
+  const dot=document.createElement('div');dot.id='tear-cursor-dot';
+  document.body.appendChild(ring);document.body.appendChild(dot);
+  const K=150,D=7.5;
+  let rx=-100,ry=-100,vx=0,vy=0,mx=-100,my=-100,rafId=0,lastT=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    if(!ring.classList.contains('visible')){ring.classList.add('visible');dot.classList.add('visible');rx=mx;ry=my;}
+    const el=document.elementFromPoint(mx,my);
+    const onLink=el&&(el.closest('a')||el.closest('button')||el.closest('[role="button"]'));
+    ring.classList.toggle('on-link',!!onLink);
+  },{passive:true});
+  document.addEventListener('mouseleave',()=>{ring.classList.remove('visible');dot.classList.remove('visible');});
+  function frame(now){
+    const dt=Math.min((now-lastT)/1000,0.05);lastT=now;
+    const ax=(mx-rx)*K-vx*D,ay=(my-ry)*K-vy*D;
+    vx+=ax*dt;vy+=ay*dt;rx+=vx*dt;ry+=vy*dt;
+    ring.style.transform='translate('+(rx-ring.offsetWidth/2)+'px,'+(ry-ring.offsetHeight/2)+'px)';
+    dot.style.transform='translate('+(mx-1.5)+'px,'+(my-1.5)+'px)';
+    rafId=requestAnimationFrame(frame);
+  }
+  lastT=performance.now();rafId=requestAnimationFrame(frame);
+  function initHpBars(){
+    document.querySelectorAll('.tear-hp-bar-fill[data-hp]').forEach(bar=>{
+      const io=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{if(e.isIntersecting){bar.style.width=(bar.dataset.hp||'0')+'%';io.unobserve(bar);}});
+      },{threshold:0.4});io.observe(bar);
+    });
+  }
+  initHpBars();
+  document.addEventListener('astro:page-load',initHpBars);
+  document.addEventListener('astro:before-swap',()=>cancelAnimationFrame(rafId));
+  document.addEventListener('astro:page-load',()=>{lastT=performance.now();rafId=requestAnimationFrame(frame);});
+})()
+`,
+				},
 			],
 			sidebar: [
 				{

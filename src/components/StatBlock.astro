@@ -1,110 +1,56 @@
 ---
 // StatBlock.astro
 // Renders a structured stat table for an enemy or boss.
-// Usage: <StatBlock name="Charger" color="#e23b3b" stats={...} bars={...} />
+// Usage: <StatBlock name="Charger" color="#e23b3b" hp={220} hpMax={300} stats={...} notes="..." />
 
 interface Props {
   name: string;
-  color: string;        // hex accent for the type
-  variant?: string;     // optional sub-name
+  color: string;        // hex accent for the enemy type (from CONFIG.colors)
+  variant?: string;     // optional sub-name / affix
+  hp?: number;          // actual HP value (shown as animated bar)
+  hpMax?: number;       // reference HP for bar percentage (default: same as hp)
   stats: Record<string, string | number>;
-  bars?: { label: string; value: number; max: number; color?: string }[];
   notes?: string;
 }
 
-const { name, color, variant, stats, bars = [], notes } = Astro.props;
+const { name, color, variant, hp, hpMax, stats, notes } = Astro.props;
+const hpPct = hp != null ? Math.round((hp / (hpMax ?? hp)) * 100) : null;
 ---
 
-<div class="stat-block" style={`--block-accent: ${color}`}>
-  <div class="stat-block__header">
-    <span class="stat-block__dot"></span>
-    <span class="stat-block__name">{name}</span>
-    {variant && <span class="stat-block__variant">{variant}</span>}
+<div class="tear-stat-block" style={`--stat-accent: ${color}`}>
+  <div class="tear-stat-block-header">
+    <span class="tear-stat-accent-dot" aria-hidden="true"></span>
+    <span class="tear-stat-block-name">{name}</span>
+    {variant && <span style="margin-left:auto;font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;opacity:0.6">{variant}</span>}
   </div>
 
-  <div class="stat-grid">
+  {hpPct != null && (
+    <div class="tear-hp-bar-wrap" title={`HP: ${hp}`}>
+      <div class="tear-hp-bar-track">
+        <div class="tear-hp-bar-fill" data-hp={hpPct}></div>
+      </div>
+    </div>
+  )}
+
+  <div class="tear-stat-rows">
     {Object.entries(stats).map(([k, v]) => (
-      <div class="stat-cell">
-        <span class="stat-cell__label">{k}</span>
-        <span class="stat-cell__value">{v}</span>
+      <div class="tear-stat-row">
+        <span class="tear-stat-label">{k}</span>
+        <span class="tear-stat-value">{v}</span>
       </div>
     ))}
   </div>
 
-  {notes && <p class="stat-block__notes">{notes}</p>}
+  {notes && <p class="tear-stat-notes">{notes}</p>}
 </div>
 
 <style>
-  .stat-block {
-    border: 1px solid var(--block-accent);
-    background: var(--sl-color-bg);
-    margin: 2rem 0;
-    position: relative;
-    font-family: var(--sl-font-mono);
-  }
-  
-  .stat-block__header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    color: var(--block-accent);
-    border-bottom: 1px solid var(--block-accent);
-  }
-  
-  .stat-block__dot {
-    width: 8px; height: 8px;
-    background: var(--block-accent);
-  }
-  
-  .stat-block__name {
-    font-weight: 800;
-    font-size: 1.1rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-  
-  .stat-block__variant {
-    font-size: 0.8rem;
-    opacity: 0.8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-left: auto;
-  }
-
-  .stat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1px;
-    background: var(--sl-color-hairline-light);
-  }
-
-  .stat-cell {
-    display: flex;
-    flex-direction: column;
-    background: var(--sl-color-bg);
-    padding: 10px 14px;
-  }
-
-  .stat-cell__label {
-    font-size: 0.7rem;
-    color: var(--sl-color-gray-3);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 4px;
-  }
-
-  .stat-cell__value {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--sl-color-white);
-  }
-
-  .stat-block__notes {
-    padding: 14px 16px;
-    font-size: 0.85rem;
-    color: var(--sl-color-gray-2);
-    border-top: 1px solid var(--sl-color-hairline-light);
-    margin: 0 !important;
-  }
+.tear-stat-notes {
+  padding: 0.6rem 0.85rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--sl-color-gray-2);
+  border-top: 1px solid var(--sl-color-hairline);
+  margin: 0 !important;
+  font-style: italic;
+}
 </style>

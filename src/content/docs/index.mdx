@@ -4,60 +4,51 @@ description: The complete community guide to Tear — a skill-based action game 
 template: splash
 tableOfContents: false
 hero:
-  tagline: The definitive manual for Tear's brutal, physics-based combat.
-  actions:
-    - text: Enter the Arena
-      link: /getting-started/overview
-      icon: right-arrow
-      variant: primary
-    - text: Master the Blade
-      link: /mechanics/the-blade
-      icon: open-book
+  tagline: ''
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import HeroCanvas from '../../components/HeroCanvas.astro';
+import BiomeNavigator from '../../components/BiomeNavigator.astro';
 
-## Welcome to the Tear Wiki
+<HeroCanvas />
 
-**Tear** is an unforgiving, skill-based action game where you wield a spring-physics blade against relentless waves of vivid, colour-soaked enemies. In a world where your foes possess all the colour, your survival depends entirely on kinetic precision.
+<div style="padding: 3rem var(--sl-content-pad-x, 1.5rem) 0;">
 
-This wiki is your survival manual: a deep breakdown of mechanics, raw stats, enemy behaviors, upgrade synergies, and optimal combat strategies.
+## The Manual
 
----
+**Tear** puts a spring-physics blade in your hand and sends you against relentless waves of vivid, colour-soaked enemies. Your foes carry all the colour. You are a black silhouette. Survival is earned through reads, commits, and kinetic precision — not passive healing.
 
-<CardGrid stagger>
-  <Card title="Getting Started" icon="rocket">
-    New to Tear? Learn the core loop, controls, and HUD in the [Overview](/getting-started/overview), [Controls](/getting-started/controls), and [UI Guide](/getting-started/ui-guide).
-  </Card>
-  <Card title="Mechanics" icon="seti:config">
-    Deep-dive into [The Blade](/mechanics/the-blade), [Combat](/mechanics/combat), [Slams & Launches](/mechanics/slams-and-launches), [Parry & Deflect](/mechanics/parry-and-deflect), the [Style Meter](/mechanics/style-meter), the [Dash](/mechanics/dash), and [Status Effects](/mechanics/status-effects).
-  </Card>
-  <Card title="Game Modes" icon="list-format">
-    Explore all modes: [Adventure](/modes/adventure), [Endless](/modes/endless), [Gauntlet](/modes/gauntlet), [Playground](/modes/playground), and the full [Modes Overview](/modes/).
-  </Card>
-  <Card title="Progression" icon="star">
-    Track your growth through [Achievements](/progression/achievements), [Daily Challenges](/progression/daily-challenges), and the [Meta Shop](/progression/meta-shop).
-  </Card>
-  <Card title="Enemies & Elites" icon="warning">
-    Learn how affixes and elite rolls work on the [Affixes & Elites](/enemies/affixes) page.
-  </Card>
-  <Card title="Reference" icon="open-book">
-    Look up any number fast: [Stat Glossary](/reference/stat-glossary), [Colour Palette](/reference/color-palette), and [Changelog](/reference/changelog).
-  </Card>
-</CardGrid>
+<div class="tear-card-grid">
+  <a href="/getting-started/overview" class="tear-card" style="--card-accent:#e23b3b">
+    <span class="tear-card-title">🗡 Getting Started</span>
+    <span class="tear-card-desc">Core loop, controls, and HUD — everything to stop dying immediately.</span>
+  </a>
+  <a href="/mechanics/the-blade" class="tear-card" style="--card-accent:#c9c4e0">
+    <span class="tear-card-title">⚙ Mechanics</span>
+    <span class="tear-card-desc">The blade, combat math, slams, launches, parries, dash, status effects.</span>
+  </a>
+  <a href="/upgrades" class="tear-card" style="--card-accent:#e0a326">
+    <span class="tear-card-title">⬆ Upgrades</span>
+    <span class="tear-card-desc">Every ability, tier-by-tier. Synergies and draft strategy.</span>
+  </a>
+  <a href="/enemies" class="tear-card" style="--card-accent:#e23b3b">
+    <span class="tear-card-title">👁 Enemies</span>
+    <span class="tear-card-desc">Stats, behaviours, affix rolls, and what makes each type dangerous.</span>
+  </a>
+  <a href="/bosses" class="tear-card" style="--card-accent:#8b3bd6">
+    <span class="tear-card-title">💀 Bosses</span>
+    <span class="tear-card-desc">All five campaign bosses. Phase breakdowns, tells, and counters.</span>
+  </a>
+  <a href="/progression/achievements" class="tear-card" style="--card-accent:#1faf5a">
+    <span class="tear-card-title">🏆 Progression</span>
+    <span class="tear-card-desc">Achievements, daily challenges, and the meta shop.</span>
+  </a>
+</div>
 
----
-
-## About Tear
-
-> *"Skill is your only shield."*
-
-Tear puts you in an arena against waves of enemies that escalate in speed, number, and ferocity. Between waves you draft upgrades from a rotating shop, slowly building a run that matches your playstyle. At the end of each stage a boss tests everything you've learned.
-
-What sets Tear apart is its input fidelity. The blade responds to **how** you move it — the angle of attack, the speed of your wrist, whether you commit to a full swing or poke with the tip. Mastering that physical vocabulary is the entire game.
-
-The [Style Meter](/mechanics/style-meter) rewards variety: chain slams, launches, parries, and throws together to push into **TEARING!** tier and unlock meaningful damage bonuses. Take a hit and lose half your meter — survivability is earned through reads and reactions, not passive regen.
+<BiomeNavigator />
 
 ---
 
-*Wiki version: **v0.1** · Game version: **v0.1***
+*Wiki v0.1 · Game v0.1*
+
+</div>

@@ -1,0 +1,93 @@
+---
+// TearLore.astro
+// Typewriter lore reveal. Pass `text` as a prop.
+// Animates character-by-character on scroll-enter.
+// Press S or click to skip to end.
+
+interface Props {
+  text: string;
+  /** Speed in ms per character (default 22) */
+  speed?: number;
+}
+
+const { text, speed = 22 } = Astro.props;
+---
+
+<div class="tear-lore" role="complementary" aria-label="Stage lore">
+  <p class="tear-lore-text" data-lore-text={text} data-lore-speed={speed}></p>
+  <span class="tear-lore-cursor" aria-hidden="true"></span>
+  <p class="tear-lore-skip" aria-hidden="true">[ S ] skip</p>
+</div>
+
+<style>
+.tear-lore-skip {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-color-gray-4);
+  margin-top: 0.5rem;
+  cursor: default;
+  display: none;
+}
+.tear-lore[data-typing] .tear-lore-skip { display: block; }
+.tear-lore[data-done] .tear-lore-cursor { display: none; }
+.tear-lore[data-done] .tear-lore-skip   { display: none; }
+</style>
+
+<script>
+(function () {
+  document.querySelectorAll('.tear-lore').forEach(lore => {
+    const el    = lore.querySelector('.tear-lore-text');
+    const cur   = lore.querySelector('.tear-lore-cursor');
+    if (!(el instanceof HTMLElement)) return;
+
+    const fullText = el.dataset.loreText ?? '';
+    const speed    = parseInt(el.dataset.loreSpeed ?? '22', 10);
+    let   idx      = 0;
+    let   timer    = 0;
+    let   started  = false;
+    let   done     = false;
+
+    function finish() {
+      clearInterval(timer);
+      el.textContent = fullText;
+      lore.setAttribute('data-done', '');
+      lore.removeAttribute('data-typing');
+      done = true;
+    }
+
+    function start() {
+      if (started) return;
+      started = true;
+      lore.setAttribute('data-typing', '');
+      timer = setInterval(() => {
+        idx++;
+        el.textContent = fullText.slice(0, idx);
+        if (idx >= fullText.length) finish();
+      }, speed);
+    }
+
+    // Trigger on viewport entry
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { start(); io.disconnect(); }
+    }, { threshold: 0.2 });
+    io.observe(lore);
+
+    // Skip on S key or click
+    const skipHandler = (e) => {
+      if (done) return;
+      if (e instanceof KeyboardEvent && e.key !== 's' && e.key !== 'S') return;
+      finish();
+    };
+    document.addEventListener('keydown', skipHandler);
+    lore.addEventListener('click', () => { if (!done) finish(); });
+
+    document.addEventListener('astro:before-swap', () => {
+      clearInterval(timer);
+      io.disconnect();
+      document.removeEventListener('keydown', skipHandler);
+    });
+  });
+})();
+</script>
