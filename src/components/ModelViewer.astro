@@ -74,8 +74,8 @@ const { model, variant } = Astro.props;
         const y = e.clientY - rect.top;
         const cx = rect.width / 2;
         const cy = rect.height / 2;
-        const rotateX = ((y - cy) / cy) * -4; // subtle tilt
-        const rotateY = ((x - cx) / cx) * 4;
+        const rotateX = ((y - cy) / cy) * -1.5; // subtle tilt
+        const rotateY = ((x - cx) / cx) * 1.5;
         wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       });
       
@@ -137,7 +137,7 @@ const { model, variant } = Astro.props;
     background: #0a0a0d;
     overflow: hidden;
     cursor: crosshair;
-    transition: transform 0.1s ease-out;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     transform-style: preserve-3d;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);

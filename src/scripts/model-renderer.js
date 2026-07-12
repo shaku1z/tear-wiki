@@ -27,9 +27,9 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
   let mouseX = 0, mouseY = 0;
   
   // Camera State
-  let camScale = 1.0; // Base scale (which will be multiplied by 1.5 in the render logic)
-  let camX = 0, camY = 0;
-  let isPanning = false;
+  let camScale = 1.0;
+  let realCamX = CONFIG.view.w / 2;
+  let realCamY = CONFIG.view.h / 2;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -47,27 +47,11 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
     mouseX = e.clientX - rect.left;
     mouseY = e.clientY - rect.top;
     isHovered = true;
-
-    if (isPanning) {
-      camX += e.movementX / camScale;
-      camY += e.movementY / camScale;
-    }
   });
   canvas.addEventListener('mouseleave', () => { 
     isHovered = false; 
-    isPanning = false;
   });
 
-  // Pan and Zoom Listeners
-  canvas.addEventListener('mousedown', (e) => {
-    if (e.button === 1 || e.button === 2) { // Middle or Right click to pan
-      isPanning = true;
-      e.preventDefault();
-    }
-  });
-  canvas.addEventListener('mouseup', (e) => {
-    isPanning = false;
-  });
   canvas.addEventListener('contextmenu', e => e.preventDefault()); // Prevent right click menu
   
   canvas.addEventListener('wheel', (e) => {
@@ -158,14 +142,24 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
     const dpr = window.devicePixelRatio || 1;
     
     ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    
+    // Smart Camera Tracking
+    // Lerp camera towards the enemy
+    const camSpeed = 8 * dt; // Spring stiffness
+    realCamX += (enemyInstance.x - realCamX) * camSpeed;
+    realCamY += (enemyInstance.y - realCamY) * camSpeed;
+    
+    // Dynamic Action Zoom
+    const enemySpeed = Math.sqrt((enemyInstance.vx || 0)**2 + (enemyInstance.vy || 0)**2);
+    let actionZoom = 1.0 - (enemySpeed * 0.00015);
+    actionZoom = Math.max(0.75, Math.min(1.0, actionZoom));
+    
+    const finalScale = 1.5 * camScale * actionZoom;
 
     // Transform mouse coordinates into simulation coordinates for the player
-    const simX = CONFIG.view.w / 2;
-    const simY = CONFIG.view.h / 2;
-    
     // We reverse the camera transform to find where the mouse is in world space
-    const worldMouseX = (mouseX - cx) / (1.5 * camScale) - camX + simX;
-    const worldMouseY = (mouseY - cy) / (1.5 * camScale) - camY + simY;
+    const worldMouseX = (mouseX - cx) / finalScale + realCamX;
+    const worldMouseY = (mouseY - cy) / finalScale + realCamY;
     
     window.player.x = worldMouseX;
     window.player.y = worldMouseY;
@@ -197,11 +191,6 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
 
     // Simulate engine
     enemyInstance.update(dt, window.platforms, window.player, window.projectiles);
-    
-    // Bind position to center of sim for viewer (unless it's moving from a hit)
-    // We let vx/vy from hits decay naturally, then snap back
-    enemyInstance.x += (simX - enemyInstance.x) * (dt * 5); 
-    enemyInstance.y += (simY - enemyInstance.y) * (dt * 5);
 
     // Simulate Projectiles natively
     window.projectiles = window.projectiles.filter(p => !p.dead && p.life > 0);
@@ -212,9 +201,8 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.scale(1.5 * camScale, 1.5 * camScale);
-    ctx.translate(camX, camY);
-    ctx.translate(-simX, -simY); // offset so simX,simY draws at center of canvas
+    ctx.scale(finalScale, finalScale);
+    ctx.translate(-realCamX, -realCamY); // Center exactly on the tracking camera
     
     // Draw all natively
     window.projectiles.forEach(p => {
