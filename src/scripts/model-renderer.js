@@ -1,7 +1,8 @@
 import {
   CONFIG,
   FX, Projectile,
-  Enemy, Charger, Ranged, Flyer, Bomber, Armored, Support, Wraith, Chimera, Warden, Colossus, Aldric, Echo, Source, applyVariant
+  VARIANTS, applyVariant,
+  Enemy, Charger, Ranged, Flyer, Bomber, Armored, Support, Wraith, Chimera, Warden, Colossus, Aldric, Echo, Source
 } from './game-engine.js';
 
 // Setup Mock Globals
@@ -60,7 +61,14 @@ export function initModelViewer(canvas, modelName, variant) {
   }
   
   if (variant) {
-    applyVariant(enemyInstance, variant);
+    let variantObj = null;
+    for (const family in VARIANTS) {
+      const found = VARIANTS[family].find(v => v.id === variant);
+      if (found) { variantObj = found; break; }
+    }
+    if (variantObj) {
+      applyVariant(enemyInstance, variantObj);
+    }
   }
 
   const COLORS = {

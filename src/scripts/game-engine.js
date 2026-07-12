@@ -2980,6 +2980,6 @@ export {
   clamp, lerp, len, lerpAngle, segPointDist, chargeTelegraph,
   CONFIG,
   FX, Projectile,
-  applyVariant,
+  VARIANTS, applyVariant,
   Enemy, Charger, Ranged, Flyer, Bomber, Armored, Boss, Support, Wraith, Chimera, Warden, Colossus, Aldric, Echo, Source
 };
