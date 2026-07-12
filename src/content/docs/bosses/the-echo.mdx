@@ -1,56 +1,18 @@
 ---
-title: "The Echo"
-description: "How to defeat The Echo, the Stage 4 boss in Tear. Phase breakdowns, attack patterns, and lore."
-gameVersion: v0.1
+title: The Echo
+description: Stage-four mirror boss, split phase, and invisibility pressure.
 ---
-
 import BossProfile from '../../../components/BossProfile.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
-
 <BiomeBadge stages={["The Voidspire"]} />
-
-> *Your own silhouette — mirrors your tricks, then splits, then turns invisible.*
-
-**Stage 4 Boss.** Found at the end of [The Voidspire](/stages/the-voidspire).
-Defeating The Echo grants an **Ability Tier-Up**.
-
 <ModelViewer model="the-echo" />
+<BossProfile name="echo" />
 
-<BossProfile name="the-echo" />
+The Echo mirrors recent player behavior, splits into real and false targets, then attacks while hidden. Its live copy delay, visibility cycle, and attack parameters are sourced in the dossier above.
 
-## Phases
+## Strategy
 
-3 phases total. Phase transitions are triggered by HP thresholds.
-
-### Phase 1 — The Mirror
-
-The Echo copies your last trick with a 0.55s delay. It uses your own style against you — a slam will be followed by a mirrored slam. Fires projectiles (14 dmg, 820 px/s) and a shockwave (16 dmg).
-
-:::tip[Strategy]
-Switch tricks constantly. The Echo can't copy a trick it hasn't seen from you yet.
-:::
-
-### Phase 2 — Split
-
-At ~50% HP, The Echo splits into two copies. Only one is real — the other mirrors your hits for zero damage. The real Echo is slightly brighter.
-
-:::tip[Strategy]
-Throw your blade at both. The real one reacts differently when hit — it staggers. The fake does not.
-:::
-
-### Phase 3 — Invisible
-
-Cycles between visible (10s) and invisible (3.5s). During invisibility it still attacks — watch for shockwave particles to locate it. Lunge speed increases to 1500 px/s.
-
-:::tip[Strategy]
-During invisibility, keep moving and listen for audio cues. The shockwave particles give its position away.
-:::
-
-## Lore
-
-> The Voidspire is quiet for the first time. On the wall behind where The Echo stood, scratched deep over what must have been years: your name. Over and over — hundreds of times. Below them all, fresher, still sharp: "I remember what it was like to be going somewhere." And at the very bottom: "Go finish it. One of us should."
-
-## Related Links
-- Explore the [The Voidspire](/stages/the-voidspire) biome.
-- Learn about [Ability Tier-Ups](/mechanics/combat).
+- Vary actions so the mirror has less predictable follow-up value.
+- Use throws to identify the real target during the split.
+- During invisibility, follow particles, sound, and shockwave tells rather than waiting passively.

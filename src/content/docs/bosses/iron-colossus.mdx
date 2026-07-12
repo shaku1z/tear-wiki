@@ -1,46 +1,18 @@
 ---
-title: "Iron Colossus"
-description: "Dismantle the Iron Colossus, the Stage 2 Boss of Tear. Expose its core and dodge sweeping lasers."
-gameVersion: v0.1
+title: Iron Colossus
+description: Stage-two fortress boss, armor panels, charges, and exposed-core pressure.
 ---
-
 import BossProfile from '../../../components/BossProfile.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Crimson Fields"]} />
-
-The **Iron Colossus** is the unstoppable juggernaut of Stage 2. It is a literal tank, possessing 0 knockback susceptibility and a massive weight pool. You cannot move the Colossus; you can only survive it until you expose its vulnerable core.
-
-> [!CAUTION]
-> The Iron Colossus takes **0 knockback** from any source (`knockbackTaken: 0`). Do not try to push it or launch it. It dictates the spacing of the fight entirely.
-
-## Base Attributes
-
+<BiomeBadge stages={["The Undercroft"]} />
 <ModelViewer model="colossus" />
-
 <BossProfile name="colossus" />
 
-### Phase 1: The Fortress
-In its starting phase, the Colossus uses its immense size to dominate the ground.
-- **Heavy Shockwave:** Winds up for **0.6s** before slamming the ground, unleashing a massive **24 px radius shockwave** at **720 px/s** (dealing **20 damage**). This is larger and faster than the Warden's shockwave.
-- **Juggernaut Charge:** Winds up for **0.7s**, then barrels forward at an incredible **1350 px/s**. Because of its 152x150 size, you must double-jump or dash upward to clear it safely.
-- **Base Attack Cooldown:** It attacks methodically, with a **2.5s** cooldown between standard moves.
+The Colossus controls spacing through a heavy charge, shockwaves, a sweeping arm, and later crossfire. It cannot be meaningfully displaced; instead, create windows by avoiding its committed moves and breaking its armor.
 
-### Phase 2: The Sweeping Arm
-After taking damage, the Colossus deploys its sweeping laser arm.
-- **Sweeper Laser:** It throws a sweeping arm that tracks across the arena at a height of **540 px**, moving at **540 px/s** and dealing **16 damage**. You must duck under it or dash through it.
-- **Panel Armor:** The Colossus guards its core with **4 breakable panels**. You must destroy these panels sequentially to deal true damage to the boss.
+## Strategy
 
-### Phase 3: Exposed Core
-Once the panels are stripped, the Colossus panics and floods the arena with crossfire.
-- **Cross Lasers:** Fires intersecting beams at **640 px/s**, dealing **14 damage**. 
-- **Laser Cooldown:** The cross lasers fire every **2.2s**, forcing you to manage tight dodges while trying to DPS the exposed core.
-
----
-
-## Strategy Summary
-
-- **Patience is Key:** With 2900 HP and armor panels, this is an endurance fight. Do not overcommit to long combos.
-- **Verticality:** Its charge covers a massive horizontal area. Save your double jump or Updraft purely for dodging the 1350 px/s charge.
-- **Break the Panels:** Focus all your heavy strikes (Power Slams, fully charged Throws) directly on the 4 armored panels. Once they break, the boss's health melts.
+- Save vertical movement for the charge and sweeper.
+- Focus heavy attacks on exposed armor panels.
+- Once the core is accessible, convert every safe gap into burst damage.

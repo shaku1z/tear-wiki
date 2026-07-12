@@ -1,47 +1,18 @@
 ---
-title: "Aldric, The Berserker King"
-description: "Face Aldric in Stage 3. Navigate his fire columns, fake death, and frenzy mechanics."
-gameVersion: v0.1
+title: Aldric, The Berserker King
+description: Stage-three duelist, fire arena, fake death, and frenzy.
 ---
-
 import BossProfile from '../../../components/BossProfile.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Tear"]} />
-
-**Aldric, The Berserker King** is the Stage 3 boss. He begins as a fast, aggressive duelist, transforms the arena into a throne of fire, and ultimately attempts to trick you with a fake death before entering a lethal frenzy.
-
-> [!WARNING]
-> Aldric will fake his death at 20% HP (`fakeTier: 0.20`). During this downed state, he takes 70% less damage (`downedDmgTaken: 0.3`) and regenerates 5% of his HP every second, up to 50% max HP (`reviveFrac: 0.5`). You *must* DPS him while he is down to stop the regeneration!
-
-## Base Attributes
-
+<BiomeBadge stages={["The Crimson Fields"]} />
 <ModelViewer model="aldric" />
-
 <BossProfile name="aldric" />
 
-### Phase 1: The Duel
-Aldric matches your speed and aggression.
-- **Fast Lunge:** With only a **0.45s windup**, he lunges at **1150 px/s**.
-- **Shockwave Slam:** He slams the ground, sending out a **20 px radius shockwave** at **740 px/s** (dealing **18 damage**).
-- **Relentless Pace:** His base attack cooldown is only **1.7s**, making him much faster than the Colossus or the Warden.
+Aldric is an aggressive duel that escalates into a fire-pattern arena and then a false death. His live thresholds, recovery behavior, and frenzy modifiers are shown above from the game configuration.
 
-### Phase 2: The Throne of Fire (65% HP)
-When reduced to **65% HP** (`fireTier: 0.65`), Aldric ignites the arena.
-- **Checkerboard Flames:** He summons **8 columns of fire** (`fireCols: 8`) that pulse across the arena.
-- **Pulse Cycle:** The fire pulses every **3.0 seconds**, creating a rhythmic jumping puzzle while you continue to duel him.
-- **King's Charge:** Every **13 seconds**, he winds up for **0.5s** and charges across the burning arena at a blinding **1550 px/s**.
+## Strategy
 
-### Phase 3: The Fake Death & Frenzy (20% HP)
-At **20% HP**, Aldric collapses, seemingly defeated.
-- **The Regeneration:** While downed, he takes drastically reduced damage (`x0.3`) and regains HP at **5% per second**, capping out when he reaches **50% HP**.
-- **The Frenzy:** Once he revives, he enters a Berserker Frenzy. He attacks wildly, but in his rage, he takes **35% bonus damage** (`frenzyDmgTaken: 1.35`) from all your attacks.
-
----
-
-## Strategy Summary
-
-- **Punish the Downed State:** When he fakes his death, do not stop attacking. Use your highest DPS combos (Power Slams and consecutive blade hits) to out-damage his 5% regen and kill him before he can revive.
-- **Sync with the Fire:** The 3-second fire cycle becomes the metronome of the fight. Time your jumps and aerial combos to keep you off the floor exactly when the columns pulse.
-- **Glass Cannon Frenzy:** If he successfully revives into his Frenzy, dodge his chaotic attacks and strike hard. His 35% damage vulnerability means a clean Perfect Parry or Power Slam will chunk his health massively.
+- Learn the rhythm of the fire columns before extending a combo.
+- Keep pressure on the downed state; stopping gives the regeneration sequence room to recover.
+- Frenzy creates danger but also a decisive burst window when you can safely counter.
