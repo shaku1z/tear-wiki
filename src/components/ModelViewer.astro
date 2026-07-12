@@ -29,7 +29,7 @@ const { model, variant } = Astro.props;
             <button class="ctrl-btn active" data-time="1">1.0x</button>
           </div>
           
-          {(model === "warden" || model === "aldric" || model === "iron-colossus" || model === "the-echo" || model === "the-source") && (
+          {(isBoss) && (
             <div class="control-group phase-controls">
               <span class="control-label">PHASE</span>
               <button class="ctrl-btn active" data-phase="auto">AUTO</button>
@@ -209,51 +209,66 @@ const { model, variant } = Astro.props;
   }
   .model-controls {
     display: flex;
-    gap: 0.5rem;
-    justify-content: center; /* Center the command bar */
-    pointer-events: auto; /* Allow clicking buttons */
-    margin-bottom: 0.5rem; /* Lift slightly off the bottom */
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    margin-bottom: 0.5rem;
+    background: rgba(10, 10, 13, 0.75);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 100px;
+    padding: 0.25rem 0.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   .control-group {
     display: flex;
     align-items: center;
-    background: rgba(15, 15, 20, 0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px;
-    padding: 0.35rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    position: relative;
+    padding: 0 0.75rem;
+  }
+  .control-group:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 15%;
+    bottom: 15%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.1);
   }
   .control-label {
     font-family: var(--sl-font-mono);
     font-size: 0.65rem;
-    color: var(--sl-color-gray-3);
-    padding: 0 0.75rem;
-    letter-spacing: 0.15em;
-    font-weight: bold;
+    color: rgba(255, 255, 255, 0.4);
+    padding-right: 0.75rem;
+    letter-spacing: 0.2em;
+    font-weight: 600;
   }
   .ctrl-btn {
     background: transparent;
     border: none;
-    color: var(--sl-color-gray-3);
+    color: rgba(255, 255, 255, 0.6);
     font-family: var(--sl-font-mono);
     font-size: 0.75rem;
-    padding: 0.35rem 0.85rem;
+    padding: 0.4rem 0.85rem;
+    margin: 0 0.1rem;
     cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border-radius: 100px;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   .ctrl-btn:hover {
-    color: var(--sl-color-white);
-    background: rgba(255,255,255,0.08);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
   }
   .ctrl-btn.active {
-    color: #15c2c2;
-    background: rgba(21, 194, 194, 0.15);
+    color: #000;
+    background: #13c4d6;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(19, 196, 214, 0.4);
   }
   .debug-toggle.active {
-    color: #ff00ff;
-    background: rgba(255, 0, 255, 0.15);
+    background: #e23b3b;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(226, 59, 59, 0.4);
   }
   
   .model-zoom-container {
