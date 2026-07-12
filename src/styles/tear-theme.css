@@ -257,3 +257,26 @@ site-search kbd {
 main {
   animation: tear-fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ---- Kill Neon Effects --------------------------------------- */
+/* User despises neon glow. Starlight's splash page adds a huge neon orb. */
+:root {
+  --sl-color-text-shadow: none !important;
+}
+
+[data-has-hero] .hero > img,
+[data-has-hero] .sl-markdown-content,
+.hero-bg, 
+.hero,
+[data-has-hero] .page,
+[data-has-hero] main {
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Ensure no text-shadow anywhere */
+* {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
