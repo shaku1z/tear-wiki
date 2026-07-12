@@ -1,0 +1,87 @@
+---
+export interface Props {
+  model: 'charger' | 'ranged' | 'flyer' | 'bomber' | 'armored' | 'aldric';
+}
+const { model } = Astro.props;
+---
+
+<tear-model-viewer data-model={model} class="tear-model-viewer">
+  <div class="model-canvas-wrapper">
+    <canvas></canvas>
+    <div class="model-ui-overlay">
+      <span class="model-label">[{model.toUpperCase()}]</span>
+      <span class="model-status">IDLE // HOVER TO ENGAGE</span>
+    </div>
+  </div>
+</tear-model-viewer>
+
+<script>
+  import { initModelViewer } from '../scripts/model-renderer.js';
+
+  class TearModelViewer extends HTMLElement {
+    constructor() {
+      super();
+      this.cleanup = null;
+    }
+
+    connectedCallback() {
+      const canvas = this.querySelector('canvas');
+      const modelName = this.dataset.model;
+      if (canvas && modelName) {
+        this.cleanup = initModelViewer(canvas, modelName);
+      }
+    }
+
+    disconnectedCallback() {
+      if (this.cleanup) {
+        this.cleanup();
+        this.cleanup = null;
+      }
+    }
+  }
+
+  customElements.define('tear-model-viewer', TearModelViewer);
+</script>
+
+<style>
+  .tear-model-viewer {
+    display: block;
+    margin: 2rem 0;
+    border: 1px solid var(--sl-color-hairline);
+    background: #0a0a0d;
+  }
+  .model-canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .model-ui-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .model-label {
+    font-family: var(--sl-font-mono);
+    font-size: 0.75rem;
+    color: var(--sl-color-white);
+    letter-spacing: 0.2em;
+  }
+  .model-status {
+    font-family: var(--sl-font-mono);
+    font-size: 0.65rem;
+    color: var(--sl-color-gray-3);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+</style>
