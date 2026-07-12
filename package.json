@@ -3,9 +3,10 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "node scripts/sync-config.js && astro dev",
-    "start": "node scripts/sync-config.js && astro dev",
-    "build": "node scripts/sync-config.js && astro build",
+    "sync:game": "node scripts/sync-game-data.mjs",
+    "dev": "npm run sync:game && astro dev",
+    "start": "npm run sync:game && astro dev",
+    "build": "npm run sync:game && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

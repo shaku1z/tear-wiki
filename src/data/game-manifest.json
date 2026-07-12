@@ -1,0 +1,2711 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "shaku1z/tear",
+    "commit": "9e0d1f15c4b35b716219168e3cda37074b615fa5",
+    "mode": "remote",
+    "syncedAt": "2026-07-12T22:48:25.947Z"
+  },
+  "config": {
+    "view": {
+      "w": 1600,
+      "h": 900
+    },
+    "world": {
+      "gravity": 2400,
+      "groundY": 800
+    },
+    "player": {
+      "w": 32,
+      "h": 50,
+      "moveSpeed": 430,
+      "thrownMoveBoost": 1.15,
+      "groundAccel": 5000,
+      "airAccel": 2800,
+      "friction": 6000,
+      "jumpSpeed": 920,
+      "coyoteTime": 0.1,
+      "jumpBuffer": 0.1,
+      "maxFall": 1800,
+      "hp": 100,
+      "hitIframe": 0.9,
+      "dmgTakenMult": 1
+    },
+    "dash": {
+      "speed": 1500,
+      "duration": 0.15,
+      "cooldown": 0.55,
+      "iframe": 0.15,
+      "endSpeedKeep": 0.35,
+      "steer": 15
+    },
+    "blade": {
+      "length": 95,
+      "handOffsetX": 0,
+      "handOffsetY": -6,
+      "aimRadius": 85,
+      "minTether": 0.45,
+      "aimSensitivity": 0.9,
+      "springStiffness": 150,
+      "damping": 7.5,
+      "gravity": 900,
+      "maxReach": 120,
+      "leashStiffness": 55,
+      "maxSpeed": 7000,
+      "angleSmooth": 35,
+      "leadAmount": 0.45,
+      "leadSpeedRef": 2600,
+      "minHitSpeed": 950,
+      "damageScale": 0.0092,
+      "maxDamage": 58,
+      "enemyHitIframe": 0.18,
+      "deflectMinSpeed": 700,
+      "deflectBoost": 1.25,
+      "deflectDmgMult": 1,
+      "perfectSpeed": 2400,
+      "counterParryFactor": 0.55,
+      "slamMultiplier": 1.8,
+      "slamMinDownSpeed": 1750,
+      "slamPowerSpeed": 1700,
+      "slamPowerBonus": 0.7,
+      "slamEmpowerAt": 0.5,
+      "launchMinUpSpeed": 1250,
+      "launchPower": 780,
+      "risingSpeedRef": 850,
+      "risingDmgBonus": 0.9,
+      "risingLaunchBonus": 0.7,
+      "throw": {
+        "speed": 1900,
+        "speedFromSwing": 0.45,
+        "maxSpeed": 4600,
+        "damage": 22,
+        "damageFromSpeed": 0.008,
+        "recallMult": 1,
+        "hiMult": 1.4,
+        "loMult": 0.65,
+        "lobRadius": 160,
+        "lobStun": 0.8,
+        "reclaimDistance": 384,
+        "returnSpeed": 3400,
+        "maxLife": 2.5
+      }
+    },
+    "skill": {
+      "pokeFloor": 0.4,
+      "commitRef": 620,
+      "commitFloor": 0.5,
+      "styleDamage": 0.06,
+      "styleDamageMax": 0.4,
+      "aerialRaveCap": 0.5
+    },
+    "resilience": {
+      "parryGuardTime": 1.2,
+      "parryGuardMult": 0.4,
+      "flowGuardTier": 3,
+      "flowGuardMult": 0.7,
+      "maxShield": 2,
+      "bloodriteHeal": 8,
+      "lifestealPerSwing": 1.5,
+      "lifestealCd": 0.5
+    },
+    "status": {
+      "bleedDps": 6,
+      "bleedDur": 3.2,
+      "bleedMax": 8,
+      "burnDps": 20,
+      "burnDur": 2.6,
+      "markMult": 1.3,
+      "markDur": 4
+    },
+    "juice": {
+      "trailSamples": 14,
+      "trailMinStep": 6,
+      "trailAlpha": 0.22,
+      "shakeBig": 11,
+      "shakeSmall": 4,
+      "shakeDecay": 45,
+      "sparkCount": 9,
+      "deathShards": 12,
+      "bannerTime": 1.3,
+      "parrySlowmo": 0.18,
+      "parrySlowScale": 0.28,
+      "zoomBig": 0.05,
+      "zoomParry": 0.1,
+      "flashParry": 0.55,
+      "dashGhostInterval": 0.028
+    },
+    "enemy": {
+      "w": 40,
+      "h": 40,
+      "speed": 150,
+      "hp": 86,
+      "contactDmg": 12,
+      "knockbackTaken": 9,
+      "weight": 1,
+      "respawnDelay": 1.4,
+      "chargeRange": 420,
+      "chargeWindup": 0.55,
+      "chargeSpeed": 760,
+      "chargeTime": 0.5,
+      "chargeStun": 1.1,
+      "chargeCd": 1.2
+    },
+    "ranged": {
+      "w": 34,
+      "h": 44,
+      "speed": 175,
+      "hp": 60,
+      "contactDmg": 8,
+      "knockbackTaken": 12,
+      "preferredDist": 380,
+      "tooClose": 250,
+      "windup": 0.7,
+      "aimInterval": 2.3,
+      "projSpeed": 800,
+      "weight": 1
+    },
+    "flyer": {
+      "w": 36,
+      "h": 26,
+      "hp": 44,
+      "speed": 230,
+      "contactDmg": 10,
+      "knockbackTaken": 14,
+      "weight": 0.75,
+      "swoopInterval": 3.3,
+      "swoopSpeed": 700,
+      "hoverY": 150
+    },
+    "bomber": {
+      "w": 34,
+      "h": 34,
+      "hp": 40,
+      "speed": 165,
+      "contactDmg": 8,
+      "knockbackTaken": 11,
+      "weight": 1,
+      "standoff": 340,
+      "lobInterval": 2.4,
+      "bombSpeed": 540,
+      "bombArc": 540,
+      "bombGravity": 1150,
+      "blastRadius": 150,
+      "blastDmg": 24,
+      "mineArm": 1.3,
+      "mineTrigger": 66,
+      "mineInterval": 2.2
+    },
+    "armored": {
+      "w": 46,
+      "h": 46,
+      "hp": 154,
+      "speed": 95,
+      "contactDmg": 14,
+      "knockbackTaken": 3,
+      "weight": 2.2,
+      "breakSpeed": 1500,
+      "groundDR": 0.5,
+      "airDR": 1.15,
+      "stompCd": 3.2,
+      "stompWindup": 0.55,
+      "stompRange": 400,
+      "shockSpeed": 560,
+      "shockDmg": 16,
+      "shockR": 15
+    },
+    "boss": {
+      "w": 118,
+      "h": 118,
+      "hp": 1900,
+      "speed": 70,
+      "contactDmg": 20,
+      "knockbackTaken": 0.6,
+      "weight": 6,
+      "fireBase": 2
+    },
+    "echo": {
+      "w": 32,
+      "h": 50,
+      "hp": 3000,
+      "speed": 280,
+      "contactDmg": 18,
+      "knockbackTaken": 0.5,
+      "weight": 4,
+      "copyDelay": 0.55,
+      "shockDmg": 16,
+      "shockSpeed": 700,
+      "projSpeed": 820,
+      "projDmg": 14,
+      "invisCycle": 10,
+      "invisDur": 3.5,
+      "lungeSpeed": 1500
+    },
+    "source": {
+      "w": 116,
+      "h": 128,
+      "hp": 4200,
+      "speed": 125,
+      "contactDmg": 22,
+      "knockbackTaken": 0.35,
+      "weight": 7,
+      "floorTier": 0.62,
+      "fakeTier": 0.34,
+      "reviveFrac": 0.46,
+      "cycleCd": 2.5,
+      "shockDmg": 18,
+      "shockSpeed": 720,
+      "shockR": 16,
+      "sweeperDmg": 18,
+      "sweeperSpeed": 600,
+      "crossDmg": 16,
+      "crossSpeed": 740,
+      "copyDelay": 0.5,
+      "collapseCd": 1.3,
+      "regenRate": 0.05
+    },
+    "aldric": {
+      "w": 116,
+      "h": 132,
+      "hp": 3400,
+      "speed": 130,
+      "contactDmg": 22,
+      "knockbackTaken": 0.3,
+      "weight": 7,
+      "atkCd": 1.7,
+      "windup": 0.45,
+      "lungeSpeed": 1150,
+      "shockDmg": 18,
+      "shockSpeed": 740,
+      "shockR": 20,
+      "fireTier": 0.65,
+      "fakeTier": 0.2,
+      "regenRate": 0.05,
+      "reviveFrac": 0.5,
+      "fireCols": 8,
+      "fireCycle": 3,
+      "frenzyDmgTaken": 1.35,
+      "downedDmgTaken": 0.3,
+      "chargeCd": 13,
+      "chargeWindup": 0.5,
+      "chargeSpeed": 1550
+    },
+    "colossus": {
+      "w": 152,
+      "h": 150,
+      "hp": 2900,
+      "speed": 58,
+      "contactDmg": 24,
+      "knockbackTaken": 0,
+      "weight": 9,
+      "atkCd": 2.5,
+      "windup": 0.6,
+      "shockDmg": 20,
+      "shockSpeed": 720,
+      "shockR": 24,
+      "chargeWindup": 0.7,
+      "chargeSpeed": 1350,
+      "sweeperDmg": 16,
+      "sweeperSpeed": 540,
+      "sweeperY": 540,
+      "panelCount": 4,
+      "crossDmg": 14,
+      "crossSpeed": 640,
+      "crossCd": 2.2
+    },
+    "warden": {
+      "batonCd": 2.1,
+      "batonWindup": 0.5,
+      "mortarShots": 3,
+      "mortarSpeed": 760,
+      "mortarGravity": 900,
+      "mortarDmg": 14,
+      "bashRange": 150,
+      "bashKnock": 620,
+      "zoneCount": 3,
+      "zoneW": 200,
+      "zoneShift": 7,
+      "zoneTick": 7,
+      "zoneTickCd": 0.4,
+      "shockDmg": 18,
+      "shockSpeed": 700,
+      "shockR": 18,
+      "ceilingY": 150,
+      "ceilDropCd": 1.6,
+      "lungeCd": 7.5,
+      "lungeWindup": 0.55,
+      "lungeSpeed": 1500
+    },
+    "support": {
+      "w": 32,
+      "h": 42,
+      "hp": 44,
+      "speed": 125,
+      "contactDmg": 6,
+      "knockbackTaken": 13,
+      "weight": 1,
+      "range": 240,
+      "keepAway": 330,
+      "menderRate": 11,
+      "drMult": 0.5,
+      "dmgBuff": 1.35,
+      "speedBuff": 1.45,
+      "hasteBuff": 1.5,
+      "anchorDR": 0.4,
+      "anchorRegen": 9
+    },
+    "wraith": {
+      "w": 36,
+      "h": 42,
+      "hp": 64,
+      "speed": 170,
+      "contactDmg": 12,
+      "knockbackTaken": 0,
+      "weight": 1.4,
+      "hoverY": 70
+    },
+    "chimera": {
+      "w": 38,
+      "h": 48,
+      "hp": 84,
+      "speed": 150,
+      "contactDmg": 12,
+      "knockbackTaken": 9,
+      "weight": 1,
+      "copyDelay": 0.55
+    },
+    "elite": {
+      "hpMult": 2.2,
+      "speedMult": 1.3,
+      "dmgMult": 1.5,
+      "sizeMult": 1.2,
+      "chancePerWave": 0.06,
+      "chanceMax": 0.35
+    },
+    "proj": {
+      "r": 9,
+      "dmg": 10,
+      "speed": 640
+    },
+    "chargedShot": {
+      "r": 11,
+      "dmg": 30,
+      "speed": 1900,
+      "windup": 1.4
+    },
+    "exotic": {
+      "exWindup": 1.3,
+      "exShockDmg": 24,
+      "exShockSpeed": 640,
+      "exShockR": 19,
+      "gravWindup": 0.9,
+      "gravReach": 120,
+      "gravDmg": 22,
+      "gravShockR": 24,
+      "gravShockSpeed": 420,
+      "duelCd": 2.4,
+      "warlockSpeed": 430,
+      "warlockDmg": 12,
+      "warlockCurveAt": 0.42,
+      "chainSpeed": 560,
+      "chainRoot": 1.4,
+      "chainDmg": 8,
+      "chainR": 12,
+      "sludgeSpeed": 360,
+      "sludgeArc": 480,
+      "sludgeGravity": 1150,
+      "sludgeR": 12,
+      "sludgeZoneR": 72,
+      "sludgeZoneLife": 5,
+      "sludgeSlow": 0.45,
+      "sludgeInterval": 2.6,
+      "geoChannel": 1.8,
+      "geoWallW": 26,
+      "geoWallH": 155,
+      "geoWallLife": 9,
+      "geoInterval": 5,
+      "geoRange": 540
+    },
+    "colors": {
+      "charger": "#e23b3b",
+      "ranged": "#2f6df0",
+      "flyer": "#8b3bd6",
+      "bomber": "#ef8a17",
+      "armored": "#3a4654",
+      "armoredShield": "#15c2c2",
+      "boss": "#b01030",
+      "priest": "#a64dd6",
+      "herald": "#e0902f",
+      "mender": "#1faf5a",
+      "anchor": "#1597c2",
+      "wraith": "#6a6f88",
+      "chimera": "#444a5c",
+      "sludge": "#6f7a35",
+      "enemyShot": "#e23b3b",
+      "deflected": "#1faf5a",
+      "perfect": "#13c4d6",
+      "slam": "#ef8a17",
+      "scarf": "#d8324a",
+      "bladeTrail": "#13c4d6",
+      "bladeGlow": "#13c4d6",
+      "eye": "#13c4d6"
+    },
+    "hitStop": {
+      "threshold": 22,
+      "big": 0.07,
+      "small": 0.025
+    },
+    "run": {
+      "maxConcurrent": 6,
+      "spawnInterval": 0.7,
+      "firstWaveCount": 3,
+      "countPerWave": 1.4,
+      "hpScalePerWave": 0.12,
+      "scorePerKill": 6,
+      "scoreMult": 1,
+      "coinMult": 1,
+      "healEachWave": 12,
+      "startDelay": 0.8,
+      "waveClearPause": 0.8,
+      "stageHpStep": 0.34,
+      "inStageHp": 0.06,
+      "stageDmgStep": 0.14,
+      "inStageDmg": 0.02,
+      "stageCountStep": 2,
+      "concurrentPerStage": 1,
+      "maxConcurrentCap": 10
+    },
+    "trick": {
+      "decay": 2.6,
+      "drainRate": 26,
+      "hitLoss": 0.5,
+      "variety": 1.5,
+      "tiers": [
+        {
+          "at": 0,
+          "mult": 1,
+          "name": ""
+        },
+        {
+          "at": 14,
+          "mult": 1.5,
+          "name": "NICE"
+        },
+        {
+          "at": 34,
+          "mult": 2,
+          "name": "STYLISH"
+        },
+        {
+          "at": 64,
+          "mult": 3,
+          "name": "BRUTAL"
+        },
+        {
+          "at": 110,
+          "mult": 4,
+          "name": "SAVAGE"
+        },
+        {
+          "at": 175,
+          "mult": 5,
+          "name": "TEARING!"
+        }
+      ],
+      "pts": {
+        "hit": 2,
+        "throwHit": 4,
+        "deflect": 5,
+        "launch": 5,
+        "slam": 8,
+        "superslam": 11,
+        "updraft": 10,
+        "parry": 12
+      }
+    },
+    "difficulties": [
+      {
+        "id": "easy",
+        "label": "Easy",
+        "desc": "Gentler enemies, lighter hits.",
+        "mods": {
+          "hp": 0.8,
+          "dmg": 0.65,
+          "count": 0.85,
+          "coin": 0.8,
+          "score": 0.7
+        }
+      },
+      {
+        "id": "normal",
+        "label": "Normal",
+        "desc": "The intended balance.",
+        "mods": {
+          "hp": 1,
+          "dmg": 1,
+          "count": 1,
+          "coin": 1,
+          "score": 1
+        }
+      },
+      {
+        "id": "hard",
+        "label": "Hard",
+        "desc": "Tougher, hungrier, more of them.",
+        "mods": {
+          "hp": 1.3,
+          "dmg": 1.35,
+          "count": 1.15,
+          "coin": 1.3,
+          "score": 1.4
+        }
+      },
+      {
+        "id": "extreme",
+        "label": "Extreme",
+        "desc": "Brutal — but fair. Big rewards.",
+        "mods": {
+          "hp": 1.7,
+          "dmg": 1.8,
+          "count": 1.3,
+          "coin": 1.7,
+          "score": 2
+        }
+      },
+      {
+        "id": "onehit",
+        "label": "One-Hit",
+        "desc": "One touch and you fall. Max reward.",
+        "oneHit": true,
+        "mods": {
+          "hp": 0.9,
+          "dmg": 1,
+          "count": 1,
+          "coin": 1.8,
+          "score": 2.2
+        }
+      }
+    ],
+    "modes": [
+      {
+        "id": "campaign",
+        "label": "Adventure",
+        "enabled": true,
+        "blurb": "Journey through biomes — 9 waves then a boss, stage after stage, ever deeper."
+      },
+      {
+        "id": "endless",
+        "label": "Endless",
+        "enabled": true,
+        "blurb": "Survive forever — biomes cycle, hordes swell, mini-bosses crash in. Chase your best."
+      },
+      {
+        "id": "gauntlet",
+        "label": "Gauntlet",
+        "enabled": true,
+        "blurb": "Endless, but a full boss storms in every 8 waves — cycling all five, ever tougher."
+      },
+      {
+        "id": "playground",
+        "label": "Playground",
+        "enabled": true,
+        "training": true,
+        "blurb": "An open arena — spawn any enemy, grab any ability at any tier, test everything."
+      },
+      {
+        "id": "tutorial",
+        "label": "Tutorial",
+        "enabled": true,
+        "training": true,
+        "blurb": "Learn the blade: swings, slams, power slams, launches, juggles, updrafts, throws, parries."
+      },
+      {
+        "id": "bossonly",
+        "label": "Boss Test",
+        "enabled": true,
+        "bossOnly": true,
+        "debug": true,
+        "blurb": "Boss gauntlet — fight every boss in a row, evolving an ability after each."
+      },
+      {
+        "id": "sandbox",
+        "label": "Enemy Test",
+        "enabled": true,
+        "sandbox": true,
+        "debug": true,
+        "blurb": "Sandbox: every enemy variant spawns from wave 1 — try the full roster."
+      }
+    ],
+    "touch": {
+      "aimBoost": 1.5
+    }
+  },
+  "upgrades": [
+    {
+      "id": "vitality",
+      "name": "Vitality",
+      "cat": "resilience",
+      "desc": "+30 max HP, and heal 30.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "keen_edge",
+      "name": "Keen Edge",
+      "cat": "offense",
+      "desc": "+12% swing damage.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "fleet",
+      "name": "Fleet Foot",
+      "cat": "mobility",
+      "desc": "+8% move speed, higher jump.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "quick_recovery",
+      "name": "Quick Recovery",
+      "cat": "mobility",
+      "desc": "-25% dash cooldown.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "long_reach",
+      "name": "Long Reach",
+      "cat": "utility",
+      "desc": "+ blade reach and length.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "heavy_swing",
+      "name": "Heavy Swing",
+      "cat": "offense",
+      "desc": "+25% knockback, stronger launches.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "deadly_throw",
+      "name": "Deadly Throw",
+      "cat": "throw",
+      "desc": "+20% thrown-blade damage, and it flies faster.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "vampiric",
+      "name": "Vampiric Edge",
+      "cat": "resilience",
+      "desc": "Swings trickle back a sliver of HP (once per swing).",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "air_superiority",
+      "name": "Air Superiority",
+      "cat": "offense",
+      "desc": "+15% damage while airborne.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "tough_hide",
+      "name": "Tough Hide",
+      "cat": "resilience",
+      "desc": "Take 12% less damage.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "air_dash",
+      "name": "Air Dash",
+      "cat": "mobility",
+      "desc": "Gain a second dash you can use in mid-air. Charges refill when you land.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "bounty",
+      "name": "Bounty Hunter",
+      "cat": "utility",
+      "desc": "+20% score from kills.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "glass_cannon",
+      "name": "Glass Cannon",
+      "cat": "offense",
+      "desc": "+30% ALL damage (swing + throw), but you take +25% more.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "bloodrite",
+      "name": "Bloodrite",
+      "cat": "resilience",
+      "desc": "Skill kills (slam, spike, perfect-parry) restore HP.",
+      "unique": true,
+      "rare": true,
+      "tiers": [
+        {
+          "desc": "Skill kills (slam, spike, perfect-parry) restore much more HP and grant 1s of invincibility."
+        },
+        {
+          "desc": "Skill kills (slam, spike, perfect-parry) restore massive HP and grant 1s of invincibility. Plus, EVERY normal kill now trickles HP back."
+        }
+      ]
+    },
+    {
+      "id": "riposte",
+      "name": "Riposte",
+      "cat": "parry",
+      "desc": "After a perfect parry, take 60% less damage for 1.2s.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "After a perfect parry, restore HP and take 75% less damage for 1.8s."
+        },
+        {
+          "desc": "After a perfect parry, restore HP and become completely INVINCIBLE for 2.3s."
+        }
+      ]
+    },
+    {
+      "id": "flow_guard",
+      "name": "Flow Guard",
+      "cat": "resilience",
+      "desc": "Take 30% less damage while your trick rank is BRUTAL (x3) or higher.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Take 50% less damage while your trick rank is BRUTAL (x3) or higher."
+        },
+        {
+          "desc": "Take 50% less damage starting at STYLISH (x2). At BRUTAL (x3) or higher, you also rapidly REGENERATE HP."
+        }
+      ]
+    },
+    {
+      "id": "aegis",
+      "name": "Aegis",
+      "cat": "resilience",
+      "desc": "Slam kills grant a shield that blocks the next hit (max 2 shields).",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Slam and Perfect-Parry kills grant a shield that blocks the next hit (max 3)."
+        },
+        {
+          "desc": "Slam and Perfect-Parry kills grant a blocking shield (max 4). When a shield breaks, it erupts in a damaging shockwave."
+        }
+      ]
+    },
+    {
+      "id": "phase_step",
+      "name": "Phase Step",
+      "cat": "parry",
+      "desc": "Dash through an enemy shot to deflect it — turn defense into offense.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "backfire",
+      "name": "Backfire",
+      "cat": "parry",
+      "desc": "Your reflected shots STUN the enemies they strike.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "crater",
+      "name": "Crater",
+      "cat": "offense",
+      "desc": "Power Slams erupt in a shockwave that grows with your descent speed.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "aerial_rave",
+      "name": "Aerial Rave",
+      "cat": "offense",
+      "desc": "Staying airborne ramps up your swing damage over time (up to +50%).",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Staying airborne ramps up your swing damage much faster (up to +80%)."
+        },
+        {
+          "desc": "Staying airborne ramps up your swing damage incredibly fast (up to +130%)."
+        }
+      ]
+    },
+    {
+      "id": "seismic_slam",
+      "name": "Seismic Slam",
+      "cat": "offense",
+      "desc": "Slams blast nearby enemies for 22.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "detonate",
+      "name": "Detonate",
+      "cat": "offense",
+      "desc": "Kills explode for 18 to nearby foes.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "adrenaline",
+      "name": "Adrenaline",
+      "cat": "mobility",
+      "desc": "Kills instantly refresh your dash.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "throw_momentum",
+      "name": "Razor Momentum",
+      "cat": "throw",
+      "desc": "A thrown blade grows faster and stronger for every enemy it pierces.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "A thrown blade ramps up speed and damage much harder for every pierce."
+        },
+        {
+          "desc": "A thrown blade heavily ramps up speed and damage. Each pierce also briefly STUNS the target."
+        }
+      ]
+    },
+    {
+      "id": "throw_giant",
+      "name": "Greatblade",
+      "cat": "throw",
+      "desc": "The blade becomes huge while thrown (normal size in hand).",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "parry_pierce",
+      "name": "Piercing Parry",
+      "cat": "parry",
+      "desc": "Parried projectiles pierce through every enemy.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "parry_split",
+      "name": "Scatter Parry",
+      "cat": "parry",
+      "desc": "Parried projectiles split into 3 that ricochet up to 3 times.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "tempest",
+      "name": "Tempest",
+      "cat": "offense",
+      "desc": "Rising updrafts also launch all nearby enemies skyward.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "storm_recall",
+      "name": "Storm Recall",
+      "cat": "throw",
+      "desc": "Recalling the blade tears through enemies for +85% damage.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Recalling the blade tears through enemies for +140% damage."
+        },
+        {
+          "desc": "Recalling the blade tears through enemies for +200% damage. Catching it unleashes a shockwave."
+        }
+      ]
+    },
+    {
+      "id": "phantom_dash",
+      "name": "Phantom Dash",
+      "cat": "mobility",
+      "desc": "Dashing directly through enemies unleashes a damaging phase-slice.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Dashing directly through enemies unleashes a much heavier phase-slice."
+        },
+        {
+          "desc": "Dashing directly through enemies unleashes a devastating phase-slice. If the slice kills, your dash instantly REFUNDS."
+        }
+      ]
+    },
+    {
+      "id": "boomerang",
+      "name": "Boomerang",
+      "cat": "throw",
+      "desc": "Recall the thrown blade from any distance.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "ricochet",
+      "name": "Ricochet",
+      "cat": "throw",
+      "desc": "A thrown blade curves to a new target after each enemy it pierces — chain a whole crowd.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "vortex_recall",
+      "name": "Vortex Recall",
+      "cat": "throw",
+      "desc": "The returning blade drags every enemy it passes toward you — cluster them, then punish.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "slipstream",
+      "name": "Slipstream",
+      "cat": "mobility",
+      "desc": "For a moment after a dash, your hits land for +35% — dash in, strike hard.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "berserk",
+      "name": "Berserker",
+      "cat": "offense",
+      "desc": "+25% damage while below half HP.",
+      "unique": true,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "last_stand",
+      "name": "Last Stand",
+      "cat": "resilience",
+      "desc": "Once per run, refuse to fall — rise from a killing blow with 40% HP.",
+      "unique": true,
+      "rare": true,
+      "tiers": []
+    },
+    {
+      "id": "whetstone",
+      "name": "Whetstone",
+      "cat": "throw",
+      "desc": "The RETURNING blade (recall) cuts +25% harder — make the catch a finisher.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "gyroblade",
+      "name": "Gyroblade",
+      "cat": "throw",
+      "desc": "The thrown blade flies and returns 12% faster.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "quickdraw",
+      "name": "Quickdraw",
+      "cat": "throw",
+      "desc": "+ recall range, and the blade snaps back faster.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "steady_hand",
+      "name": "Steady Hand",
+      "cat": "parry",
+      "desc": "Perfect parries land more easily — a more forgiving window.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "wide_guard",
+      "name": "Wide Guard",
+      "cat": "parry",
+      "desc": "Deflect shots even with slower swings.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "counterforce",
+      "name": "Counterforce",
+      "cat": "parry",
+      "desc": "Reflected shots fly faster and hit +18% harder.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "tailwind",
+      "name": "Tailwind",
+      "cat": "mobility",
+      "desc": "Higher jump and sharper air control.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "kinetic",
+      "name": "Kinetic Charge",
+      "cat": "mobility",
+      "desc": "+9% dash distance, and longer dash i-frames.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "bulwark",
+      "name": "Bulwark",
+      "cat": "resilience",
+      "desc": "Recover an extra 10 HP each time you clear a wave.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "showtime",
+      "name": "Showtime",
+      "cat": "utility",
+      "desc": "Your trick meter lingers — it drains 25% slower.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "fortune",
+      "name": "Fortune",
+      "cat": "utility",
+      "desc": "+18% coins earned this run.",
+      "unique": false,
+      "rare": false,
+      "tiers": []
+    },
+    {
+      "id": "rupture",
+      "name": "Rupture",
+      "cat": "offense",
+      "desc": "Cuts inflict BLEED—a stacking wound that damages over time.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Cuts inflict 2 BLEED stacks. Power Slams instantly DETONATE nearby bleed for a burst of damage."
+        },
+        {
+          "desc": "Cuts inflict 3 BLEED stacks. Slams DETONATE bleed, and dying bleeding enemies splash their stacks onto the nearby crowd."
+        }
+      ]
+    },
+    {
+      "id": "sunder",
+      "name": "Sunder",
+      "cat": "offense",
+      "desc": "Hits MARK enemies, making them take +30% damage from all sources for 4s.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "MARKED enemies take +40% damage. Marking armored or shielded foes instantly SHATTERS their guard."
+        },
+        {
+          "desc": "MARKED enemies take +50% damage. Marks SHATTER guards, and striking a marked foe SPREADS the mark to nearby enemies."
+        }
+      ]
+    },
+    {
+      "id": "impale",
+      "name": "Impale",
+      "cat": "throw",
+      "desc": "A thrown blade PINS the first enemy hit in place, applying deep BLEED.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "A thrown blade PINS EVERY enemy it pierces in place, applying heavier BLEED."
+        },
+        {
+          "desc": "A thrown blade PINS EVERY enemy pierced with massive BLEED. The returning blade RIPS the wounds open, detonating the bleed."
+        }
+      ]
+    },
+    {
+      "id": "tempo",
+      "name": "Tempo",
+      "cat": "parry",
+      "desc": "Perfect parries grant TEMPO (+25% damage, faster speed, refreshes dash) for 4s.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Perfect parries grant TEMPO (+30% damage, faster speed, refreshes dash) for 6s. Stacks up to 2 times."
+        },
+        {
+          "desc": "Perfect parries plunge the room into deep slow-mo and grant TEMPO (+34% damage per stack, max 2, faster speed, refreshes dash)."
+        }
+      ]
+    },
+    {
+      "id": "backlash",
+      "name": "Backlash",
+      "cat": "parry",
+      "desc": "A perfect parry erupts a COUNTER-SHOCK, damaging and stunning nearby enemies.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "A perfect parry erupts a larger COUNTER-SHOCK, damaging, stunning, and MARKING nearby enemies."
+        },
+        {
+          "desc": "A perfect parry erupts a massive COUNTER-SHOCK (damages, stuns, marks), and leaves you completely INVINCIBLE for a beat."
+        }
+      ]
+    },
+    {
+      "id": "cinder",
+      "name": "Cinder Trail",
+      "cat": "mobility",
+      "desc": "Dashing ignites enemies passed through, inflicting BURN damage over time.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Dashing inflicts a hotter BURN that damages and SLOWS enemies over time."
+        },
+        {
+          "desc": "Dashing inflicts a massive, slowing BURN. Dying burned enemies erupt, igniting everything nearby."
+        }
+      ]
+    },
+    {
+      "id": "concussive",
+      "name": "Concussive Dash",
+      "cat": "mobility",
+      "desc": "Ending a dash erupts a shockwave that deals damage and knockback.",
+      "unique": true,
+      "rare": false,
+      "tiers": [
+        {
+          "desc": "Ending a dash erupts a heavier shockwave that deals damage, knockback, and STUNS."
+        },
+        {
+          "desc": "Ending a dash erupts a massive stunning shockwave. Hitting 2+ enemies instantly REFUNDS your dash."
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "name": "The Grounds",
+      "blurb": "Where order is kept.",
+      "boss": "warden",
+      "lore": "The Warden's badge lies in pieces. Etched inside, worn almost smooth: \"Appointed by the Council of First Light. Directive: none shall reach the Undercroft.\" Below it, scratched by hand: \"I never asked what was down there.\"",
+      "bg": "#ffffff",
+      "plat": "#111111",
+      "accent": "#e23b3b",
+      "pool": [
+        [
+          "charger",
+          1,
+          1
+        ],
+        [
+          "ranged",
+          0.5,
+          2
+        ],
+        [
+          "bomber",
+          0.3,
+          4
+        ],
+        [
+          "armored",
+          0.3,
+          5
+        ]
+      ],
+      "layout": [
+        {
+          "x": 230,
+          "y": 650,
+          "w": 280,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1090,
+          "y": 650,
+          "w": 280,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 640,
+          "y": 500,
+          "w": 320,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 150,
+          "y": 360,
+          "w": 250,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1200,
+          "y": 360,
+          "w": 250,
+          "h": 24,
+          "oneway": true
+        }
+      ]
+    },
+    {
+      "name": "The Undercroft",
+      "blurb": "Gray industry, deep below.",
+      "boss": "colossus",
+      "lore": "In the deepest wall of the Undercroft, beneath the mechanism that is now still, words are carved into the original stone — older than the machine: \"Built to contain the Tide of Crimson. Should the Colossus fall, know this — we tried to stop it before it reached the Fields. We failed then too.\"",
+      "bg": "#dbe0e6",
+      "plat": "#2a2f37",
+      "accent": "#15c2c2",
+      "pool": [
+        [
+          "armored",
+          0.8,
+          1
+        ],
+        [
+          "bomber",
+          0.7,
+          1
+        ],
+        [
+          "charger",
+          0.6,
+          1
+        ],
+        [
+          "ranged",
+          0.5,
+          2
+        ],
+        [
+          "anchor",
+          0.25,
+          4
+        ]
+      ],
+      "layout": [
+        {
+          "x": 120,
+          "y": 600,
+          "w": 250,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1230,
+          "y": 600,
+          "w": 250,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 600,
+          "y": 620,
+          "w": 400,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 330,
+          "y": 430,
+          "w": 240,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1030,
+          "y": 430,
+          "w": 240,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 700,
+          "y": 300,
+          "w": 200,
+          "h": 24,
+          "oneway": true
+        }
+      ]
+    },
+    {
+      "name": "The Crimson Fields",
+      "blurb": "Red and gold, and old rage.",
+      "boss": "aldric",
+      "lore": "Among Aldric's belongings, tucked inside the wrapping of his broken cleaver's handle: a small painted portrait, almost worn through. Two children, laughing. On the back, in handwriting read so many times the ink is barely there: \"Elan and Mira — before the first Tear opened.\" And, in another hand: \"Aldric. Come home.\" He never did.",
+      "bg": "#f7e3e3",
+      "plat": "#5a1320",
+      "accent": "#e23b3b",
+      "pool": [
+        [
+          "charger",
+          1,
+          1
+        ],
+        [
+          "flyer",
+          0.6,
+          1
+        ],
+        [
+          "bomber",
+          0.3,
+          2
+        ],
+        [
+          "herald",
+          0.3,
+          3
+        ],
+        [
+          "chimera",
+          0.35,
+          5
+        ]
+      ],
+      "layout": [
+        {
+          "x": 180,
+          "y": 560,
+          "w": 300,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1120,
+          "y": 560,
+          "w": 300,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 640,
+          "y": 660,
+          "w": 340,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 430,
+          "y": 390,
+          "w": 260,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 910,
+          "y": 390,
+          "w": 260,
+          "h": 24,
+          "oneway": true
+        }
+      ]
+    },
+    {
+      "name": "The Voidspire",
+      "blurb": "Where the rules thin out.",
+      "boss": "echo",
+      "lore": "The Voidspire is quiet for the first time. On the wall behind where The Echo stood, scratched deep over what must have been years: your name. Over and over — hundreds of times. Below them all, fresher, still sharp: \"I remember what it was like to be going somewhere.\" And at the very bottom: \"Go finish it. One of us should.\"",
+      "bg": "#e7e3f3",
+      "plat": "#382c54",
+      "accent": "#8b3bd6",
+      "pool": [
+        [
+          "wraith",
+          0.7,
+          1
+        ],
+        [
+          "flyer",
+          0.5,
+          1
+        ],
+        [
+          "ranged",
+          0.4,
+          1
+        ],
+        [
+          "priest",
+          0.3,
+          2
+        ],
+        [
+          "chimera",
+          0.5,
+          3
+        ],
+        [
+          "mender",
+          0.25,
+          4
+        ]
+      ],
+      "layout": [
+        {
+          "x": 280,
+          "y": 630,
+          "w": 220,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1100,
+          "y": 630,
+          "w": 220,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 690,
+          "y": 540,
+          "w": 220,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 170,
+          "y": 410,
+          "w": 220,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1210,
+          "y": 410,
+          "w": 220,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 690,
+          "y": 320,
+          "w": 220,
+          "h": 24,
+          "oneway": true
+        }
+      ]
+    },
+    {
+      "name": "The Tear",
+      "blurb": "Everything, all at once.",
+      "dark": true,
+      "boss": "source",
+      "lore": "There is nothing left to carve the words into — only the quiet where the Tear used to be. You understand it now: the Source was never an enemy, only the wound the world kept reopening, wearing the shape of everyone who ever tried to close it. It wore your shape last. The blade is lighter than it has ever been. Somewhere, far above, something that has not been able to for a very long time begins, tentatively, to heal.",
+      "bg": "#0e0b1a",
+      "plat": "#c9c4e0",
+      "accent": "#13c4d6",
+      "pool": [
+        [
+          "charger",
+          1,
+          1
+        ],
+        [
+          "ranged",
+          0.6,
+          1
+        ],
+        [
+          "flyer",
+          0.5,
+          1
+        ],
+        [
+          "bomber",
+          0.4,
+          1
+        ],
+        [
+          "armored",
+          0.4,
+          1
+        ],
+        [
+          "wraith",
+          0.4,
+          1
+        ],
+        [
+          "chimera",
+          0.4,
+          1
+        ],
+        [
+          "herald",
+          0.2,
+          1
+        ],
+        [
+          "anchor",
+          0.2,
+          1
+        ],
+        [
+          "priest",
+          0.2,
+          1
+        ],
+        [
+          "mender",
+          0.18,
+          1
+        ]
+      ],
+      "layout": [
+        {
+          "x": 230,
+          "y": 650,
+          "w": 280,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1090,
+          "y": 650,
+          "w": 280,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 640,
+          "y": 500,
+          "w": 320,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 150,
+          "y": 360,
+          "w": 250,
+          "h": 24,
+          "oneway": true
+        },
+        {
+          "x": 1200,
+          "y": 360,
+          "w": 250,
+          "h": 24,
+          "oneway": true
+        }
+      ]
+    }
+  ],
+  "variants": {
+    "charger": [
+      {
+        "id": "bull",
+        "name": "Charger",
+        "weight": 1
+      },
+      {
+        "id": "brawler",
+        "name": "Brawler",
+        "weight": 0.8,
+        "minWave": 2
+      },
+      {
+        "id": "stalker",
+        "name": "Stalker",
+        "weight": 0.7,
+        "minWave": 4
+      },
+      {
+        "id": "executioner",
+        "name": "Executioner",
+        "weight": 0.5,
+        "minWave": 6
+      },
+      {
+        "id": "gravedigger",
+        "name": "Gravedigger",
+        "weight": 0.5,
+        "minWave": 5
+      },
+      {
+        "id": "duelist",
+        "name": "Duelist",
+        "weight": 0.5,
+        "minWave": 6
+      }
+    ],
+    "ranged": [
+      {
+        "id": "sentinel",
+        "name": "Sentinel",
+        "weight": 1
+      },
+      {
+        "id": "rifleman",
+        "name": "Rifleman",
+        "weight": 0.8,
+        "minWave": 3
+      },
+      {
+        "id": "marksman",
+        "name": "Marksman",
+        "weight": 0.6,
+        "minWave": 5
+      },
+      {
+        "id": "warlock",
+        "name": "Warlock",
+        "weight": 0.55,
+        "minWave": 6
+      },
+      {
+        "id": "chain",
+        "name": "Chain Caster",
+        "weight": 0.5,
+        "minWave": 7
+      }
+    ],
+    "flyer": [
+      {
+        "id": "swooper",
+        "name": "Flyer",
+        "weight": 1
+      },
+      {
+        "id": "divebomber",
+        "name": "Dive Bomber",
+        "weight": 0.8,
+        "minWave": 3
+      },
+      {
+        "id": "highdiver",
+        "name": "Swooper",
+        "weight": 0.6,
+        "minWave": 5
+      }
+    ],
+    "bomber": [
+      {
+        "id": "lobber",
+        "name": "Bomber",
+        "weight": 1
+      },
+      {
+        "id": "juggler",
+        "name": "Juggler",
+        "weight": 0.7,
+        "minWave": 4
+      },
+      {
+        "id": "trapper",
+        "name": "Trapper",
+        "weight": 0.6,
+        "minWave": 3
+      },
+      {
+        "id": "sludge",
+        "name": "Sludge",
+        "weight": 0.5,
+        "minWave": 5
+      },
+      {
+        "id": "geomancer",
+        "name": "Geomancer",
+        "weight": 0.45,
+        "minWave": 7
+      }
+    ]
+  },
+  "achievements": {
+    "RARITY": {
+      "common": {
+        "name": "COMMON",
+        "color": "#8a93a6",
+        "shards": 5,
+        "coins": 100
+      },
+      "uncommon": {
+        "name": "UNCOMMON",
+        "color": "#2f9e6b",
+        "shards": 12,
+        "coins": 300
+      },
+      "rare": {
+        "name": "RARE",
+        "color": "#2f7bd6",
+        "shards": 25,
+        "coins": 700
+      },
+      "epic": {
+        "name": "EPIC",
+        "color": "#9b53d6",
+        "shards": 50,
+        "coins": 1500
+      },
+      "legendary": {
+        "name": "LEGENDARY",
+        "color": "#e0a326",
+        "shards": 100,
+        "coins": 4000
+      }
+    },
+    "CATS": {
+      "combat": {
+        "name": "Combat",
+        "color": "#e23b3b",
+        "icon": "⚔"
+      },
+      "skill": {
+        "name": "Skill",
+        "color": "#13c4d6",
+        "icon": "✦"
+      },
+      "progress": {
+        "name": "Progression",
+        "color": "#e0a326",
+        "icon": "▲"
+      },
+      "boss": {
+        "name": "Bosses",
+        "color": "#9b53d6",
+        "icon": "☠"
+      },
+      "survival": {
+        "name": "Survival",
+        "color": "#2f9e6b",
+        "icon": "❤"
+      },
+      "mastery": {
+        "name": "Mastery",
+        "color": "#c9ccd6",
+        "icon": "◆"
+      }
+    },
+    "list": [
+      {
+        "id": "first_blood",
+        "cat": "combat",
+        "rarity": "common",
+        "name": "First Blood",
+        "desc": "Defeat your first enemy.",
+        "stat": "kills",
+        "goal": 1
+      },
+      {
+        "id": "centurion",
+        "cat": "combat",
+        "rarity": "uncommon",
+        "name": "Centurion",
+        "desc": "Defeat 100 enemies.",
+        "stat": "kills",
+        "goal": 100
+      },
+      {
+        "id": "thousand_cuts",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Death of a Thousand Cuts",
+        "desc": "Defeat 1,000 enemies.",
+        "stat": "kills",
+        "goal": 1000
+      },
+      {
+        "id": "reaper",
+        "cat": "combat",
+        "rarity": "epic",
+        "name": "Reaper",
+        "desc": "Defeat 5,000 enemies.",
+        "stat": "kills",
+        "goal": 5000
+      },
+      {
+        "id": "annihilation",
+        "cat": "combat",
+        "rarity": "legendary",
+        "name": "Annihilation",
+        "desc": "Defeat 20,000 enemies.",
+        "stat": "kills",
+        "goal": 20000
+      },
+      {
+        "id": "cull",
+        "cat": "combat",
+        "rarity": "uncommon",
+        "name": "Cull",
+        "desc": "Defeat 20 enemies in a single wave.",
+        "stat": "killsOneWave",
+        "goal": 20
+      },
+      {
+        "id": "massacre",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Massacre",
+        "desc": "Defeat 40 enemies in a single wave.",
+        "stat": "killsOneWave",
+        "goal": 40
+      },
+      {
+        "id": "bomber_baiter",
+        "cat": "combat",
+        "rarity": "uncommon",
+        "name": "Controlled Demolition",
+        "desc": "Set off 25 bombers.",
+        "stat": "bomberKills",
+        "goal": 25
+      },
+      {
+        "id": "first_parry",
+        "cat": "skill",
+        "rarity": "common",
+        "name": "Turnabout",
+        "desc": "Land your first perfect parry.",
+        "stat": "parries",
+        "goal": 1
+      },
+      {
+        "id": "deflector",
+        "cat": "skill",
+        "rarity": "uncommon",
+        "name": "Deflector",
+        "desc": "Parry or deflect 100 projectiles.",
+        "stat": "deflects",
+        "goal": 100
+      },
+      {
+        "id": "bulletstorm",
+        "cat": "skill",
+        "rarity": "rare",
+        "name": "Bulletstorm",
+        "desc": "Parry or deflect 1,000 projectiles.",
+        "stat": "deflects",
+        "goal": 1000
+      },
+      {
+        "id": "perfect_hand",
+        "cat": "skill",
+        "rarity": "epic",
+        "name": "Perfect Hand",
+        "desc": "Land 250 perfect parries.",
+        "stat": "parries",
+        "goal": 250
+      },
+      {
+        "id": "juggler",
+        "cat": "skill",
+        "rarity": "uncommon",
+        "name": "Juggler",
+        "desc": "Land 50 airborne hits.",
+        "stat": "airHits",
+        "goal": 50
+      },
+      {
+        "id": "titan_drop",
+        "cat": "skill",
+        "rarity": "rare",
+        "name": "Titan Drop",
+        "desc": "Land 25 power slams.",
+        "stat": "superslams",
+        "goal": 25
+      },
+      {
+        "id": "updraft_artist",
+        "cat": "skill",
+        "rarity": "uncommon",
+        "name": "Updraft Artist",
+        "desc": "Land 50 updraft launches.",
+        "stat": "updrafts",
+        "goal": 50
+      },
+      {
+        "id": "s_rank",
+        "cat": "skill",
+        "rarity": "rare",
+        "name": "Immaculate",
+        "desc": "Reach the top style rank in a run.",
+        "stat": "topRank",
+        "goal": 1
+      },
+      {
+        "id": "velocity",
+        "cat": "skill",
+        "rarity": "epic",
+        "name": "Terminal Velocity",
+        "desc": "Land a maximum-momentum strike.",
+        "stat": "maxMomentum",
+        "goal": 1
+      },
+      {
+        "id": "long_shot",
+        "cat": "skill",
+        "rarity": "uncommon",
+        "name": "Long Shot",
+        "desc": "Land 50 thrown-blade hits.",
+        "stat": "throwHits",
+        "goal": 50
+      },
+      {
+        "id": "wave_10",
+        "cat": "progress",
+        "rarity": "common",
+        "name": "Getting Warm",
+        "desc": "Reach wave 10 in any mode.",
+        "stat": "bestWave",
+        "goal": 10
+      },
+      {
+        "id": "wave_25",
+        "cat": "progress",
+        "rarity": "uncommon",
+        "name": "Seasoned",
+        "desc": "Reach wave 25 in any mode.",
+        "stat": "bestWave",
+        "goal": 25
+      },
+      {
+        "id": "wave_50",
+        "cat": "progress",
+        "rarity": "rare",
+        "name": "Unrelenting",
+        "desc": "Reach wave 50 in any mode.",
+        "stat": "bestWave",
+        "goal": 50
+      },
+      {
+        "id": "wave_100",
+        "cat": "progress",
+        "rarity": "legendary",
+        "name": "Endless",
+        "desc": "Reach wave 100 in any mode.",
+        "stat": "bestWave",
+        "goal": 100
+      },
+      {
+        "id": "stage_clear",
+        "cat": "progress",
+        "rarity": "uncommon",
+        "name": "Threshold",
+        "desc": "Clear a full campaign stage.",
+        "stat": "stageClears",
+        "goal": 1
+      },
+      {
+        "id": "campaign",
+        "cat": "progress",
+        "rarity": "epic",
+        "name": "Sealed",
+        "desc": "Complete the Adventure campaign.",
+        "stat": "campaignClears",
+        "goal": 1
+      },
+      {
+        "id": "all_biomes",
+        "cat": "progress",
+        "rarity": "rare",
+        "name": "Wayfarer",
+        "desc": "Fight in all five biomes.",
+        "stat": "biomesSeen",
+        "goal": 5
+      },
+      {
+        "id": "first_boss",
+        "cat": "boss",
+        "rarity": "uncommon",
+        "name": "Giant Slayer",
+        "desc": "Defeat your first boss.",
+        "stat": "bossKills",
+        "goal": 1
+      },
+      {
+        "id": "boss_5",
+        "cat": "boss",
+        "rarity": "rare",
+        "name": "Warbreaker",
+        "desc": "Defeat 5 bosses.",
+        "stat": "bossKills",
+        "goal": 5
+      },
+      {
+        "id": "boss_25",
+        "cat": "boss",
+        "rarity": "epic",
+        "name": "Kingslayer",
+        "desc": "Defeat 25 bosses.",
+        "stat": "bossKills",
+        "goal": 25
+      },
+      {
+        "id": "boss_gauntlet",
+        "cat": "boss",
+        "rarity": "legendary",
+        "name": "The Whole Pantheon",
+        "desc": "Defeat every boss in one Boss Test run.",
+        "stat": "gauntletFull",
+        "goal": 1
+      },
+      {
+        "id": "boss_nohit",
+        "cat": "boss",
+        "rarity": "epic",
+        "name": "Untouchable",
+        "desc": "Defeat a boss without taking a hit.",
+        "stat": "bossNoHit",
+        "goal": 1
+      },
+      {
+        "id": "clean_wave",
+        "cat": "survival",
+        "rarity": "common",
+        "name": "Spotless",
+        "desc": "Clear a wave without taking a hit.",
+        "stat": "noHitWaves",
+        "goal": 1
+      },
+      {
+        "id": "clean_stage",
+        "cat": "survival",
+        "rarity": "rare",
+        "name": "Immortal Run",
+        "desc": "Clear a full stage without taking a hit.",
+        "stat": "noHitStages",
+        "goal": 1
+      },
+      {
+        "id": "marathon",
+        "cat": "survival",
+        "rarity": "uncommon",
+        "name": "Marathon",
+        "desc": "Survive 10 minutes in a single run.",
+        "stat": "longestRun",
+        "goal": 600
+      },
+      {
+        "id": "iron",
+        "cat": "survival",
+        "rarity": "epic",
+        "name": "Iron Will",
+        "desc": "Reach wave 5 in One-Hit mode.",
+        "stat": "oneHitWave",
+        "goal": 5
+      },
+      {
+        "id": "comeback",
+        "cat": "survival",
+        "rarity": "uncommon",
+        "name": "Second Wind",
+        "desc": "Survive a killing blow with a revive.",
+        "stat": "revivesUsed",
+        "goal": 1
+      },
+      {
+        "id": "first_buy",
+        "cat": "mastery",
+        "rarity": "common",
+        "name": "Invested",
+        "desc": "Buy your first shop upgrade.",
+        "stat": "shopBuys",
+        "goal": 1
+      },
+      {
+        "id": "collector",
+        "cat": "mastery",
+        "rarity": "rare",
+        "name": "Collector",
+        "desc": "Own 6 abilities in a single run.",
+        "stat": "abilitiesInRun",
+        "goal": 6
+      },
+      {
+        "id": "rich",
+        "cat": "mastery",
+        "rarity": "epic",
+        "name": "Coin Baron",
+        "desc": "Earn 25,000 coins in total.",
+        "stat": "coinsEarned",
+        "goal": 25000
+      },
+      {
+        "id": "veteran",
+        "cat": "mastery",
+        "rarity": "uncommon",
+        "name": "Veteran",
+        "desc": "Finish 25 runs.",
+        "stat": "runs",
+        "goal": 25
+      },
+      {
+        "id": "well_rounded",
+        "cat": "mastery",
+        "rarity": "rare",
+        "name": "Well-Rounded",
+        "desc": "Play every game mode.",
+        "stat": "modesPlayed",
+        "goal": 5
+      },
+      {
+        "id": "student",
+        "cat": "mastery",
+        "rarity": "common",
+        "name": "Apprentice",
+        "desc": "Complete the tutorial.",
+        "stat": "tutorialDone",
+        "goal": 1
+      },
+      {
+        "id": "boss_warden",
+        "cat": "boss",
+        "rarity": "uncommon",
+        "name": "Jailbreak",
+        "desc": "Defeat The Warden.",
+        "stat": "killWarden",
+        "goal": 1
+      },
+      {
+        "id": "boss_colossus",
+        "cat": "boss",
+        "rarity": "rare",
+        "name": "Scrap Metal",
+        "desc": "Defeat The Iron Colossus.",
+        "stat": "killColossus",
+        "goal": 1
+      },
+      {
+        "id": "boss_aldric",
+        "cat": "boss",
+        "rarity": "rare",
+        "name": "Regicide",
+        "desc": "Defeat The Berserker King, Aldric.",
+        "stat": "killAldric",
+        "goal": 1
+      },
+      {
+        "id": "boss_echo",
+        "cat": "boss",
+        "rarity": "epic",
+        "name": "Shattered Mirror",
+        "desc": "Defeat The Echo.",
+        "stat": "killEcho",
+        "goal": 1
+      },
+      {
+        "id": "boss_source",
+        "cat": "boss",
+        "rarity": "legendary",
+        "name": "The Wound Closes",
+        "desc": "Defeat The Source.",
+        "stat": "killSource",
+        "goal": 1
+      },
+      {
+        "id": "endless_25",
+        "cat": "survival",
+        "rarity": "uncommon",
+        "name": "Endless: Initiation",
+        "desc": "Reach Wave 25 in Endless.",
+        "stat": "bestWaveEndless",
+        "goal": 25
+      },
+      {
+        "id": "endless_50",
+        "cat": "survival",
+        "rarity": "rare",
+        "name": "Endless: Midway",
+        "desc": "Reach Wave 50 in Endless.",
+        "stat": "bestWaveEndless",
+        "goal": 50
+      },
+      {
+        "id": "endless_75",
+        "cat": "survival",
+        "rarity": "epic",
+        "name": "Endless: Deep Dive",
+        "desc": "Reach Wave 75 in Endless.",
+        "stat": "bestWaveEndless",
+        "goal": 75
+      },
+      {
+        "id": "endless_100",
+        "cat": "survival",
+        "rarity": "legendary",
+        "name": "Beyond",
+        "desc": "Reach Wave 100 in Endless.",
+        "stat": "bestWaveEndless",
+        "goal": 100
+      },
+      {
+        "id": "adv_hard",
+        "cat": "progress",
+        "rarity": "rare",
+        "name": "Hardened",
+        "desc": "Clear Adventure on Hard difficulty.",
+        "stat": "clearAdvHard",
+        "goal": 1
+      },
+      {
+        "id": "adv_extreme",
+        "cat": "progress",
+        "rarity": "epic",
+        "name": "Masochist",
+        "desc": "Clear Adventure on Extreme difficulty.",
+        "stat": "clearAdvExtreme",
+        "goal": 1
+      },
+      {
+        "id": "adv_all",
+        "cat": "progress",
+        "rarity": "legendary",
+        "name": "Omnipotent",
+        "desc": "Clear Adventure on all 5 difficulties.",
+        "stat": "clearAdvAll",
+        "goal": 5
+      },
+      {
+        "id": "endless_50_hard",
+        "cat": "survival",
+        "rarity": "epic",
+        "name": "Endurance",
+        "desc": "Reach Wave 50 in Endless on Hard.",
+        "stat": "wave50Hard",
+        "goal": 1
+      },
+      {
+        "id": "endless_100_extreme",
+        "cat": "survival",
+        "rarity": "legendary",
+        "name": "Beyond Human",
+        "desc": "Reach Wave 100 in Endless on Extreme.",
+        "stat": "wave100Extreme",
+        "goal": 1
+      },
+      {
+        "id": "adv_flawless",
+        "cat": "survival",
+        "rarity": "legendary",
+        "name": "Flawless Victory",
+        "desc": "Clear the whole Adventure campaign without taking a single hit.",
+        "stat": "clearAdvNoHit",
+        "goal": 1
+      },
+      {
+        "id": "overkill",
+        "cat": "combat",
+        "rarity": "uncommon",
+        "name": "Overkill",
+        "desc": "Deal over 3,000 damage in a single strike.",
+        "stat": "maxDamageHit",
+        "goal": 3000
+      },
+      {
+        "id": "collateral",
+        "cat": "skill",
+        "rarity": "uncommon",
+        "name": "Collateral Damage",
+        "desc": "Defeat an enemy by throwing the blade through another enemy.",
+        "stat": "throwPierceKills",
+        "goal": 1
+      },
+      {
+        "id": "surgeon",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Surgeon",
+        "desc": "Stack 20 Bleed on a single enemy.",
+        "stat": "maxBleedStacks",
+        "goal": 20
+      },
+      {
+        "id": "inferno",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Inferno",
+        "desc": "Have 10 enemies burning at once.",
+        "stat": "maxConcurrentBurn",
+        "goal": 10
+      },
+      {
+        "id": "floor_is_lava",
+        "cat": "skill",
+        "rarity": "epic",
+        "name": "Air Superiority",
+        "desc": "Stay airborne for 15 straight seconds.",
+        "stat": "maxAirTime",
+        "goal": 15
+      },
+      {
+        "id": "gravity_defied",
+        "cat": "skill",
+        "rarity": "rare",
+        "name": "Gravity Defied",
+        "desc": "Chain 3 Updraft launches without landing.",
+        "stat": "consecutiveUpdrafts",
+        "goal": 3
+      },
+      {
+        "id": "friendly_fire",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Friendly Fire",
+        "desc": "Have a Bomber blast kill 3 other enemies.",
+        "stat": "bomberBetrayal",
+        "goal": 3
+      },
+      {
+        "id": "weapon_master",
+        "cat": "mastery",
+        "rarity": "rare",
+        "name": "Armory",
+        "desc": "Win a run with each weapon.",
+        "stat": "distinctWeaponsWon",
+        "goal": 2
+      },
+      {
+        "id": "arsenal",
+        "cat": "mastery",
+        "rarity": "legendary",
+        "name": "Arsenal",
+        "desc": "Max out every item in the meta shop.",
+        "stat": "shopMaxed",
+        "goal": 13
+      },
+      {
+        "id": "speedrunner",
+        "cat": "mastery",
+        "rarity": "epic",
+        "name": "Speedrunner",
+        "desc": "Clear the Adventure campaign in under 15 minutes.",
+        "stat": "speedrunUnder15",
+        "goal": 1
+      },
+      {
+        "id": "close_call",
+        "cat": "survival",
+        "rarity": "rare",
+        "name": "By a Thread",
+        "desc": "Defeat a boss while at 10% HP or lower.",
+        "stat": "bossKillsLowHP",
+        "goal": 1
+      },
+      {
+        "id": "warden_deflect",
+        "cat": "boss",
+        "rarity": "epic",
+        "name": "Stop Hitting Yourself",
+        "desc": "Defeat The Warden using ONLY their deflected projectiles.",
+        "stat": "wardenDeflectOnly",
+        "goal": 1
+      },
+      {
+        "id": "colossus_throw",
+        "cat": "boss",
+        "rarity": "rare",
+        "name": "David and Goliath",
+        "desc": "Defeat The Iron Colossus without a single melee swing (throws only).",
+        "stat": "colossusThrowOnly",
+        "goal": 1
+      },
+      {
+        "id": "aldric_interrupt",
+        "cat": "boss",
+        "rarity": "epic",
+        "name": "Silence, King",
+        "desc": "Interrupt Aldric with a Power Slam 3 times in one fight.",
+        "stat": "aldricSlams",
+        "goal": 3
+      },
+      {
+        "id": "echo_parry",
+        "cat": "boss",
+        "rarity": "legendary",
+        "name": "I Am Rubber",
+        "desc": "Land the killing blow on The Echo with a deflected projectile.",
+        "stat": "echoReflectKill",
+        "goal": 1
+      },
+      {
+        "id": "source_speed",
+        "cat": "boss",
+        "rarity": "epic",
+        "name": "Pulling the Plug",
+        "desc": "Defeat The Source in under 60 seconds.",
+        "stat": "sourceSpeedrun",
+        "goal": 1
+      },
+      {
+        "id": "space_program",
+        "cat": "skill",
+        "rarity": "rare",
+        "name": "Space Program",
+        "desc": "Launch an enemy clean off the top of the screen.",
+        "stat": "launchOffScreen",
+        "goal": 1
+      },
+      {
+        "id": "pinball",
+        "cat": "skill",
+        "rarity": "epic",
+        "name": "Pinball Wizard",
+        "desc": "Hit 4 different enemies with a single thrown blade.",
+        "stat": "bladeBounces",
+        "goal": 4
+      },
+      {
+        "id": "rainbow_pain",
+        "cat": "combat",
+        "rarity": "epic",
+        "name": "Taste the Rainbow",
+        "desc": "Have Bleed, Burn and Mark on one enemy at once.",
+        "stat": "tripleStatus",
+        "goal": 1
+      },
+      {
+        "id": "surgical",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Surgical Extraction",
+        "desc": "Kill an Armored enemy with status effects — armor never broken.",
+        "stat": "armorBypassKills",
+        "goal": 1
+      },
+      {
+        "id": "air_assassination",
+        "cat": "skill",
+        "rarity": "epic",
+        "name": "Death from Above",
+        "desc": "Kill 3 enemies in one airborne combo without landing.",
+        "stat": "airComboKills",
+        "goal": 3
+      },
+      {
+        "id": "no_takebacks",
+        "cat": "mastery",
+        "rarity": "epic",
+        "name": "No Takebacks",
+        "desc": "Clear an Adventure stage without ever throwing your blade.",
+        "stat": "stageNoThrow",
+        "goal": 1
+      },
+      {
+        "id": "butterfingers",
+        "cat": "mastery",
+        "rarity": "epic",
+        "name": "Butterfingers",
+        "desc": "Clear an Adventure stage without a single melee swing.",
+        "stat": "stageThrowOnly",
+        "goal": 1
+      },
+      {
+        "id": "glass_cannon",
+        "cat": "mastery",
+        "rarity": "rare",
+        "name": "Glass Cannon",
+        "desc": "Clear a stage with damage upgrades but no Thick Skin or Warding.",
+        "stat": "stageGlassCannon",
+        "goal": 1
+      },
+      {
+        "id": "deflector_shield",
+        "cat": "skill",
+        "rarity": "epic",
+        "name": "Immovable Object",
+        "desc": "Perfect-parry 10 in a row without moving, dashing or being hit.",
+        "stat": "staticParryStreak",
+        "goal": 10
+      },
+      {
+        "id": "heavy_boots",
+        "cat": "mastery",
+        "rarity": "epic",
+        "name": "Heavy Boots",
+        "desc": "Clear a 10-wave stage without jumping once.",
+        "stat": "stageNoJump",
+        "goal": 1
+      },
+      {
+        "id": "the_setup",
+        "cat": "skill",
+        "rarity": "rare",
+        "name": "The Setup",
+        "desc": "Updraft an Armored enemy, then spike it into the ground.",
+        "stat": "spikeArmored",
+        "goal": 1
+      },
+      {
+        "id": "return_to_sender",
+        "cat": "combat",
+        "rarity": "uncommon",
+        "name": "Return to Sender",
+        "desc": "Kill a Bomber with its own deflected bomb.",
+        "stat": "bombDeflectKills",
+        "goal": 1
+      },
+      {
+        "id": "chain_reaction",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Chain Reaction",
+        "desc": "Kill 5 enemies with a single deflected bomb.",
+        "stat": "bombMultikill",
+        "goal": 5
+      },
+      {
+        "id": "matador",
+        "cat": "skill",
+        "rarity": "rare",
+        "name": "Matador",
+        "desc": "I-frame dash through 15 projectiles in one run.",
+        "stat": "projectileDashes",
+        "goal": 15
+      },
+      {
+        "id": "cinematic_kill",
+        "cat": "combat",
+        "rarity": "uncommon",
+        "name": "Stylishly Late",
+        "desc": "Land a kill during the stage-clear transition.",
+        "stat": "transitionKills",
+        "goal": 1
+      },
+      {
+        "id": "phoenix_full",
+        "cat": "survival",
+        "rarity": "epic",
+        "name": "From the Ashes",
+        "desc": "Revive from a killing blow, then heal back to full HP.",
+        "stat": "reviveToFull",
+        "goal": 1
+      },
+      {
+        "id": "horde_breaker",
+        "cat": "combat",
+        "rarity": "rare",
+        "name": "Horde Breaker",
+        "desc": "Clear an Endless horde wave in under 15 seconds.",
+        "stat": "fastHordeClear",
+        "goal": 1
+      },
+      {
+        "id": "exodia",
+        "cat": "mastery",
+        "rarity": "legendary",
+        "name": "The Forbidden Technique",
+        "desc": "Own Long Arm, Throwing Arm, Aether Step and Lifeline at once.",
+        "stat": "exodiaBuild",
+        "goal": 1
+      },
+      {
+        "id": "master_combat",
+        "cat": "combat",
+        "rarity": "epic",
+        "name": "Warmaster",
+        "desc": "Complete all other Combat achievements.",
+        "master": true
+      },
+      {
+        "id": "master_skill",
+        "cat": "skill",
+        "rarity": "epic",
+        "name": "Virtuoso",
+        "desc": "Complete all other Skill achievements.",
+        "master": true
+      },
+      {
+        "id": "master_progress",
+        "cat": "progress",
+        "rarity": "epic",
+        "name": "The Journey",
+        "desc": "Complete all other Progression achievements.",
+        "master": true
+      },
+      {
+        "id": "master_boss",
+        "cat": "boss",
+        "rarity": "epic",
+        "name": "Godslayer",
+        "desc": "Complete all other Boss achievements.",
+        "master": true
+      },
+      {
+        "id": "master_survival",
+        "cat": "survival",
+        "rarity": "epic",
+        "name": "Indomitable",
+        "desc": "Complete all other Survival achievements.",
+        "master": true
+      },
+      {
+        "id": "master_mastery",
+        "cat": "mastery",
+        "rarity": "epic",
+        "name": "The Apex",
+        "desc": "Complete all other Mastery achievements.",
+        "master": true
+      },
+      {
+        "id": "completionist",
+        "cat": "mastery",
+        "rarity": "legendary",
+        "name": "The Momentum Blade",
+        "desc": "Unlock every other achievement in Tear.",
+        "master": true
+      }
+    ],
+    "pending": []
+  }
+}

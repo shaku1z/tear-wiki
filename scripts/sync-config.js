@@ -1,15 +1,26 @@
 import https from 'https';
 import fs from 'fs';
 import path from 'path';
+import { execFileSync } from 'child_process';
 
-const BASE_URL = 'https://raw.githubusercontent.com/shaku1z/tear/master/js/';
+const GAME_REPOSITORY = process.env.GAME_REPOSITORY || 'shaku1z/tear';
+const DEFAULT_BRANCH = process.env.GAME_BRANCH || 'main';
 const FILES = ['utils.js', 'config.js', 'particles.js', 'projectile.js', 'variants.js', 'enemy.js', 'meta.js', 'upgrades.js', 'stages.js', 'achievements.js'];
 const DEST_PATH = path.join(process.cwd(), 'src', 'scripts', 'game-engine.js');
+const LOCAL_GAME_DIR = path.resolve(process.cwd(), '..', 'Tear');
 
-function fetchFile(filename) {
+function getLocalCommit() {
+  try {
+    return execFileSync('git', ['-C', LOCAL_GAME_DIR, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  } catch {
+    return 'local-unversioned';
+  }
+}
+
+function fetchUrl(url, headers = {}) {
   return new Promise((resolve, reject) => {
-    https.get(BASE_URL + filename, (res) => {
-      if (res.statusCode !== 200) return reject(new Error(`Failed to fetch ${filename}: ${res.statusCode}`));
+    https.get(url, { headers: { 'User-Agent': 'tear-wiki-sync', ...headers } }, (res) => {
+      if (res.statusCode !== 200) return reject(new Error(`Failed to fetch ${url}: ${res.statusCode}`));
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve(data));
@@ -17,13 +28,41 @@ function fetchFile(filename) {
   });
 }
 
+async function resolveRemoteCommit() {
+  if (process.env.GAME_COMMIT_SHA) return process.env.GAME_COMMIT_SHA;
+  const data = await fetchUrl(`https://api.github.com/repos/${GAME_REPOSITORY}/commits/${DEFAULT_BRANCH}`, { Accept: 'application/vnd.github+json' });
+  return JSON.parse(data).sha;
+}
+
+async function resolveSource() {
+  const requestedMode = process.env.GAME_SOURCE || 'auto';
+  const hasLocalGame = fs.existsSync(path.join(LOCAL_GAME_DIR, 'js'));
+
+  if ((requestedMode === 'local' || requestedMode === 'auto') && hasLocalGame && !process.env.GAME_COMMIT_SHA) {
+    return { mode: 'local', commit: getLocalCommit(), root: path.join(LOCAL_GAME_DIR, 'js') };
+  }
+
+  const commit = await resolveRemoteCommit();
+  return {
+    mode: 'remote',
+    commit,
+    root: `https://raw.githubusercontent.com/${GAME_REPOSITORY}/${commit}/js/`,
+  };
+}
+
+async function readSourceFile(source, filename) {
+  if (source.mode === 'local') return fs.promises.readFile(path.join(source.root, filename), 'utf8');
+  return fetchUrl(source.root + filename);
+}
+
 async function sync() {
-  console.log(`Syncing game engine from ${BASE_URL}...`);
+  const source = await resolveSource();
+  console.log(`Syncing game engine from ${source.mode} source at ${source.commit}...`);
   try {
     let combined = '';
     for (const file of FILES) {
-      console.log(`Fetching ${file}...`);
-      const data = await fetchFile(file);
+      console.log(`Syncing ${file}...`);
+      const data = await readSourceFile(source, file);
       combined += `\n// --- ${file} ---\n` + data + '\n';
     }
     
@@ -45,6 +84,12 @@ export {
     const dir = path.dirname(DEST_PATH);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(DEST_PATH, combined);
+    fs.writeFileSync(path.join(path.dirname(DEST_PATH), 'game-source.json'), JSON.stringify({
+      repository: GAME_REPOSITORY,
+      commit: source.commit,
+      mode: source.mode,
+      syncedAt: new Date().toISOString(),
+    }, null, 2) + '\n');
     console.log(`Successfully synced game engine to ${DEST_PATH}`);
   } catch(e) {
     console.error(e);

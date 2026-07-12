@@ -1,0 +1,14 @@
+---
+import gameManifest from '../data/game-manifest.json';
+const date = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(gameManifest.source.syncedAt));
+---
+
+<aside class="game-source-status" aria-label="Game data source">
+  <span class="status-mark"></span><span>GAME DATA SYNCED</span><code>{gameManifest.source.commit.slice(0, 7)}</code><span class="status-date">{date}</span>
+</aside>
+
+<style>
+  .game-source-status { align-items: center; border: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; flex-wrap: wrap; font-family: var(--sl-font-mono); font-size: .64rem; font-weight: 800; gap: .55rem; letter-spacing: .1em; margin: 1rem 0 1.5rem; padding: .6rem .75rem; text-transform: uppercase; }
+  .status-mark { background: var(--tear-cyan); height: .5rem; width: .5rem; } code { color: var(--tear-cyan); font: inherit; } .status-date { border-left: 1px solid var(--sl-color-hairline); margin-left: auto; padding-left: .6rem; }
+  @media (max-width: 520px) { .status-date { border-left: 0; margin-left: 0; padding-left: 0; width: 100%; } }
+</style>

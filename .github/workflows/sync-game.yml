@@ -1,0 +1,45 @@
+name: Synchronize game data
+
+on:
+  repository_dispatch:
+    types: [tear-game-updated]
+  workflow_dispatch:
+    inputs:
+      game_commit:
+        description: Exact shaku1z/tear commit to synchronize
+        required: false
+        type: string
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: game-data-sync
+  cancel-in-progress: false
+
+jobs:
+  synchronize:
+    runs-on: ubuntu-latest
+    env:
+      GAME_SOURCE: remote
+      GAME_COMMIT_SHA: ${{ github.event.client_payload.game_commit || inputs.game_commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run sync:game
+      - run: npm run build
+      - name: Commit synchronized game snapshot
+        run: |
+          git config user.name "tear-wiki-sync[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scripts/game-engine.js src/scripts/game-source.json src/data/game-manifest.json
+          git diff --cached --quiet || git commit -m "chore(sync): game data ${GAME_COMMIT_SHA:-latest}"
+          git push
