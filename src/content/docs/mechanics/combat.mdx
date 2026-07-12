@@ -1,95 +1,48 @@
 ---
 title: Combat & Damage
-description: Deep dive into the mechanics of damage, hit detection, style multipliers, and commitment calculations.
-gameVersion: v0.1
+description: Damage, hit detection, commitment, and thrown-blade calculations from the live game configuration.
 ---
 
+import ConfigTable from '../../../components/ConfigTable.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
-Combat in Tear revolves around velocity, positioning, and style. Every swing is evaluated based on the blade's physical simulation, determining exact damage output on the fly. 
+Combat is velocity, positioning, and style. The engine evaluates the blade at the exact moment it contacts a hurtbox—there are no random critical hits.
 
-> [!NOTE]
-> All damage calculations are deterministic. There is no random critical hit chance; if you deal massive damage, it's because you swung properly.
+## Melee Damage
 
----
+`damage = (tipSpeed − minHitSpeed) × damageScale × angleModifier × commitModifier × styleMod`
 
-## Melee Damage Formula
+<ConfigTable title="MELEE DAMAGE PARAMETERS" rows={[
+  { label: 'Maximum tip velocity', path: 'blade.maxSpeed', unit: 'px/s' },
+  { label: 'Minimum hit velocity', path: 'blade.minHitSpeed', unit: 'px/s' },
+  { label: 'Damage scale', path: 'blade.damageScale' },
+  { label: 'Base damage cap', path: 'blade.maxDamage' },
+  { label: 'Enemy hit cooldown', path: 'blade.enemyHitIframe', unit: 's' }
+]} />
 
-Damage is calculated continuously at the moment of impact. The engine evaluates:
+Slow blade contact does not register as a damaging hit. A single committed swing can still affect separate enemies at once because hit cooldown is tracked per entity.
 
-```
-damage = (tipSpeed − minHitSpeed) × damageScale × angleModifier × commitModifier × styleMod
-```
+## Commitment and Cut Angle
 
-| Variable | Config Value | Description |
-|----------|--------------|-------------|
-| `tipSpeed` | up to **7000 px/s** | Speed of the blade tip at impact (`blade.maxSpeed`). |
-| `minHitSpeed` | **950 px/s** | Minimum tip speed to register a hit (`blade.minHitSpeed`). |
-| `damageScale` | **0.0092** | Multiplier for speed over the minimum (`blade.damageScale`). |
-| `maxDamage` | **58** | Base damage cap before external multipliers (`blade.maxDamage`). |
+<ConfigTable title="COMMITMENT PARAMETERS" rows={[
+  { label: 'Minimum commitment multiplier', path: 'skill.commitFloor', format: 'multiplier' },
+  { label: 'Full-commit reference speed', path: 'skill.commitRef', unit: 'px/s' },
+  { label: 'Poke angle floor', path: 'skill.pokeFloor', format: 'multiplier' }
+]} />
 
-> [!WARNING]
-> Swings below **950 px/s** deal exactly **0 damage**. You cannot gently prod enemies to death; you must build momentum.
-
-### Enemy Invincibility Frames (Hit Cooldown)
-
-To prevent a single swing from registering infinite hits, enemies gain a brief invincibility frame after being hit.
-- **Cooldown duration**: `0.18s` (`blade.enemyHitIframe`)
-- This is **per-enemy**, meaning a single wide swing can hit multiple enemies simultaneously without penalty.
-
----
-
-## The Commitment System
-
-Tear penalizes "wrist-flicking"—rapidly twitching the cursor without moving the player character. The `commitModifier` scales damage based on the *hilt's* velocity (the player's movement).
-
-| Hilt Speed | Modifier | Description |
-|------------|----------|-------------|
-| Stationary | **0.5x** | Minimal body movement (`skill.commitFloor`). |
-| **620 px/s** | **1.0x** | Full commitment (`skill.commitRef`). |
-
-> [!TIP]
-> Dash into your swings or maintain high momentum while attacking to ensure your `commitModifier` remains at 1.0x.
-
----
-
-## Poke vs. Cut (Angle Modifier)
-
-The angle at which the blade connects with the enemy's hurtbox matters:
-
-| Strike Type | Angle | Modifier |
-|-------------|-------|----------|
-| **Straight Poke** | 0° (Parallel) | **0.4x** (`skill.pokeFloor`) |
-| **Clean Cut** | 90° (Perpendicular) | **1.0x** |
+Move with the swing. The hilt’s velocity governs commitment, while a perpendicular cut is substantially more effective than a straight poke.
 
 <ModelViewer model="charger" variant="bull" />
-*The Charger variants will rush you head-on. A perpendicular cut across their path is far more effective than trying to poke them as they approach.*
 
----
+## Throw Damage and Hitstop
 
-## Hitstop
+<ConfigTable title="THROW + IMPACT PARAMETERS" rows={[
+  { label: 'Base throw speed', path: 'blade.throw.speed', unit: 'px/s' },
+  { label: 'Swing-speed contribution', path: 'blade.throw.speedFromSwing' },
+  { label: 'Maximum throw speed', path: 'blade.throw.maxSpeed', unit: 'px/s' },
+  { label: 'Base throw damage', path: 'blade.throw.damage' },
+  { label: 'Impact hitstop threshold', path: 'hitStop.threshold' },
+  { label: 'Heavy hitstop', path: 'hitStop.big', unit: 's' }
+]} />
 
-To provide visceral feedback, impactful strikes trigger hitstop, briefly freezing the game state.
-
-| Damage Threshold | Hitstop Duration |
-|------------------|------------------|
-| **> 22 damage** | **0.07s** (`hitStop.big`) |
-| **≤ 22 damage** | **0.025s** (`hitStop.small`) |
-
----
-
-## Thrown Blade Damage
-
-Throwing the blade uses a unique formula, heavily rewarding player health and momentum.
-
-```
-throwDamage = 22 + (0.008 × launchSpeed)
-```
-
-The `launchSpeed` combines the base throw speed (**1900 px/s**) and the blade's tip speed at the moment of release (`throw.speedFromSwing` = **0.45**). The absolute maximum launch speed is **4600 px/s**.
-
-### Risk vs. Reward: Health Multiplier
-
-Your current HP modifies throw effectiveness:
-- **Above 50% HP**: Throw deals **1.4x** damage (`throw.hiMult`).
-- **Below 50% HP**: Throw deals **0.65x** damage (`throw.loMult`), but returning the blade becomes your best tool for survival.
+Throw release inherits blade momentum. High-speed launches make the thrown blade more dangerous, while the hitstop system gives heavy impacts their deliberate, physical punch.

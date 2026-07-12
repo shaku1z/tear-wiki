@@ -1,45 +1,20 @@
 ---
 title: Dash
-description: The core mechanics of the player dash, i-frames, and momentum retention.
-gameVersion: v0.1
+description: Live dash physics, invincibility, steering, and momentum retention.
 ---
 
-The Dash is your primary defensive and repositioning tool. Mastering the dash is essential for evading enemy attacks, managing spacing, and maintaining the `commitModifier` for your blade strikes.
+import ConfigTable from '../../../components/ConfigTable.astro';
 
-> [!IMPORTANT]
-> The dash provides both high mobility and invincibility frames. Using it offensively to close gaps is just as important as using it to dodge.
+Dash is both a defensive escape and a way to carry commitment into the next swing. It trades direct steering for a fixed burst of speed and a controlled exit state.
 
----
+<ConfigTable title="DASH PROTOCOL" rows={[
+  { label: 'Dash speed', path: 'dash.speed', unit: 'px/s' },
+  { label: 'Dash duration', path: 'dash.duration', unit: 's' },
+  { label: 'Dash cooldown', path: 'dash.cooldown', unit: 's' },
+  { label: 'Invincibility window', path: 'dash.iframe', unit: 's' },
+  { label: 'Exit velocity retained', path: 'dash.endSpeedKeep', format: 'percent' },
+  { label: 'Steering factor', path: 'dash.steer' },
+  { label: 'Ghost interval', path: 'juice.dashGhostInterval', unit: 's' }
+]} />
 
-## Dash Properties
-
-The player dash is governed by strict physics parameters to ensure it feels responsive but requires commitment.
-
-| Parameter | Config Value | Description |
-|-----------|--------------|-------------|
-| **Speed** | **1500 px/s** | Peak velocity during the dash (`dash.speed`). |
-| **Duration** | **0.15s** | Total time the dash state is active (`dash.duration`). |
-| **Cooldown** | **0.55s** | Time before you can dash again (`dash.cooldown`). |
-| **I-Frames** | **0.15s** | Invincibility frames (`dash.iframe`), exactly matching the dash duration. |
-| **Ghost Interval**| **0.028s** | The visual trail interval (`juice.dashGhostInterval`). |
-
----
-
-## Momentum Retention
-
-When a dash ends, you do not immediately stop. The engine applies an `endSpeedKeep` modifier, retaining a portion of the dash velocity and transitioning it back into normal movement physics.
-
-- **Speed Retained**: **35%** (`dash.endSpeedKeep` = 0.35)
-- This translates to roughly **525 px/s** of residual velocity (more than the base `moveSpeed` of **430 px/s**).
-
-> [!TIP]
-> Because you retain 35% of your dash speed, chaining a dash into a jump carries massive momentum.
-
----
-
-## Steering
-
-While dashing, your movement direction is largely locked, but you have slight steering capabilities to correct your trajectory.
-
-- **Steer Factor**: **15** (`dash.steer`)
-- This allows minor adjustments to bypass obstacles or curve around enemy attacks during the 0.15s window.
+The exit velocity is deliberately preserved instead of erased. Use a dash to cross danger, then carry that momentum through a jump or committed cut.

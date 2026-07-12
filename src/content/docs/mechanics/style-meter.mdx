@@ -1,54 +1,24 @@
 ---
 title: Style Meter
-description: How the Trick/Style system works, point values, and tier thresholds.
-gameVersion: v0.1
+description: Live style thresholds, point rewards, and decay behavior.
 ---
 
-Tear rewards aggressive, varied, and stylish combat. The Style Meter directly buffs your damage output as it fills, pushing you to combine different techniques rather than relying on a single move.
+import StyleMeterReadout from '../../../components/StyleMeterReadout.astro';
+import ConfigTable from '../../../components/ConfigTable.astro';
 
----
+Tear rewards varied, aggressive combat. Style is a multiplicative system: launch, parry, slam, deflect, and throw actions all feed the same meter.
 
-## Style Tiers
+<StyleMeterReadout />
 
-As you gain points, you ascend through the Style Tiers. Each tier provides a multiplicative damage bonus to all attacks.
+<ConfigTable title="STYLE ACTION REWARDS" rows={[
+  { label: 'Melee hit', path: 'trick.pts.hit' },
+  { label: 'Throw hit', path: 'trick.pts.throwHit' },
+  { label: 'Deflect', path: 'trick.pts.deflect' },
+  { label: 'Launch', path: 'trick.pts.launch' },
+  { label: 'Slam', path: 'trick.pts.slam' },
+  { label: 'Updraft', path: 'trick.pts.updraft' },
+  { label: 'Perfect parry', path: 'trick.pts.parry' },
+  { label: 'Maximum raw style bonus', path: 'skill.styleDamageMax', format: 'percent' }
+]} />
 
-| Points Required | Name | Damage Bonus | Config Base Multiplier |
-|-----------------|------|--------------|------------------------|
-| **0** | (None) | +0% | `1.0x` |
-| **14** | **NICE** | **+6%** | `1.5x` (Base Logic) |
-| **34** | **STYLISH** | **+12%** | `2.0x` |
-| **64** | **BRUTAL** | **+18%** | `3.0x` |
-| **110** | **SAVAGE** | **+24%** | `4.0x` |
-| **175** | **TEARING!** | **+40%** | `5.0x` (Capped) |
-
-> [!NOTE]
-> The engine configures maximum raw style damage at `skill.styleDamageMax` = **0.40** (40% bonus).
-
----
-
-## Earning Points
-
-Actions in combat grant points (`trick.pts`). To maintain high tiers, you must continuously perform these actions.
-
-| Action | Points | Description |
-|--------|--------|-------------|
-| **Hit** | +2 | Standard melee strike. |
-| **Throw Hit** | +4 | Hitting an enemy with a thrown blade. |
-| **Deflect** | +5 | Deflecting a projectile. |
-| **Launch** | +5 | Knocking an enemy into the air. |
-| **Slam** | +8 | Hitting an airborne enemy downward. |
-| **Updraft** | +10 | Hitting an enemy upward at high velocity. |
-| **Superslam** | +11 | Performing a Power Slam (>1700 px/s). |
-| **Parry** | +12 | Successfully parrying a melee attack. |
-
----
-
-## Drain and Decay
-
-The Style Meter is constantly draining. You cannot play passively.
-
-- **Drain Rate**: **26** points per second (`trick.drainRate`).
-- **Hit Loss**: **0.5x** multiplier applied to current style points when the player takes damage (`trick.hitLoss`).
-- **Decay**: The decay scales up to **2.6** over time (`trick.decay`).
-
-If you get hit, you instantly lose 50% of your current style points. Maintaining **TEARING!** requires flawless, varied execution.
+Getting hit reduces the current meter according to the live hit-loss rule above. The strongest tiers therefore demand varied, clean execution rather than passive farming.

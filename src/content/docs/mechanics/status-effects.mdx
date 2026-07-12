@@ -1,39 +1,22 @@
 ---
 title: Status Effects
-description: Detailed breakdown of Bleed, Burn, and Mark status effects.
-gameVersion: v0.1
+description: Bleed, burn, and mark values generated from the live game configuration.
 ---
 
-Status effects in Tear allow for damage over time and vulnerability windows. These are usually applied via specific Upgrades.
+import StatusEffectReadout from '../../../components/StatusEffectReadout.astro';
 
----
+Status effects create sustained pressure and vulnerability windows. Their exact tuning is displayed below from the synchronized game configuration.
 
-## The Three Core Statuses
+<StatusEffectReadout />
 
-| Status | Effect | Config Details |
-|--------|--------|----------------|
-| **Bleed** | Deals true damage over time. Stacks intensely. | DPS: **6** <br/> Duration: **3.2s** <br/> Max Stacks: **8** |
-| **Burn** | High burst damage over time. Short duration. | DPS: **20** <br/> Duration: **2.6s** |
-| **Mark** | Increases all damage taken by the target. | Multiplier: **1.3x** <br/> Duration: **4.0s** |
+## Bleed
 
-### Bleed (`status.bleed`)
-- `bleedDps`: **6**
-- `bleedDur`: **3.2s**
-- `bleedMax`: **8**
+Bleed stacks. Reapplying it extends the pressure; allowing it to expire means rebuilding the stack count from the beginning.
 
-Bleed is highly stackable. At maximum stacks (8), an enemy takes **48 DPS** for the duration of the effect. This is extremely lethal to high-HP targets if maintained.
+## Burn
 
-### Burn (`status.burn`)
-- `burnDps`: **20**
-- `burnDur`: **2.6s**
+Burn is a short, high-output damage-over-time effect. It refreshes rather than increasing its magnitude.
 
-Burn doesn't stack in magnitude, only in duration refresh. It applies massive flat DPS, shredding unarmored targets quickly.
+## Mark
 
-### Mark (`status.mark`)
-- `markMult`: **1.3**
-- `markDur`: **4.0s**
-
-A Marked target takes 30% more damage from *all* sources (blade, throws, other status effects, and deflected projectiles).
-
-> [!WARNING]
-> Status durations refresh when re-applied, but if allowed to expire, you must build the stacks (for Bleed) from scratch.
+Mark increases damage received from every relevant source, including blade attacks, throws, statuses, and deflected projectiles.
