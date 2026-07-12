@@ -6,9 +6,9 @@
   import { encodeLoadout, decodeLoadout } from '../../lib/urlEncoder.js';
 
   let searchQuery = '';
-  let activeDomain = 'All';
+  let activeDomain = 'Offense';
 
-  const domains = ['All', 'Offense', 'Resilience', 'Mobility', 'Throw', 'Parry', 'Utility', 'Style'];
+  const domains = ['Offense', 'Resilience', 'Mobility', 'Throw', 'Parry', 'Utility', 'Style'];
 
   // Combine into a single array with types
   const ALL_ABILITIES = [
@@ -49,7 +49,7 @@
 
   function getAbilitiesForDomain(domain) {
     return ALL_ABILITIES.filter(u => {
-      if (domain !== 'All' && u.cat.toLowerCase() !== domain.toLowerCase()) return false;
+      if (u.cat.toLowerCase() !== domain.toLowerCase()) return false;
       if (searchQuery && !u.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     });
@@ -109,7 +109,7 @@
 
   <!-- CENTER: Ability Canvas -->
   <main class="canvas">
-    {#each (activeDomain === 'All' ? domains.slice(1) : [activeDomain]) as currentDomain}
+    {#each [activeDomain] as currentDomain}
       {@const domainAbilities = getAbilitiesForDomain(currentDomain)}
       
       {#if domainAbilities.length > 0}
@@ -124,10 +124,10 @@
               
               <!-- SPECIAL -->
               {#if u.type === 'special'}
-                <div class="card spec-card cat-{u.cat}">
+                <div class="upgrade-card cat-{u.cat}">
                   <div class="card-head">
                     <strong>{u.name}</strong>
-                    <span class="tag">Special</span>
+                    <span class="badge">Special</span>
                   </div>
                   <div class="mech-switch-group">
                     {#each [0, 1, 2, 3] as t}
@@ -153,7 +153,7 @@
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div 
-                  class="card unique-card cat-{u.cat}" 
+                  class="upgrade-card unique-card cat-{u.cat}" 
                   class:selected={$loadout.uniques.includes(u.id)}
                   on:click={() => toggleUnique(u.id)}>
                   <div class="card-head">
@@ -165,7 +165,7 @@
 
               <!-- STACKABLE -->
               {:else}
-                <div class="card stack-card cat-{u.cat}" class:selected={$loadout.stackables[u.id] > 0}>
+                <div class="upgrade-card stack-card cat-{u.cat}" class:selected={$loadout.stackables[u.id] > 0}>
                   <div class="card-head">
                     <strong>{u.name}</strong>
                     <div class="mech-counter">
@@ -313,75 +313,105 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
   }
 
-  /* --- BRUTALIST TACTILE CARDS --- */
-  .card {
-    background: var(--sl-color-black);
+  /* --- WIKI AESTHETIC UPGRADE CARDS --- */
+  .upgrade-card {
+    background-color: var(--sl-color-gray-6);
     border: 1px solid var(--sl-color-hairline);
-    border-left-width: 6px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: clamp(16px, 4vw, 24px);
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
-    transition: transform 0.1s, box-shadow 0.1s, border-color 0.2s;
+    color: var(--sl-color-text);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
   }
 
-  .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
-  .card-head strong { font-size: 1.1rem; color: var(--sl-color-white); line-height: 1.2; }
-  .tag { font-family: monospace; font-size: 0.7rem; color: var(--sl-color-gray-3); text-transform: uppercase; border: 1px solid var(--sl-color-gray-4); padding: 2px 6px; }
+  .upgrade-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: var(--sl-color-accent);
+  }
 
-  .desc { font-size: 0.85rem; color: var(--sl-color-gray-2); margin: 0; line-height: 1.5; margin-top: auto; }
+  .card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .card-head strong { font-size: 1.15rem; font-weight: 700; color: var(--sl-color-white); line-height: 1.2; }
+  
+  .badge {
+    background: var(--sl-color-accent-low);
+    color: var(--sl-color-accent-high);
+    border: 1px solid var(--sl-color-accent);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
 
-  /* Cat Colors */
-  .cat-offense { border-left-color: #ef4444; background-color: #ef4444; }
-  .cat-resilience { border-left-color: #10b981; background-color: #10b981; }
-  .cat-mobility { border-left-color: #3b82f6; background-color: #3b82f6; }
-  .cat-utility { border-left-color: #a855f7; background-color: #a855f7; }
-  .cat-throw { border-left-color: #f59e0b; background-color: #f59e0b; }
-  .cat-parry { border-left-color: #13c4d6; background-color: #13c4d6; }
-  .cat-all { border-left-color: var(--sl-color-white); background-color: var(--sl-color-white); }
+  .desc { font-size: 0.95rem; color: var(--sl-color-gray-3); margin: 0; line-height: 1.5; margin-top: auto; }
+
+  /* Cat Colors (Top Borders like wiki) */
+  .cat-offense { border-top: 3px solid #ef4444; }
+  .cat-resilience { border-top: 3px solid #10b981; }
+  .cat-mobility { border-top: 3px solid #3b82f6; }
+  .cat-utility { border-top: 3px solid #a855f7; }
+  .cat-throw { border-top: 3px solid #f59e0b; }
+  .cat-parry { border-top: 3px solid #13c4d6; }
+  .cat-all { border-top: 3px solid var(--sl-color-white); }
+  
+  .block.cat-offense { background-color: #ef4444; border: none; }
+  .block.cat-resilience { background-color: #10b981; border: none; }
+  .block.cat-mobility { background-color: #3b82f6; border: none; }
+  .block.cat-utility { background-color: #a855f7; border: none; }
+  .block.cat-throw { background-color: #f59e0b; border: none; }
+  .block.cat-parry { background-color: #13c4d6; border: none; }
+  .block.cat-all { background-color: var(--sl-color-white); border: none; }
 
   /* UNIQUE TOGGLE */
   .unique-card { cursor: pointer; user-select: none; touch-action: manipulation; }
-  .unique-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
-  .unique-card.selected { background: var(--sl-color-gray-6); border-color: var(--sl-color-white); }
-  .checkbox-indicator { width: 20px; height: 20px; border: 2px solid var(--sl-color-gray-4); border-radius: 2px; }
+  .unique-card:active { transform: scale(0.98); }
+  .unique-card.selected { border-color: var(--sl-color-white); background-color: rgba(255, 255, 255, 0.03); }
+  .checkbox-indicator { width: 18px; height: 18px; border: 2px solid var(--sl-color-gray-4); border-radius: 4px; transition: 0.1s; flex-shrink: 0; }
   .unique-card.selected .checkbox-indicator { background: var(--sl-color-white); border-color: var(--sl-color-white); }
 
   /* MECHANICAL SWITCHES (Specials) */
-  .mech-switch-group { display: flex; gap: 8px; background: var(--sl-color-gray-6); padding: 6px; border: 1px solid var(--sl-color-hairline); }
+  .mech-switch-group { display: flex; gap: 4px; background: var(--sl-color-black); padding: 4px; border-radius: 8px; border: 1px solid var(--sl-color-hairline); }
   .mech-switch {
     flex: 1;
-    padding: 8px 0;
+    padding: 6px 0;
     font-family: monospace;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: bold;
     color: var(--sl-color-gray-3);
-    background: var(--sl-color-black);
-    border: 1px solid var(--sl-color-hairline);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
     touch-action: manipulation;
-    transition: transform 0.05s, box-shadow 0.05s, background 0.1s;
-    box-shadow: 0 2px 0 rgba(0,0,0,0.5); /* Raised */
+    transition: 0.1s;
   }
-  .mech-switch:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(0,0,0,0); /* Depressed */ }
-  .mech-switch.on { background: var(--sl-color-white); color: var(--sl-color-black); border-color: var(--sl-color-white); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); transform: translateY(2px); }
+  .mech-switch:hover { background: var(--sl-color-gray-6); }
+  .mech-switch.on { background: var(--sl-color-gray-5); color: var(--sl-color-white); box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
   /* MECHANICAL COUNTER (Stackables) */
-  .stack-card.selected { background: var(--sl-color-gray-6); }
-  .mech-counter { display: flex; align-items: center; border: 1px solid var(--sl-color-hairline); background: var(--sl-color-black); }
+  .stack-card.selected { border-color: var(--sl-color-white); background-color: rgba(255, 255, 255, 0.03); }
+  .mech-counter { display: flex; align-items: center; border: 1px solid var(--sl-color-hairline); background: var(--sl-color-black); border-radius: 20px; padding: 2px; }
   .mech-counter button {
-    width: 36px; height: 36px;
-    background: transparent; border: none;
+    width: 28px; height: 28px;
+    background: var(--sl-color-gray-6); border: none; border-radius: 50%;
     color: var(--sl-color-white); font-size: 1.2rem; cursor: pointer; touch-action: manipulation;
-    transition: background 0.1s;
+    transition: background 0.1s; display: flex; align-items: center; justify-content: center;
   }
-  .mech-counter button:active { background: var(--sl-color-gray-5); }
-  .mech-counter span { font-family: monospace; font-size: 1.1rem; width: 32px; text-align: center; font-weight: bold; border-left: 1px solid var(--sl-color-hairline); border-right: 1px solid var(--sl-color-hairline); }
+  .mech-counter button:hover { background: var(--sl-color-gray-5); }
+  .mech-counter button:active { background: var(--sl-color-gray-4); transform: scale(0.95); }
+  .mech-counter span { font-family: monospace; font-size: 1rem; width: 28px; text-align: center; font-weight: bold; }
 
   /* --- TELEMETRY DASHBOARD (RIGHT / BOTTOM) --- */
   .dashboard-container {
