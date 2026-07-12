@@ -62,14 +62,6 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
   });
 
   canvas.addEventListener('contextmenu', e => e.preventDefault()); // Prevent right click menu
-  
-  canvas.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const zoomFactor = 1.1;
-    if (e.deltaY < 0) camScale *= zoomFactor;
-    else camScale /= zoomFactor;
-    camScale = Math.max(0.2, Math.min(camScale, 5.0));
-  }, { passive: false });
 
   // Interactive Striking (Left Click)
   canvas.addEventListener('mousedown', (e) => {
@@ -163,7 +155,7 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
     let actionZoom = 1.0 - (enemySpeed * 0.00015);
     actionZoom = Math.max(0.75, Math.min(1.0, actionZoom));
     
-    const finalScale = 1.5 * camScale * actionZoom;
+    const finalScale = 1.5 * state.camScale * actionZoom;
 
     // Transform mouse coordinates into simulation coordinates for the player
     // We reverse the camera transform to find where the mouse is in world space

@@ -17,6 +17,10 @@ const { model, variant } = Astro.props;
           <span class="model-status">IDLE // HOVER TO ENGAGE</span>
         </div>
         
+        <div class="model-zoom-container">
+          <input type="range" class="zoom-slider" min="0.4" max="2.5" step="0.1" value="1.0">
+        </div>
+        
         <div class="model-controls">
           <div class="control-group time-controls">
             <span class="control-label">TIME</span>
@@ -61,7 +65,7 @@ const { model, variant } = Astro.props;
       const variant = this.dataset.variant;
       
       // Setup state
-      const state = { timeScale: 1, phase: 'auto', debug: false };
+      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 1.0 };
 
       if (canvas && modelName) {
         this.cleanup = initModelViewer(canvas, modelName, variant, state);
@@ -106,6 +110,13 @@ const { model, variant } = Astro.props;
           state.debug = !state.debug;
           debugBtn.textContent = `DEBUG: ${state.debug ? 'ON' : 'OFF'}`;
           debugBtn.classList.toggle('active', state.debug);
+        });
+      }
+
+      const zoomSlider = this.querySelector('.zoom-slider') as HTMLInputElement;
+      if (zoomSlider) {
+        zoomSlider.addEventListener('input', () => {
+          state.camScale = parseFloat(zoomSlider.value);
         });
       }
     }
@@ -233,5 +244,44 @@ const { model, variant } = Astro.props;
   .debug-toggle.active {
     color: #ff00ff;
     background: rgba(255, 0, 255, 0.15);
+  }
+  
+  .model-zoom-container {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: auto;
+    background: rgba(15, 15, 20, 0.75);
+    padding: 1rem 0.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
+  .zoom-slider {
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+    width: 6px;
+    height: 120px;
+    cursor: ns-resize;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    outline: none;
+  }
+  
+  .zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #15c2c2;
+    cursor: ns-resize;
+    box-shadow: 0 0 10px rgba(21, 194, 194, 0.5);
   }
 </style>
