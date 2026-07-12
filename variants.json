@@ -1,0 +1,120 @@
+{
+  "charger": [
+    {
+      "id": "bull",
+      "name": "Charger",
+      "weight": 1
+    },
+    {
+      "id": "brawler",
+      "name": "Brawler",
+      "weight": 0.8,
+      "minWave": 2
+    },
+    {
+      "id": "stalker",
+      "name": "Stalker",
+      "weight": 0.7,
+      "minWave": 4
+    },
+    {
+      "id": "executioner",
+      "name": "Executioner",
+      "weight": 0.5,
+      "minWave": 6
+    },
+    {
+      "id": "gravedigger",
+      "name": "Gravedigger",
+      "weight": 0.5,
+      "minWave": 5
+    },
+    {
+      "id": "duelist",
+      "name": "Duelist",
+      "weight": 0.5,
+      "minWave": 6
+    }
+  ],
+  "ranged": [
+    {
+      "id": "sentinel",
+      "name": "Sentinel",
+      "weight": 1
+    },
+    {
+      "id": "rifleman",
+      "name": "Rifleman",
+      "weight": 0.8,
+      "minWave": 3
+    },
+    {
+      "id": "marksman",
+      "name": "Marksman",
+      "weight": 0.6,
+      "minWave": 5
+    },
+    {
+      "id": "warlock",
+      "name": "Warlock",
+      "weight": 0.55,
+      "minWave": 6
+    },
+    {
+      "id": "chain",
+      "name": "Chain Caster",
+      "weight": 0.5,
+      "minWave": 7
+    }
+  ],
+  "flyer": [
+    {
+      "id": "swooper",
+      "name": "Flyer",
+      "weight": 1
+    },
+    {
+      "id": "divebomber",
+      "name": "Dive Bomber",
+      "weight": 0.8,
+      "minWave": 3
+    },
+    {
+      "id": "highdiver",
+      "name": "Swooper",
+      "weight": 0.6,
+      "minWave": 5
+    }
+  ],
+  "bomber": [
+    {
+      "id": "lobber",
+      "name": "Bomber",
+      "weight": 1
+    },
+    {
+      "id": "juggler",
+      "name": "Juggler",
+      "weight": 0.7,
+      "minWave": 4
+    },
+    {
+      "id": "trapper",
+      "name": "Trapper",
+      "weight": 0.6,
+      "minWave": 3
+    },
+    {
+      "id": "sludge",
+      "name": "Sludge",
+      "weight": 0.5,
+      "minWave": 5
+    },
+    {
+      "id": "geomancer",
+      "name": "Geomancer",
+      "weight": 0.45,
+      "minWave": 7
+    }
+  ]
+}

@@ -6,14 +6,13 @@ gameVersion: v0.1
 
 import StatBlock from '../../../components/StatBlock.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
+import ModelViewer from '../../../components/ModelViewer.astro';
 
 <BiomeBadge stages={["The Grounds"]} />
 
 > *Where order is kept.*
 
 **Stage 1 of 5.** 9 waves, then [**The Warden**](/bosses/warden).
-
-
 
 ## Environment
 
@@ -26,19 +25,35 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 
 ## Enemy Pool
 
-| Enemy Type | Spawn Chance | Available From |
-|---|---|---|
-| Charger | 100% | Wave 1+ |
-| Ranged | 50% | Wave 2+ |
-| Bomber | 30% | Wave 4+ |
-| Armored | 30% | Wave 5+ |
+The Grounds introduce the basic melee and ranged threats. The arena is bright, providing high visibility against the dark platforms.
 
-Enemy HP and damage increase by **+6%** and **+2%** per wave within this stage.
+| Enemy Type | Spawn Chance | Available From | Base HP | Speed |
+|---|---|---|---|---|
+| **Charger** | 100% | Wave 1+ | 86 | 150 px/s |
+| **Ranged** | 50% | Wave 2+ | 60 | 175 px/s |
+| **Bomber** | 30% | Wave 4+ | 40 | 165 px/s |
+| **Armored** | 30% | Wave 5+ | 154 | 95 px/s |
 
-## Boss
+> [!NOTE] Wave Scaling
+> Within this stage, Enemy HP increases by **+6%** and damage by **+2%** each wave.
 
-When the 9th wave is cleared, [**The Warden**](/bosses/warden) enters the arena.
-Defeating it unlocks an **Ability Tier-Up** — evolve one of your owned tiered abilities to its next level.
+<ModelViewer model="charger" />
+
+## Boss: The Warden
+
+When the 9th wave is cleared, [**The Warden**](/bosses/warden) enters the arena. Defeating it unlocks an **Ability Tier-Up** — evolve one of your owned tiered abilities to its next level.
+
+<ModelViewer model="warden" />
+
+### Mechanics
+
+The Warden is a methodical guard who weaponizes the arena across 3 phases:
+- **Phase 1**: Fires mortars (3 shots, 760 px/s speed) and bashes if you get too close.
+- **Phase 2 (Zones)**: Creates prohibited zones (3 zones, shifting) that deal damage if you enter them.
+- **Phase 3 (Ceiling Lock)**: Drops from the ceiling with a devastating lunge (1500 px/s speed).
+
+> [!TIP]
+> Use upward swings ("updrafts") to knock the Warden off-balance or parry its mortars back for massive damage.
 
 ## Lore
 

@@ -6,14 +6,13 @@ gameVersion: v0.1
 
 import StatBlock from '../../../components/StatBlock.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
+import ModelViewer from '../../../components/ModelViewer.astro';
 
 <BiomeBadge stages={["The Crimson Fields"]} />
 
 > *Red and gold, and old rage.*
 
 **Stage 3 of 5.** 9 waves, then [**Aldric (Berserker King)**](/bosses/aldric).
-
-
 
 ## Environment
 
@@ -26,20 +25,36 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 
 ## Enemy Pool
 
-| Enemy Type | Spawn Chance | Available From |
-|---|---|---|
-| Charger | 100% | Wave 1+ |
-| Flyer | 60% | Wave 1+ |
-| Bomber | 30% | Wave 2+ |
-| Herald | 30% | Wave 3+ |
-| Chimera | 35% | Wave 5+ |
+The Crimson Fields test your crowd control. Fast flyers and hybrid Chimera units demand constant adaptation.
 
-Enemy HP and damage increase by **+6%** and **+2%** per wave within this stage.
+| Enemy Type | Spawn Chance | Available From | Base HP | Speed |
+|---|---|---|---|---|
+| **Charger** | 100% | Wave 1+ | 86 | 150 px/s |
+| **Flyer** | 60% | Wave 1+ | 44 | 230 px/s |
+| **Bomber** | 30% | Wave 2+ | 40 | 165 px/s |
+| **Herald** | 30% | Wave 3+ | 44 | 125 px/s |
+| **Chimera** | 35% | Wave 5+ | 84 | 150 px/s |
 
-## Boss
+> [!NOTE] Support Targeting
+> **Heralds** buff enemy speed by 1.45x and attack rate by 1.5x. Take them out first!
 
-When the 9th wave is cleared, [**Aldric (Berserker King)**](/bosses/aldric) enters the arena.
-Defeating it unlocks an **Ability Tier-Up** — evolve one of your owned tiered abilities to its next level.
+<ModelViewer model="chimera" />
+
+## Boss: Aldric (Berserker King)
+
+When the 9th wave is cleared, [**Aldric**](/bosses/aldric) enters the arena. 
+
+<ModelViewer model="aldric" />
+
+### Mechanics
+
+Aldric offers a fierce duel that evolves into a deadly desperation phase:
+- **Base Stats**: 3400 HP, 130 px/s speed.
+- **Throne of Fire**: Creates a checkerboard of fire that pulses every 3 seconds.
+- **Fake Death & Frenzy**: Aldric will feign death and rapidly regenerate up to 50% HP (at 5% per second). During his Frenzy, he charges at 1550 px/s but takes 35% extra damage!
+
+> [!WARNING]
+> Do not let your guard down when Aldric falls. When he enters frenzy, prepare to dodge or execute perfect parries to counter his massive 1550 px/s charges!
 
 ## Lore
 

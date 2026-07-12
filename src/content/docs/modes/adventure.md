@@ -6,91 +6,52 @@ gameVersion: v0.1
 
 Adventure mode is Tear's primary campaign and the recommended starting point. It teaches you every mechanic organically through progressively harder waves and biome-specific enemy rosters.
 
----
-
 ## Structure
 
 ```
-Stage 1 (Ruins)     → 9 Waves + Boss 1
-Stage 2 (Canopy)    → 9 Waves + Boss 2
-Stage 3 (Depths)    → 9 Waves + Boss 3
-Stage 4 (Sanctum)   → 9 Waves + Boss 4
-Stage 5 (Apex)      → 9 Waves + Boss 5 (Final)
+Stage 1 (The Grounds)      ➔ 9 Waves + Boss 1
+Stage 2 (The Undercroft)   ➔ 9 Waves + Boss 2
+Stage 3 (Crimson Fields)   ➔ 9 Waves + Boss 3
+Stage 4 (The Voidspire)    ➔ 9 Waves + Boss 4
+Stage 5 (The Tear)         ➔ 9 Waves + Boss 5 (Final)
 ```
 
 Each stage:
-- Has 9 combat waves followed by a boss encounter.
+- Consists of **9 combat waves** followed by a boss encounter.
 - Introduces new enemy types suited to the biome.
 - Has its own visual palette that affects HUD colour rendering.
-
----
 
 ## Wave Structure
 
 | Element | Detail |
 |---------|--------|
 | **Waves per stage** | 9 (+ 1 boss) |
-| **Enemy count** | Starts small, increases through the stage |
+| **Enemy count** | Starts at 3 in Wave 1. Increases by **+2 enemies per wave per stage**. |
+| **Concurrent Cap** | Starts low, increases by **+1 per stage** (max 10 on screen). |
 | **Shop access** | Between each wave |
 | **Boss wave** | Wave 10 — no shop before the boss |
 
-During each wave you must eliminate all enemies to proceed. There is no time limit, but the style meter decays after 2.6 s of inactivity, so prolonged idling will cost your tier.
+During each wave you must eliminate all enemies to proceed. There is no time limit, but the style meter decays after 2.6 seconds of inactivity, so prolonged idling will cost your tier.
 
----
+> [!NOTE] Wave Scaling (Within Stage)
+> Each wave within a stage, enemy HP increases by **+6%** and enemy damage by **+2%**.
 
-## HP Scaling
+## Between-Stage HP Scaling
 
-Enemy HP scales at two levels:
+Each time you enter a new stage, enemies receive a massive structural buff:
+- **+34% Enemy HP** per stage entered.
+- **+14% Enemy Damage** per stage entered.
 
-### Within a Stage
-Each wave in a stage, enemy base HP is multiplied:
-
-```
-wave_HP = base_HP × (1.06 ^ wave_index)
-```
-
-| Wave | HP Multiplier |
-|------|--------------|
-| 1 | ×1.00 |
-| 2 | ×1.06 |
-| 3 | ×1.12 |
-| 4 | ×1.19 |
-| 5 | ×1.26 |
-| 6 | ×1.34 |
-| 7 | ×1.42 |
-| 8 | ×1.50 |
-| 9 | ×1.59 |
-
-### Between Stages
-Each stage transition applies a **+34% HP multiplier** on top of all prior scaling:
-
-```
-stage_HP_base = previous_stage_base × 1.34
-```
-
-| Stage | Cumulative Stage Multiplier |
-|-------|---------------------------|
-| 1 | ×1.00 |
-| 2 | ×1.34 |
-| 3 | ×1.80 |
-| 4 | ×2.41 |
-| 5 | ×3.23 |
-
-Combined with wave-within-stage scaling, a Stage 5 Wave 9 enemy has roughly **5.1× the HP** of a Stage 1 Wave 1 enemy. Build your run to scale accordingly.
-
----
+When combined with the per-wave scaling, a Stage 5 wave enemy has significantly more health and hits far harder than anything in Stage 1. Build your run to scale accordingly!
 
 ## Shop & Upgrades
 
 After every wave (waves 1–9), you visit the inter-wave shop. The shop offers a rotating selection of upgrade options. You may:
-
 - **Buy one upgrade** with your current coins.
 - **Skip** (free — no cost).
 - **Reroll** the shop (costs a small coin fee, increases with each reroll).
 
 Upgrades are tiered (T1, T2, T3). Higher tiers cost more coins but have significantly stronger effects. You can only purchase T2 of an upgrade if you already own T1, and similarly for T3.
-
----
 
 ## Boss Encounters
 
@@ -98,34 +59,19 @@ After wave 9 of each stage, the **Boss** arrives. This is a unique, scripted ene
 
 **On boss defeat:**
 - You receive an **Ability Tier-Up** — this upgrades one of your current abilities to the next tier for free, without spending coins.
+- You receive **12 HP restored** (on Normal difficulty).
 - The next stage's wave 1 begins.
 
 Boss encounters do not have a shop before them — enter with whatever you have from the preceding 9 waves.
 
----
-
 ## Campaign Completion
 
-Defeating the Stage 5 Boss completes the campaign. Doing so awards the **Sealed** achievement (Epic, 50 shards).
+Defeating the Stage 5 Boss completes the campaign. 
 
-| Run Outcome | Reward |
-|------------|--------|
-| Complete all 5 stages | **Sealed** achievement (Epic) |
-| Each boss defeated | Ability Tier-Up |
-| Full no-hit stage | **Immortal Run** achievement (Rare) |
+> [!TIP]
+> **Draft for the stage, not the run.** If you're entering Stage 3, the enemy roster shifts toward Flyers and Armored types. Prioritise upgrades that handle airborne targets (Launch enhancers, throw damage) before spending on ground-attack skills.
+>
+> **Hold coins for Stage bosses.** By wave 7–8, you should have a clear picture of what your build needs. Saving coins for a single big upgrade on wave 8 or 9 is often better than buying marginal upgrades every wave.
 
-:::note
-Your upgrades, coins, and style tier **do not** persist between runs. Each Adventure run starts from scratch. The strategic decisions you make in the shop are the primary expression of run-to-run variety.
-:::
-
----
-
-## Progression Tips
-
-:::tip
-**Draft for the stage, not the run.** If you're entering Stage 3 (Depths), the enemy roster shifts toward Flyers and Armored types. Prioritise upgrades that handle airborne targets (Launch enhancers, throw damage) before spending on ground-attack skills.
-:::
-
-:::tip
-**Hold coins for Stage bosses.** By wave 7–8, you should have a clear picture of what your build needs. Saving coins for a single big upgrade on wave 8 or 9 is often better than buying marginal upgrades every wave.
-:::
+> [!WARNING] No-Hit Challenge
+> For the bravest players, a full no-hit stage awards the **Immortal Run** achievement. If you're playing on **One-Hit** difficulty, any damage ends your run entirely.

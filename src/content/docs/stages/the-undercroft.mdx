@@ -6,14 +6,13 @@ gameVersion: v0.1
 
 import StatBlock from '../../../components/StatBlock.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
+import ModelViewer from '../../../components/ModelViewer.astro';
 
 <BiomeBadge stages={["The Undercroft"]} />
 
 > *Gray industry, deep below.*
 
 **Stage 2 of 5.** 9 waves, then [**The Iron Colossus**](/bosses/colossus).
-
-
 
 ## Environment
 
@@ -26,20 +25,37 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 
 ## Enemy Pool
 
-| Enemy Type | Spawn Chance | Available From |
-|---|---|---|
-| Armored | 80% | Wave 1+ |
-| Bomber | 70% | Wave 1+ |
-| Charger | 60% | Wave 1+ |
-| Ranged | 50% | Wave 2+ |
-| Anchor | 25% | Wave 4+ |
+The Undercroft introduces heavy resistance. Armored enemies are common, requiring you to break their guards or hit them from above/behind.
 
-Enemy HP and damage increase by **+6%** and **+2%** per wave within this stage.
+| Enemy Type | Spawn Chance | Available From | Base HP | Speed |
+|---|---|---|---|---|
+| **Armored** | 80% | Wave 1+ | 154 | 95 px/s |
+| **Bomber** | 70% | Wave 1+ | 40 | 165 px/s |
+| **Charger** | 60% | Wave 1+ | 86 | 150 px/s |
+| **Ranged** | 50% | Wave 2+ | 60 | 175 px/s |
+| **Anchor** | 25% | Wave 4+ | 44 | 125 px/s |
 
-## Boss
+> [!NOTE] Wave Scaling
+> Within this stage, Enemy HP increases by **+6%** and damage by **+2%** each wave. Additionally, stage 2 brings an inherent **+34% Enemy HP** bump from stage 1.
+
+<ModelViewer model="armored" />
+
+## Boss: The Iron Colossus
 
 When the 9th wave is cleared, [**The Iron Colossus**](/bosses/colossus) enters the arena.
-Defeating it unlocks an **Ability Tier-Up** — evolve one of your owned tiered abilities to its next level.
+
+<ModelViewer model="iron-colossus" />
+
+### Mechanics
+
+The Iron Colossus is a tank with a front shield that forces you to maneuver. 
+- **Base Stats**: 2900 HP, massive weight (9) preventing knockback.
+- **Sweeping Arm**: Throws a sweeping arm across the arena (540 px/s).
+- **Core Expose**: Temporarily exposes its core after heavy attacks.
+- **Cross Panels**: Actively uses 4 panels for defensive shocks.
+
+> [!TIP]
+> The Colossus cannot be knocked back (0 knockback taken). Rely on mobility and dashing to get behind its front shield to deal full damage!
 
 ## Lore
 

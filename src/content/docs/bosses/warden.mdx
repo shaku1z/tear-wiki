@@ -1,6 +1,6 @@
 ---
 title: "The Warden"
-description: "How to defeat The Warden, the Stage 1 boss in Tear. Phase breakdowns, attack patterns, and lore."
+description: "Defeat The Warden, the Stage 1 Boss of Tear. Learn his mortar patterns, zone denial, and baton strikes."
 gameVersion: v0.1
 ---
 
@@ -10,60 +10,49 @@ import ModelViewer from '../../../components/ModelViewer.astro';
 
 <BiomeBadge stages={["The Grounds"]} />
 
-> *A methodical guard who weaponizes the arena across 3 phases.*
+**The Warden** is the first true test of your mastery over the blade. Acting as the gatekeeper of The Grounds, he is a methodical, heavy-hitting bruiser who weaponizes the arena itself across three distinct phases. 
 
-**Stage 1 Boss.** Found at the end of [The Grounds](/stages/the-grounds).
-Defeating The Warden grants an **Ability Tier-Up**.
+> [!TIP]
+> The Warden uses base boss stats, meaning he is incredibly heavy (Weight: 6). You will not be able to launch or juggle him like a standard enemy. Focus on parries and high-damage Ground Slams.
+
+## Base Attributes
 
 <ModelViewer model="warden" />
 
 <StatBlock
   name="The Warden"
-  color="#e23b3b"
+  color="#b01030"
   stats={{
-    'Baton Cooldown': '2.1s',
-    'Baton Telegraph': '0.5s',
-    'Mortar Shots': '3 per burst',
-    'Mortar Speed': '760 px/s',
-    'Mortar Damage': '14',
-    'Bash Knockback': '620 px/s',
-    'Phase 2 Zones': '3 × 200 px wide',
-    'Phase 3 Lunge Speed': '1500 px/s',
+    'HP': 1900,
+    'Speed': '70 px/s',
+    'Contact Damage': 20,
+    'Knockback Taken': 0.6,
+    'Weight': 6,
+    'Dimensions': '118x118 px'
   }}
 />
 
-## Phases
+### Phase 1: The Enforcer
+The Warden relies on heavy melee strikes and artillery to keep you at bay.
+- **Baton Bash:** If you stand within **150 px**, he winds up for **0.5s** before swinging his baton. This deals heavy damage and applies a massive **620 px/s knockback**, putting him on a **2.1s cooldown**.
+- **Mortar Volley:** He fires **3 mortar shells** sequentially. These shells travel at **760 px/s** with a heavy arc (**900 gravity**). Each shell deals **14 damage**.
+- **Shockwave Stomp:** Like the Armored brute, he can stomp the ground, sending out an **18 px radius shockwave** at **700 px/s**, dealing **18 damage**. Jump to avoid it.
 
-3 phases total. Phase transitions are triggered by HP thresholds.
+### Phase 2: Zone Denial
+Upon taking enough damage, The Warden activates the arena's security systems.
+- **Prohibited Zones:** He summons **3 distinct laser zones**, each **200 px wide**.
+- **Zone Shifting:** The zones shift around the arena at a rate of **7 px/s**.
+- **Lethal Ticks:** Standing in a zone deals **7 damage** every **0.4s**. You must manage the boss while constantly repositioning to stay in the safe gaps.
 
-### Phase 1 — The Patrol
+### Phase 3: The Lockdown
+In his final desperate phase, he brings the ceiling down.
+- **Ceiling Collapse:** He locks onto your position, telegraphs, and drops a **150 px high** block from the ceiling every **1.6s**.
+- **Desperation Lunge:** With a **0.55s windup**, he throws his entire weight forward in a devastating **1500 px/s lunge**. If you dodge this, he suffers a massive **7.5s recovery cooldown**, leaving him wide open for a brutal finisher.
 
-Standard combat. Baton strikes with a 2.1s cooldown and 0.5s telegraph. Fires 3-round mortar bursts (760 px/s, 14 dmg). Bashes with knockback (620 px/s) at melee range.
+---
 
-:::tip[Strategy]
-The mortar arc is predictable. Parry the first shot of a burst to get ahead of the rhythm.
-:::
+## Strategy Summary
 
-### Phase 2 — Prohibited Zones
-
-3 danger zones (each 200 px wide) appear on the arena. Each zone shifts 7 times and ticks damage every 0.4s if you stand in it. Zone placement forces you to keep moving.
-
-:::tip[Strategy]
-Treat the zones like hot coals — glance at the floor, not the Warden, to track them.
-:::
-
-### Phase 3 — Ceiling Lock
-
-The ceiling drops to y=150 px, severely limiting jump height. The Warden gains a lunging ceiling-dive (1500 px/s, 7.5s cooldown, 0.55s telegraph). Dodge perpendicular to the dive axis.
-
-:::tip[Strategy]
-The ceiling drop makes updrafts difficult. Switch to ground-based slams and throws.
-:::
-
-## Lore
-
-> The Warden's badge lies in pieces. Etched inside, worn almost smooth: "Appointed by the Council of First Light. Directive: none shall reach the Undercroft." Below it, scratched by hand: "I never asked what was down there."
-
-## Related Links
-- Explore the [The Grounds](/stages/the-grounds) biome.
-- Learn about [Ability Tier-Ups](/mechanics/combat).
+- **Bat the Mortars:** The Phase 1 mortars can be deflected. A Perfect Parry will send the 14-damage shell flying back into his face.
+- **Stay Airborne in Phase 2:** The Prohibited Zones make the floor extremely dangerous. Use Updrafts and Aerial Raves to suspend yourself in the air, avoiding the shifting zones entirely.
+- **Bait the Lunge:** In Phase 3, you want him to lunge. The 7.5s recovery window is your chance to dump all your burst damage (Power Slams and Throws).

@@ -1,0 +1,49 @@
+---
+title: Slams & Launches
+description: Aerial combat, juggling enemies, and the physics of slams and updrafts.
+gameVersion: v0.1
+---
+
+import ModelViewer from '../../../components/ModelViewer.astro';
+
+Tear's physics engine allows you to manipulate enemy positioning. Lightweight enemies can be launched into the air for juggles, and airborne enemies can be violently slammed back to the ground.
+
+---
+
+## Launches (Updrafts)
+
+Striking an enemy with a fast, upward swing can launch them. This is primarily governed by the `launchMinUpSpeed` threshold.
+
+| Variable | Config Value | Description |
+|----------|--------------|-------------|
+| `launchMinUpSpeed` | **1250 px/s** | Minimum vertical blade speed required to launch. |
+| `launchPower` | **780 px/s** | The base upward velocity applied to the launched enemy. |
+| `risingSpeedRef` | **850 px/s** | Reference speed for rising attacks. |
+| `risingDmgBonus` | **+90%** | Damage bonus when striking upward (`0.9`). |
+| `risingLaunchBonus`| **+70%** | Bonus launch power when attacking upward (`0.7`). |
+
+<ModelViewer model="flyer" variant="swooper" />
+*Flyers naturally hover around 150px. Updrafts are exceptionally good at catching them out of their swoop (700 px/s).*
+
+---
+
+## Slams
+
+If an enemy is airborne (either via a launch, or naturally flying), a downward strike will execute a **Slam**.
+
+| Type | Condition | Damage Multiplier |
+|------|-----------|-------------------|
+| **Standard Slam** | Enemy in air, hit downward | **1.8x** (`blade.slamMultiplier`) |
+| **Power Slam** | Downward tip speed ≥ **1700 px/s** | **1.8x** + **70% Bonus** |
+
+### Power Slam Mechanics
+
+To trigger a Power Slam:
+1. The enemy must be airborne.
+2. Your downward blade speed must exceed `slamPowerSpeed` (**1700 px/s**).
+3. (Optional) The player can also be moving downward faster than `slamMinDownSpeed` (**1750 px/s**) for additional synergies.
+
+A successful Power Slam grants `slamPowerBonus` (**0.7**), massively amplifying damage and driving the enemy into the ground with explosive force.
+
+> [!TIP]
+> Juggling enemies with Updrafts and finishing with a Power Slam yields massive Style points: **10 pts** for the Updraft, and **11 pts** for the Superslam (`trick.pts`).

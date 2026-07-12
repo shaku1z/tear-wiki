@@ -1,6 +1,6 @@
 ---
 title: "Ranged"
-description: "Defeat the Ranged in Tear. View raw stats, attack patterns, variants, and optimal combat strategies."
+description: "Defeat the Ranged enemy in Tear. View stats, variants like the Marksman or Warlock, and strategies for parrying their projectiles."
 gameVersion: v0.1
 ---
 
@@ -9,81 +9,94 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-<BiomeBadge stages={["The Grounds", "The Undercroft", "The Voidspire", "The Tear"]} />
+<BiomeBadge stages={["The Grounds", "The Crimson Fields", "The Tear"]} />
 
-> Keeps distance, kites away when you close, fires telegraphed shots.
+The **Ranged** class (often appearing as snipers, casters, or gunners) prefers to keep its distance, pressuring you with highly telegraphed but lethal projectiles. It forces you to either weave through cover, deflect shots back at them, or dive in aggressively.
+
+> [!NOTE]
+> The base projectile travels at **800 px/s**. You need a blade tip speed of at least **700 px/s** to successfully deflect it. A Perfect Parry (**2400 px/s**) will send the shot homing back at the attacker with bonus damage!
+
+## Base Attributes
+
+<StatBlock
+  name="Ranged"
+  color="#2f6df0"
+  stats={{
+    'HP': 60,
+    'Speed': '175 px/s',
+    'Contact Damage': 8,
+    'Knockback Taken': 12,
+    'Weight': 1,
+    'Dimensions': '34x44 px'
+  }}
+/>
+
+### Mechanics
+
+- **Kiting:** It actively seeks a preferred distance of **380 px**. If you move closer than **250 px**, it will flee to maintain distance.
+- **Fire Cycle:** It waits **2.3s** between shots while kiting. 
+- **Windup:** Every shot has a **0.7s** telegraph before firing. The high projectile speed makes this telegraph your main cue to dodge or wind up a parry.
+
+---
+
+## Variants
 
 <Tabs>
-  <TabItem label="Sentinel (Base)">
+  <TabItem label="Sentinel (Wave 1+)">
     <ModelViewer model="ranged" variant="sentinel" />
-    <StatBlock
-      name="Ranged"
-      color="#2f6df0"
-      stats={{
-        'HP': 60,
-        'Speed': '175 px/s',
-        'Contact Damage': 8,
-        'Knockback Taken': 12,
-        'Preferred Distance': '380 px',
-        'Shot Windup': '0.7s',
-        'Projectile Speed': '800 px/s'
-      }}
-    />
+    The base variant. Relies on the standard 800 px/s projectile and predictable 380 px kiting distance. It acts as the rhythmic metronome of early-game combat.
   </TabItem>
-  <TabItem label="Rifleman">
+
+  <TabItem label="Rifleman (Wave 3+)">
     <ModelViewer model="ranged" variant="rifleman" />
-    <StatBlock
-      name="Rifleman"
-      color="#2f6df0"
-      stats={{
-        'HP': 60,
-        'Projectile Speed': '950 px/s',
-        'Behavior': 'Faster projectile.'
-      }}
-    />
+    A sharper evolution of the Sentinel, firing with tighter grouping and keeping pressure on you more consistently during chaotic fights. 
   </TabItem>
-  <TabItem label="Marksman">
+
+  <TabItem label="Marksman (Wave 5+)">
     <ModelViewer model="ranged" variant="marksman" />
     <StatBlock
       name="Marksman"
       color="#2f6df0"
       stats={{
-        'HP': '66 (Tougher)',
-        'Shot Windup': '1.1s',
-        'Behavior': 'Fires a massive, slow, high-damage orb.'
+        'HP': '66 (+10%)',
+        'Shot Damage': 30,
+        'Shot Speed': '1900 px/s',
+        'Windup': '1.4s'
       }}
     />
+    The deadliest sniper in the game. It uses a **1.4s** laser-sighted telegraph before snapping off a **1900 px/s** bolt. The extreme speed makes it nearly impossible to dodge on reaction, but flawlessly parrying this bolt back at the Marksman is intensely rewarding.
   </TabItem>
-  <TabItem label="Warlock">
+
+  <TabItem label="Warlock (Wave 6+)">
     <ModelViewer model="ranged" variant="warlock" />
     <StatBlock
       name="Warlock"
       color="#2f6df0"
       stats={{
-        'HP': 60,
-        'Behavior': 'Projectile curves mid-flight toward you.'
+        'Shot Damage': 12,
+        'Shot Speed': '430 px/s'
       }}
     />
+    Fires a slower, eerie projectile that **curves aggressively toward you** at exactly 42% of its flight path. This delayed tracking forces you to dodge late or parry with precision, as early dodges will simply cause the bolt to track your new location.
   </TabItem>
-  <TabItem label="Chain Caster">
+
+  <TabItem label="Chain Caster (Wave 7+)">
     <ModelViewer model="ranged" variant="chain" />
     <StatBlock
       name="Chain Caster"
       color="#2f6df0"
       stats={{
-        'HP': 60,
-        'Behavior': 'Projectile roots you in place if it hits.'
+        'Shot Damage': 8,
+        'Shot Speed': '560 px/s',
+        'Root Duration': '1.4s'
       }}
     />
+    Fires a specialized chain bolt (12 px radius) that deals low damage but **roots you in place for 1.4s** on hit. In late-game swarms, getting caught by a chain is often a death sentence as heavier enemies close in.
   </TabItem>
 </Tabs>
 
-## Strategies & Tips
+## Strategy Summary
 
-- Parrying a Marksman's charged shot back deals massive damage and rewards style points.
-- Chain bolts are easy to parry — watch for the distinctive blue projectile.
-- Warlock shots curve once. Dodge after the curve commits, not before.
-
-## Related Data
-- See how Elite mutations affect this enemy on the [Affixes & Elites](/enemies/affixes) page.
-- View the full [Stat Glossary](/reference/stat-glossary) for formula details.
+- **Deflect and Conquer:** Ranged enemies are fragile (only 60 base HP). A single reflected shot is often enough to severely cripple or kill them.
+- **Corner Them:** Their AI forces them to back up if you close within 250 px. Push them into a wall, and they will lose their mobility advantage.
+- **Beware the Root:** Prioritize Chain Casters immediately in late waves. Being rooted removes your Dash and Jump, completely disabling your defensive kit.

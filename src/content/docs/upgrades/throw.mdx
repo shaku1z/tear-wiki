@@ -5,54 +5,77 @@ gameVersion: v0.1
 ---
 
 import UpgradeCard from '../../../components/UpgradeCard.astro';
+import ModelViewer from '../../../components/ModelViewer.astro';
 
-Throw abilities transform the thrown blade into a multi-target weapon.
+Throw abilities transform your blade's projectile mechanics. By default, the throw deals massive damage (base 22 + speed bonuses up to **4600 px/s**) but leaves you vulnerable while the blade is in flight.
+
+> [!WARNING]
+> While the blade is thrown, you are entirely unarmed. If you miss, you must rely on your dash i-frames (0.15s) and movement speed until the blade auto-returns (after 2.5s) or you manually recall it.
+
+---
+
+## The Upgrades
 
 <UpgradeCard
   name="Razor Momentum"
   cat="throw"
   unique desc={"A thrown blade grows faster and stronger per enemy it pierces (+10%/pierce)."}
-  tiers={[{ level: 2, desc: "+18% per pierce." }, { level: 3, desc: "+26% per pierce. Each pierce briefly STUNS the target." }]}
+  tiers={[
+    { level: 2, desc: "+18% per pierce." },
+    { level: 3, desc: "+26% per pierce. Each pierce briefly STUNS the target." }
+  ]}
 />
 
 <UpgradeCard
   name="Greatblade"
   cat="throw"
   desc={"The blade becomes huge while thrown (1.7× size)."}
-  
 />
 
 <UpgradeCard
   name="Boomerang"
   cat="throw"
   desc={"Recall the thrown blade from any distance."}
-  
 />
 
 <UpgradeCard
   name="Ricochet"
   cat="throw"
   desc={"A thrown blade curves to a new target after each pierce."}
-  
 />
 
 <UpgradeCard
   name="Storm Recall"
   cat="throw"
   unique desc={"Recalling the blade tears through enemies for +85% damage."}
-  tiers={[{ level: 2, desc: "+140% damage on recall." }, { level: 3, desc: "+200% damage on recall. Catching the blade releases a shockwave." }]}
+  tiers={[
+    { level: 2, desc: "+140% damage on recall." },
+    { level: 3, desc: "+200% damage on recall. Catching the blade releases a shockwave." }
+  ]}
 />
 
 <UpgradeCard
   name="Vortex Recall"
   cat="throw"
   desc={"The returning blade drags every enemy it passes toward you."}
-  
 />
 
 <UpgradeCard
   name="Impale"
   cat="throw"
   unique desc={"A thrown blade PINS the first enemy hit in place, applying 3 BLEED stacks."}
-  tiers={[{ level: 2, desc: "Pins EVERY pierced enemy with 4 BLEED stacks." }, { level: 3, desc: "Pins every enemy with 5 BLEED. Returning blade DETONATES the bleed." }]}
+  tiers={[
+    { level: 2, desc: "Pins EVERY pierced enemy with 4 BLEED stacks." },
+    { level: 3, desc: "Pins every enemy with 5 BLEED. Returning blade DETONATES the bleed." }
+  ]}
 />
+
+---
+
+### Recall Synergy
+
+The blade's recall speed is **3400 px/s** (`blade.throw.returnSpeed`). It rips backward through everything in its path.
+Combine **Storm Recall** with the natural 1.4x Throw Multiplier when at high HP to annihilate dense packs of enemies.
+
+<ModelViewer model="ranged" variant="warlock" />
+*Warlocks keep their distance (`preferredDist`: 380px) and fire curving projectiles. Pinning them with **Impale** stops their retreat and allows you to deal with them at your leisure.*

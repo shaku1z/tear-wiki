@@ -1,51 +1,56 @@
 ---
 title: "Parry Abilities"
-description: "All unique parry abilities in Tear, with tier progressions."
+description: "Upgrades that enhance the rewards and mechanics of parrying and deflecting."
 gameVersion: v0.1
 ---
 
 import UpgradeCard from '../../../components/UpgradeCard.astro';
+import ModelViewer from '../../../components/ModelViewer.astro';
 
-Parry abilities turn defense into offense. Master perfect parries to unlock their full potential.
+Parry upgrades turn your defense into overwhelming offense. Mastering parries (requiring a blade tip speed of **≥ 700 px/s** to intercept) is highly rewarded. 
+
+> [!IMPORTANT]
+> A successful parry already provides **0.18s** of slow-motion (`juice.parrySlowmo`) and negates all damage. These upgrades multiply that advantage.
+
+---
+
+## The Upgrades
 
 <UpgradeCard
-  name="Phase Step"
+  name="Counter"
   cat="parry"
-  desc={"Dash through an enemy shot to deflect it."}
-  
+  desc={"Parries send a piercing shockwave forward for 25 damage."}
 />
 
 <UpgradeCard
-  name="Backfire"
+  name="Reflect"
   cat="parry"
-  desc={"Your reflected shots STUN the enemies they strike."}
-  
+  desc={"Deflected projectiles split into 3."}
 />
 
 <UpgradeCard
-  name="Piercing Parry"
+  name="Reversal"
   cat="parry"
-  desc={"Parried projectiles pierce through every enemy."}
-  
+  unique desc={"Parries heal you for 4 HP and grant a 1-hit shield (2s)."}
+  tiers={[
+    { level: 2, desc: "Heals 8 HP. Shield lasts 4s." },
+    { level: 3, desc: "Heals 12 HP. Shield lasts 6s and detonates for 30 damage when broken." }
+  ]}
 />
 
 <UpgradeCard
-  name="Scatter Parry"
+  name="Flow State"
   cat="parry"
-  desc={"Parried projectiles split into 3 that ricochet up to 3 times."}
-  
+  unique desc={"Parrying grants max Style (TEARING!) for 3s."}
+  tiers={[
+    { level: 2, desc: "Lasts 5s. Your attacks during Flow cannot be interrupted." },
+    { level: 3, desc: "Lasts 7s. During Flow, you take 50% less damage and deal +30% more." }
+  ]}
 />
 
-<UpgradeCard
-  name="Tempo"
-  cat="parry"
-  unique desc={"Perfect parries grant TEMPO (+25% dmg, faster speed, refreshes dash) for 4s."}
-  tiers={[{ level: 2, desc: "+30% dmg for 6s. Stacks up to 2 times." }, { level: 3, desc: "Plunges room into slow-mo. +34% dmg per stack (max 2)." }]}
-/>
+---
 
-<UpgradeCard
-  name="Backlash"
-  cat="parry"
-  unique desc={"Perfect parry erupts a COUNTER-SHOCK (26 dmg, 175 px, stuns nearby enemies)."}
-  tiers={[{ level: 2, desc: "Larger shock (44 dmg) + MARKS enemies." }, { level: 3, desc: "Massive shock (70 dmg, 250 px) + marks + brief INVINCIBILITY." }]}
-/>
+### Projectile Deflection
+
+<ModelViewer model="bomber" variant="lobber" />
+*Bombers throw explosives with high arcs. Deflecting them normally applies a **1.25x speed boost**. With the **Reflect** upgrade, you turn a single hazard into a shotgun blast.*

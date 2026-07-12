@@ -6,14 +6,13 @@ gameVersion: v0.1
 
 import StatBlock from '../../../components/StatBlock.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
+import ModelViewer from '../../../components/ModelViewer.astro';
 
 <BiomeBadge stages={["The Voidspire"]} />
 
 > *Where the rules thin out.*
 
 **Stage 4 of 5.** 9 waves, then [**The Echo**](/bosses/echo).
-
-
 
 ## Environment
 
@@ -26,21 +25,38 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 
 ## Enemy Pool
 
-| Enemy Type | Spawn Chance | Available From |
-|---|---|---|
-| Wraith | 70% | Wave 1+ |
-| Flyer | 50% | Wave 1+ |
-| Ranged | 40% | Wave 1+ |
-| Priest | 30% | Wave 2+ |
-| Chimera | 50% | Wave 3+ |
-| Mender | 25% | Wave 4+ |
+The Voidspire relies on ethereal and supporting enemies. Wraiths are immune to regular strikes, requiring throw or deflect damage.
 
-Enemy HP and damage increase by **+6%** and **+2%** per wave within this stage.
+| Enemy Type | Spawn Chance | Available From | Base HP | Speed |
+|---|---|---|---|---|
+| **Wraith** | 70% | Wave 1+ | 64 | 170 px/s |
+| **Flyer** | 50% | Wave 1+ | 44 | 230 px/s |
+| **Ranged** | 40% | Wave 1+ | 60 | 175 px/s |
+| **Priest** | 30% | Wave 2+ | 44 | 125 px/s |
+| **Chimera** | 50% | Wave 3+ | 84 | 150 px/s |
+| **Mender** | 25% | Wave 4+ | 44 | 125 px/s |
 
-## Boss
+> [!IMPORTANT]
+> Wraiths are **immune to direct blade hits**. Only your thrown blade or a deflected projectile will kill them!
+
+<ModelViewer model="wraith" />
+
+## Boss: The Echo
 
 When the 9th wave is cleared, [**The Echo**](/bosses/echo) enters the arena.
-Defeating it unlocks an **Ability Tier-Up** — evolve one of your owned tiered abilities to its next level.
+
+<ModelViewer model="the-echo" />
+
+### Mechanics
+
+The Echo is a dark reflection of your own silhouette:
+- **Base Stats**: 3000 HP, high speed (280 px/s).
+- **Mirroring**: Mirrors your tricks and attacks (0.55s copy delay).
+- **Invisibility**: Cycles into invisibility for 3.5 seconds every 10 seconds.
+- **Lunge**: A swift 1500 px/s lunge attack.
+
+> [!TIP]
+> The Echo mimics your aggressive style. Watch out for its sudden invisibility cycle and rely on audio/visual tells to counter its rapid lunges.
 
 ## Lore
 

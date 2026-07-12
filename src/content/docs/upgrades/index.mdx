@@ -6,34 +6,45 @@ gameVersion: v0.1
 
 import UpgradeCard from '../../../components/UpgradeCard.astro';
 
+Tear's upgrade system allows you to build powerful, synergetic loadouts. After every wave, you are presented with **3 upgrade choices**. The draft pool is highly curated, weighing rarity against impact.
+
+> [!NOTE]
+> All numerical boosts apply directly to the base engine variables (like `blade.maxSpeed` or `player.moveSpeed`). 
+
+---
+
 ## The Draft System
 
-After each wave you are presented with **3 upgrade choices** randomly drawn from the pool.
-The draft has three upgrade types with different rarity weights:
+The draft algorithm weights upgrades based on their type:
 
-| Type | Weight | Description |
-|---|---|---|
-| **Stackable Upgrades** | 1.0 | Common numeric boosts. Can be picked multiple times. |
-| **Unique Abilities** | 0.6 | Qualitative mechanics. Each can only be owned once per run. |
-| **Special Abilities** | 0.28 | Tiered mechanics (the best abilities). Deliberately rare. |
-| **Rare Special** | 0.16 | The rarest — Bloodrite, Last Stand. |
+| Type | Draft Weight | Description |
+|------|--------------|-------------|
+| **Stackable Upgrades** | **1.0** | Common numeric boosts (e.g., +Max HP, +Damage). Can be picked infinitely. |
+| **Unique Abilities** | **0.6** | Mechanics-altering passives. Only appears once per run. |
+| **Special Abilities** | **0.28** | Tiered mechanics. Highly impactful, defining your build. |
+| **Rare Special** | **0.16** | The rarest abilities (e.g., Bloodrite). |
 
-A **per-stage guarantee** ensures at least one Special ability appears in the draft every stage.
+> [!IMPORTANT]
+> The game guarantees at least **one Special Ability** will appear in the draft per stage.
+
+---
 
 ## Ability Tiers
 
-Special abilities (those with tiers) start at **Tier 1** when first acquired.
-Each time you **defeat a boss**, you earn an **Ability Tier-Up** — choose one of your owned tiered abilities to evolve to its next tier (max Tier 3).
+Special abilities (those with a `tiers` property) start at **Tier 1**.
+Each time you **defeat a Boss**, you earn an **Ability Tier-Up**. This allows you to permanently evolve one of your Special abilities to Tier 2, and eventually Tier 3.
 
-Tiers are permanent for the rest of the run and dramatically change how an ability plays.
+---
 
-## Categories
+## Upgrade Categories
 
-| Category | Focus |
-|---|---|
-| [Offense](/upgrades/offense) | Raw damage, area explosions, airborne power |
-| [Resilience](/upgrades/resilience) | HP, shields, damage reduction, life-on-kill |
-| [Mobility](/upgrades/mobility) | Dash power, speed, positioning |
-| [Parry](/upgrades/parry) | Parry rewards, counter-attacks, projectile manipulation |
-| [Throw](/upgrades/throw) | Thrown blade power, recall, chaining |
-| Utility | Score, coins, trick meter — see [Stackable Upgrades](/upgrades/stackable) |
+Upgrades are divided into focused categories:
+
+| Category | Focus | Synergies |
+|----------|-------|-----------|
+| **[Offense](/upgrades/offense)** | Raw damage, bleed/mark statuses. | Synergizes with `blade.maxDamage` and `tipSpeed`. |
+| **[Resilience](/upgrades/resilience)** | HP (`player.hp`), shields, damage reduction. | Vital for aggressive trading. |
+| **[Mobility](/upgrades/mobility)** | Dash cooldowns, `player.moveSpeed`. | Excellent for keeping the `commitModifier` at 1.0x. |
+| **[Parry](/upgrades/parry)** | Projectile deflection (`deflectBoost`), slow-mo (`juice.parrySlowmo`). | High risk, massive reward. |
+| **[Throw](/upgrades/throw)** | Projectile mechanics (`throwDamage`). | Synergizes with HP scaling and fast swings. |
+| **Stackable** | Score, coins, raw stats. | See [Stackable Upgrades](/upgrades/stackable). |

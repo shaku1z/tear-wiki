@@ -1,0 +1,54 @@
+---
+title: Parry & Deflect
+description: How to parry melee attacks and deflect enemy projectiles.
+gameVersion: v0.1
+---
+
+import ModelViewer from '../../../components/ModelViewer.astro';
+
+Defense in Tear is active. You can parry incoming melee hits with perfectly timed swings, or deflect enemy projectiles right back at them.
+
+---
+
+## Parrying (Melee Clash)
+
+When an enemy attacks, swinging your blade so it connects with their hitbox during their attack animation triggers a **Parry**.
+
+> [!IMPORTANT]
+> To parry, your blade speed must be at least **700 px/s** (`blade.deflectMinSpeed`). Slow prods will not register as a parry and you will take damage.
+
+### The Parry Reward
+
+Successfully parrying grants massive tactical advantages:
+- **Total Damage Negation**: You take 0 damage.
+- **Counter-Attack**: The parry deals damage to the attacker.
+- **Stun**: The attacker is thrown off balance.
+- **Style Points**: Grants **12 pts** to the Style Meter (`trick.pts.parry`), pushing you toward higher damage tiers.
+- **Slowmo Effect**: The game slows down briefly for **0.18s** (`juice.parrySlowmo`) by a scale of **0.28x** (`juice.parrySlowScale`), giving you a massive reaction window to chain attacks.
+
+<ModelViewer model="armored" variant="default" />
+*The Armored enemy (154 HP, 95 Speed) has devastating melee attacks. Parrying its stomp or shockwave allows you to break its armor safely.*
+
+---
+
+## Deflecting (Projectiles)
+
+Projectiles fired by enemies can be swatted out of the air.
+
+### The Math of Deflection
+
+When your blade hits a projectile, the projectile's ownership swaps, and it is fired away from the impact point.
+
+| Variable | Config Value | Effect |
+|----------|--------------|--------|
+| `deflectMinSpeed` | **700 px/s** | Required blade speed to deflect. |
+| `deflectBoost` | **1.25x** | Multiplies the projectile's base speed on return. |
+| `deflectDmgMult`| **1.0x** | Base multiplier for the deflected projectile's damage. |
+
+### Perfect Deflect
+
+If your blade tip speed is exceedingly high (≥ **2400 px/s**, `blade.perfectSpeed`), you trigger a **Perfect Deflect**.
+Perfect deflects often have upgrade synergies that turn them into screen-clearing explosions or chain-reactions.
+
+<ModelViewer model="ranged" variant="sentinel" />
+*The Ranged Sentinel fires projectiles at 800 px/s. Deflecting them with a standard swing sends them back at 1000 px/s. A Perfect Deflect can turn their own weapons against the entire horde.*

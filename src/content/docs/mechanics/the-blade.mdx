@@ -1,0 +1,59 @@
+---
+title: The Blade
+description: Full technical breakdown of the Tear blade — spring physics, dimensions, aim system, throw mechanics, and all config values.
+gameVersion: v0.1
+---
+
+The blade is Tear's only weapon and its most complex system. Understanding *how* it moves is the foundation of high-level play. The blade is fully simulated via a spring-physics system.
+
+---
+
+## Physical Properties
+
+| Property | Config Value | Notes |
+|----------|--------------|-------|
+| **Length** | **95 px** | Physical size from hilt to tip (`blade.length`). |
+| **Aim Radius**| **85 px** | The reticle orbits the player within this circle. |
+| **Min Tether**| **0.45** | How close the blade is pulled in while held. |
+| **Max Reach** | **120 px** | Elastic leash limit before snapping back. |
+| **Max Speed** | **7000 px/s** | Absolute hard cap on blade tip velocity. |
+| **Lead Amount**| **0.45** | Tip leads ahead of the aim line at high speeds. |
+
+---
+
+## Spring Physics System
+
+The blade does not simply teleport to where you aim. It is attached to the player via a simulated spring.
+
+| Parameter | Value | Effect |
+|-----------|-------|--------|
+| **Stiffness** | **150** | How aggressively the spring pulls toward target. |
+| **Damping** | **7.5** | Resistance to oscillation (prevents infinite bouncing). |
+| **Gravity** | **900 px/s²** | Downward pull when idle, giving natural droop. |
+
+When you hold the mouse:
+1. The blade is tethered and pulled toward the cursor.
+2. Spring tension builds based on `springStiffness`.
+3. Upon movement, the tip whips through the arc, constrained by the `maxReach` (120px) leash.
+
+> [!TIP]
+> A large, sweeping mouse movement (winding up) produces massive spring velocity on release, dealing max damage. Short, timid flicks won't build enough tension to break the 950 px/s damage threshold.
+
+---
+
+## Throw Mechanics
+
+Pressing right-click releases the blade as a high-speed projectile.
+
+| Property | Value |
+|----------|-------|
+| **Base throw speed** | **1900 px/s** |
+| **Release bonus** | **+0.45** × tip speed at throw |
+| **Max throw speed** | **4600 px/s** |
+| **Recall speed** | **3400 px/s** |
+| **Max flight time** | **2.5s** (auto-returns) |
+
+Because throw speed includes a bonus from tip speed at release, you can vastly increase throw speed by swinging fast right before releasing. A blade tip moving at 3000 px/s adds **1350 px/s** to the base 1900, launching it at a blistering **3250 px/s**.
+
+> [!IMPORTANT]
+> The blade auto-recalls after 2.5 seconds. When embedded in an enemy, recalling it rips through their hitboxes (and any enemies in the path) at 3400 px/s.

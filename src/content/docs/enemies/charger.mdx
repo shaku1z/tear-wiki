@@ -11,93 +11,113 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 <BiomeBadge stages={["The Grounds", "The Crimson Fields", "The Tear"]} />
 
-> Melee rusher that closes distance with a telegraphed bull-charge lunge.
+The **Charger** is the foundational melee unit of the Tear engine. It relentlessly closes distance to punish hesitant players, relying on its signature bull-charge to dictate positioning. While straightforward individually, in numbers or when paired with ranged support, Chargers can easily overwhelm you. 
+
+> [!TIP]
+> Wait for the 0.55s windup. The Charger cannot steer once committed to its 760 px/s dash. Dodge vertically, and if it slams into a wall, it will be stunned for 1.1s — a perfect window for a Power Slam.
+
+## Base Attributes
+
+<StatBlock
+  name="Charger"
+  color="#e23b3b"
+  stats={{
+    'HP': 86,
+    'Speed': '150 px/s',
+    'Contact Damage': 12,
+    'Knockback Taken': 9,
+    'Weight': 1,
+    'Dimensions': '40x40 px'
+  }}
+/>
+
+### Mechanics
+
+- **Bull-Charge**: At a range of **420 px**, the Charger stops and winds up for **0.55s**. It then bursts forward at **760 px/s** for **0.5s**.
+- **Wall Stun**: If the Charger collides with geometry during its charge, it becomes stunned for **1.1s**.
+- **Cooldown**: The Charger must wait **1.2s** before attempting another charge.
+
+---
+
+## Variants
+
+As you dive deeper into the waves, the Charger evolves to counter different playstyles.
 
 <Tabs>
-  <TabItem label="Bull (Base)">
+  <TabItem label="Bull (Wave 1+)">
     <ModelViewer model="charger" variant="bull" />
-    <StatBlock
-      name="Charger"
-      color="#e23b3b"
-      stats={{
-        'HP': 86,
-        'Speed': '150 px/s',
-        'Contact Damage': 12,
-        'Knockback Taken': 9,
-        'Charge Range': '420 px',
-        'Charge Windup': '0.55s'
-      }}
-    />
+    The base Charger form. Aggressively closes distance and commits to telegraphed lunges. Weight is standard, making it easy to launch for an Aerial Rave combo.
   </TabItem>
-  <TabItem label="Brawler">
+  
+  <TabItem label="Brawler (Wave 2+)">
     <ModelViewer model="charger" variant="brawler" />
     <StatBlock
       name="Brawler"
       color="#e23b3b"
-      stats={{
-        'HP': 86,
-        'Speed': '150 px/s',
-        'Contact Reach': '+10 px',
-        'Behavior': 'Punches instead of charging.'
-      }}
+      stats={{ 'Contact Reach': '+10 px' }}
     />
+    Abandons the telegraphed charge in favor of relentless, close-range punches. The extended contact reach makes it dangerous to approach horizontally without a committed swing.
   </TabItem>
-  <TabItem label="Stalker">
+
+  <TabItem label="Stalker (Wave 4+)">
     <ModelViewer model="charger" variant="stalker" />
     <StatBlock
       name="Stalker"
       color="#e23b3b"
       stats={{
-        'HP': '67 (Reduced)',
-        'Speed': '195 px/s (Fast)',
-        'Behavior': 'Dashes away on approach.'
+        'HP': '67 (-22%)',
+        'Speed': '195 px/s (+30%)'
       }}
     />
+    A fragile but highly elusive variant. It uses its boosted speed to constantly kite and dash away from your approach, flanking you while you focus on heavier targets.
   </TabItem>
-  <TabItem label="Executioner">
+
+  <TabItem label="Executioner (Wave 6+)">
     <ModelViewer model="charger" variant="executioner" />
     <StatBlock
       name="Executioner"
       color="#e23b3b"
       stats={{
-        'HP': '111 (Heavy)',
-        'Speed': '105 px/s (Slow)',
-        'Behavior': 'Overhead slam attack.'
+        'HP': '111 (+30%)',
+        'Speed': '105 px/s (-30%)',
+        'Shock Damage': 24,
+        'Shock Speed': '640 px/s'
       }}
     />
+    A lumbering juggernaut. It winds up for a massive **1.3s** before delivering an overhead smash that sends out **19px radius** shockwaves in both directions. Jump over the shocks and counterattack while it recovers.
   </TabItem>
-  <TabItem label="Gravedigger">
+
+  <TabItem label="Gravedigger (Wave 5+)">
     <ModelViewer model="charger" variant="gravedigger" />
     <StatBlock
       name="Gravedigger"
       color="#e23b3b"
       stats={{
-        'HP': '120 (Heavy)',
-        'Speed': '90 px/s (Slow)',
-        'Behavior': 'Wide arc sweep.'
+        'HP': '120 (+40%)',
+        'Speed': '90 px/s (-40%)',
+        'Sweep Damage': 22,
+        'Shock Speed': '420 px/s'
       }}
     />
+    Winds up for **0.9s** to deliver a massive wide arc swing with a **120 px reach**. Curiously, it is perfectly safe at point-blank range, as the shovel hits only at mid-range. Cling to it and attack aggressively.
   </TabItem>
-  <TabItem label="Duelist">
+
+  <TabItem label="Duelist (Wave 6+)">
     <ModelViewer model="charger" variant="duelist" />
     <StatBlock
       name="Duelist"
       color="#e23b3b"
       stats={{
-        'HP': 86,
         'Contact Reach': '+12 px',
-        'Behavior': 'Parries thrown blades.'
+        'Parry Cooldown': '2.4s'
       }}
     />
+    A true swordsman. If you attempt to throw your blade at the Duelist, it will parry it flawlessly. You must either bait its parry (putting it on a **2.4s** cooldown) or engage it entirely in melee.
   </TabItem>
 </Tabs>
 
-## Strategies & Tips
+## Strategy Summary
 
-- When a Charger winds up, move perpendicular — it will slam the wall and stun itself.
-- A Duelist will parry your thrown blade. Wait for the recovery, then throw again.
-- Gravediggers are safe at point-blank range. Get in close and slam downward.
-
-## Related Data
-- See how Elite mutations affect this enemy on the [Affixes & Elites](/enemies/affixes) page.
-- View the full [Stat Glossary](/reference/stat-glossary) for formula details.
+- **Capitalize on Whiffs:** Chargers are vulnerable for over a second if they hit a wall. Lure them near edges or platforms.
+- **Identify Variants Early:** A Gravedigger demands you get close; an Executioner demands you get airborne. Mix-ups between them are lethal.
+- **Aerial Combat:** Since Chargers are ground-bound, using Updrafts to launch them neutralizes their threat entirely. 

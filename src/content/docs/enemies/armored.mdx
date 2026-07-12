@@ -1,6 +1,6 @@
 ---
 title: "Armored"
-description: "Defeat the Armored in Tear. View raw stats, attack patterns, variants, and optimal combat strategies."
+description: "Shatter the defenses of the Armored brute. Discover its high health, shield mechanics, and the importance of aerial combos."
 gameVersion: v0.1
 ---
 
@@ -8,9 +8,14 @@ import StatBlock from '../../../components/StatBlock.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
-<BiomeBadge stages={["The Grounds", "The Undercroft", "The Tear"]} />
+<BiomeBadge stages={["The Crimson Fields", "The Tear"]} />
 
-> Shielded front-liner. Takes reduced damage on the ground — must be launched to kill efficiently.
+The **Armored** is a massive, heavily shielded brute designed to act as a frontline wall. It possesses immense health, very low knockback susceptibility, and takes heavily reduced damage while planted firmly on the ground. 
+
+> [!IMPORTANT]
+> The Armored unit takes **50% reduced damage** while on the ground (`groundDR: 0.5`). However, if you manage to launch it into the air, it takes **+15% bonus damage** (`airDR: 1.15`). You *must* use an Updraft launch to kill it efficiently!
+
+## Base Attributes
 
 <ModelViewer model="armored" />
 
@@ -23,26 +28,21 @@ import ModelViewer from '../../../components/ModelViewer.astro';
     'Contact Damage': 14,
     'Knockback Taken': 3,
     'Weight': 2.2,
-    'Size': '46×46 px',
-    'Ground Damage Reduction': '50%',
-    'Air Damage Mult': '×1.15',
-    'Shield Break Speed': '1500 px/s',
-    'Stomp Cooldown': '3.2s',
-    'Stomp Range': '400 px',
-    'Shock Damage': '16',
-    'Weight': '2.2 (hard to pop)',
+    'Dimensions': '46x46 px'
   }}
 />
 
-*(No named variants — uses the base family only.)*
+### Defenses & Mechanics
 
-## Strategies & Tips
+- **Directional Shield:** It holds a front-facing shield (`#15c2c2`). You can break this shield by hitting it with an attack moving faster than **1500 px/s** (such as a fast blade throw or a heavy slam).
+- **Enrage:** Once the shield breaks, the Armored brute becomes enraged, gaining aggression and attacking more frequently.
+- **Heavyweight:** With a weight of **2.2** and only **3** knockback taken per damage point, you need a fully committed upward swing (Updraft) to overcome gravity and launch it.
+- **Stomp Attack:** If you are within **400 px**, it will wind up for **0.55s** and slam the ground, creating a shockwave that travels at **560 px/s** with a **15 px radius** (dealing **16 damage**). It can do this every **3.2s**.
 
-- An Armored enemy takes 50% less damage while grounded. Launch it into the air first.
-- Once airborne, it takes +15% damage instead. Keep juggling to maximize damage.
-- A blade tip hitting at ≥1500 px/s shatters the shield — after that it's vulnerable even grounded.
-- The Sunder ability (Mark) + Sunder T2 instantly shatters the shield when applied.
+---
 
-## Related Data
-- See how Elite mutations affect this enemy on the [Affixes & Elites](/enemies/affixes) page.
-- View the full [Stat Glossary](/reference/stat-glossary) for formula details.
+## Strategy Summary
+
+- **Updraft is Mandatory:** Hitting an Armored on the ground is a waste of time. Perform a rising uppercut to launch it, then juggle it in the air where its armor plating cannot protect it.
+- **Jump the Shockwave:** The 560 px/s shockwave travels along the floor. A simple short-hop will clear the 15 px radius easily.
+- **Flank It:** If you cannot break the shield from the front, use your Dash to quickly reposition behind the Armored and strike its unprotected back before it can turn to face you.

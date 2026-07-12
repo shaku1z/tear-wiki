@@ -6,6 +6,7 @@ gameVersion: v0.1
 
 import StatBlock from '../../../components/StatBlock.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
+import ModelViewer from '../../../components/ModelViewer.astro';
 
 <BiomeBadge stages={["The Tear"]} />
 
@@ -13,9 +14,8 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 
 **Stage 5 of 5.** 9 waves, then [**The Source**](/bosses/source).
 
-:::caution[Dark Biome]
-The HUD and player silhouette flip to light colours here — the only stage where the arena itself is dark.
-:::
+> [!WARNING] Dark Biome
+> The HUD and player silhouette flip to light colours here — the only stage where the arena itself is dark. Watch for the luminous rims on enemies!
 
 ## Environment
 
@@ -28,26 +28,41 @@ The HUD and player silhouette flip to light colours here — the only stage wher
 
 ## Enemy Pool
 
-| Enemy Type | Spawn Chance | Available From |
-|---|---|---|
-| Charger | 100% | Wave 1+ |
-| Ranged | 60% | Wave 1+ |
-| Flyer | 50% | Wave 1+ |
-| Bomber | 40% | Wave 1+ |
-| Armored | 40% | Wave 1+ |
-| Wraith | 40% | Wave 1+ |
-| Chimera | 40% | Wave 1+ |
-| Herald | 20% | Wave 1+ |
-| Anchor | 20% | Wave 1+ |
-| Priest | 20% | Wave 1+ |
-| Mender | 18% | Wave 1+ |
+The final battleground. The enemy pool is utterly unleashed, pulling from every single unit type.
 
-Enemy HP and damage increase by **+6%** and **+2%** per wave within this stage.
+| Enemy Type | Spawn Chance | Available From | Base HP | Speed |
+|---|---|---|---|---|
+| **Charger** | 100% | Wave 1+ | 86 | 150 px/s |
+| **Ranged** | 60% | Wave 1+ | 60 | 175 px/s |
+| **Flyer** | 50% | Wave 1+ | 44 | 230 px/s |
+| **Bomber** | 40% | Wave 1+ | 40 | 165 px/s |
+| **Armored** | 40% | Wave 1+ | 154 | 95 px/s |
+| **Wraith** | 40% | Wave 1+ | 64 | 170 px/s |
+| **Chimera** | 40% | Wave 1+ | 84 | 150 px/s |
+| **Herald** | 20% | Wave 1+ | 44 | 125 px/s |
+| **Anchor** | 20% | Wave 1+ | 44 | 125 px/s |
+| **Priest** | 20% | Wave 1+ | 44 | 125 px/s |
+| **Mender** | 18% | Wave 1+ | 44 | 125 px/s |
 
-## Boss
+> [!CAUTION] Stage 5 Scaling
+> Enemy HP and damage scale massively in this final stretch, featuring an accumulated **+136% base health** from stage scaling before per-wave multipliers even apply.
+
+## Boss: The Source
 
 When the 9th wave is cleared, [**The Source**](/bosses/source) enters the arena.
-Defeating it unlocks an **Ability Tier-Up** — evolve one of your owned tiered abilities to its next level.
+
+<ModelViewer model="the-source" />
+
+### Mechanics
+
+A floating rift that cycles every fallen boss's signature mechanics:
+- **Base Stats**: 4200 HP, massive weight (7).
+- **Mechanic Cycling**: Cycles a past boss mechanic every 2.5 seconds (Phase 1).
+- **Floor Collapse**: In Phase 2, it rips platforms out of the arena every 1.3 seconds.
+- **Fake Death**: Regenerates at 5% per second until erupting into its true form.
+
+> [!CAUTION]
+> Be prepared for the floor to literally disappear from under you in Phase 2. Use your dashes and up-drafts to maintain aerial momentum while platforms collapse!
 
 ## Lore
 
