@@ -1,36 +1,8 @@
 ---
-title: "Wraith"
-description: "Banish the Wraith. Learn why your melee swings phase right through them and how to use projectiles to kill them."
-gameVersion: v0.1
+title: Wraith
+description: Live Wraith configuration and immunity counterplay.
 ---
-
 import EnemyStats from '../../../components/EnemyStats.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Crimson Fields", "The Tear"]} />
-
-The **Wraith** is an ethereal specter that hovers just above the ground. It is fundamentally immune to standard melee combat. Your blade will simply phase through its spectral form, dealing absolutely zero damage.
-
-> [!IMPORTANT]
-> The Wraith is immune to direct blade swings. The *only* way to kill a Wraith is to hit it with your **Thrown Blade** (Right-Click) or by bouncing a **Deflected Projectile** into it.
-
-## Base Attributes
-
-<ModelViewer model="wraith" />
-
 <EnemyStats variant="wraith" />
 
-### Mechanics
-
-- **Ethereal Body:** It takes **0 knockback** from any source and ignores standard melee hits.
-- **Low Hover:** It floats **70 px** off the ground, allowing it to glide over hazards and small obstacles.
-- **Relentless Pursuit:** Because it cannot be staggered by melee hits, it will continuously drift toward you at **170 px/s**, threatening you with its **12 contact damage**.
-
----
-
-## Strategy Summary
-
-- **The Quick Draw:** The moment you spot a Wraith, do not try to engage it in a combo. Step back, aim, and throw your blade. A single high-speed throw (base 22 damage + speed scaling) will usually execute it.
-- **Ricochet Kills:** If a Ranged unit fires at you while a Wraith is approaching, parry the projectile. A deflected shot (`deflected: #1faf5a`) will instantly shatter the Wraith's ethereal form.
-- **Do Not Get Cornered:** Wraiths apply immense spatial pressure because you cannot push them back with melee swings. If a Wraith corners you, you must Dash through it (using your 0.15s i-frames).
+Wraiths invalidate direct blade pressure. Use the correct indirect damage route—throws, deflects, or enabled effects—rather than wasting a normal combo.

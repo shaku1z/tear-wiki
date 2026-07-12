@@ -1,36 +1,8 @@
 ---
-title: "Chimera"
-description: "Face the unpredictable Chimera. Learn how it mimics other enemies' attacks and how to read its windups."
-gameVersion: v0.1
+title: Chimera
+description: Live Chimera configuration and copied-pattern guidance.
 ---
-
 import EnemyStats from '../../../components/EnemyStats.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Tear"]} />
-
-The **Chimera** is a horrifying late-game amalgamation that possesses no original attacks of its own. Instead, it observes the other enemies currently spawned in the wave and adopts their movesets, seamlessly cycling between them.
-
-> [!CAUTION]
-> The Chimera will actively steal the mechanics of any enemy currently alive. If a Bomber and a Charger are alive, the Chimera might lob an explosive, then immediately bull-charge you.
-
-## Base Attributes
-
-<ModelViewer model="chimera" />
-
 <EnemyStats variant="chimera" />
 
-### Mechanics
-
-- **Mimicry:** The Chimera scans the wave. It can perform a Charger's dash, a Bomber's lob, a Ranged unit's shot, or an Armored unit's stomp, depending on what it observed.
-- **Copy Delay:** After observing a move, it takes **0.55s** for the Chimera to adapt and execute it. 
-- **The Windup Tell:** Because it can do anything, you must watch its animation windup to predict the incoming attack. The visual tell will mimic the original enemy (e.g., pulling back like a Ranged sniper, or glowing like an Executioner).
-
----
-
-## Strategy Summary
-
-- **Control the Wave:** The Chimera is only as dangerous as the enemies around it. If you kill all the dangerous variants (like Marksmen or Trappers), the Chimera loses access to their lethal moves.
-- **Isolate It:** In a 1-on-1 scenario where it has no allies to copy from, the Chimera is forced back to a sluggish baseline melee attack.
-- **Read the Animation:** Do not assume a Chimera is safe at mid-range. If it starts leaning back, a 1900 px/s Marksman shot might be coming. Treat it with extreme caution until you identify which move it has queued.
+Chimeras borrow other enemy behaviors. Read the active animation first, then respond to the copied pattern instead of treating every Chimera as a standard melee threat.

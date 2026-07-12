@@ -1,62 +1,8 @@
 ---
-title: "Support"
-description: "Identify and eliminate Support targets. Learn about the Priest, Herald, Mender, and Anchor variants."
-gameVersion: v0.1
+title: Support
+description: Live Support configuration and priority guidance.
 ---
-
 import EnemyStats from '../../../components/EnemyStats.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
-<BiomeBadge stages={["The Grounds", "The Crimson Fields", "The Tear"]} />
-
-The **Support** class possesses no real offensive threat. Instead, their sole purpose is to make every other enemy on the screen exponentially more dangerous. They will actively run away from you, hiding behind Armored brutes and Chargers while applying powerful auras to their allies.
-
-> [!WARNING]
-> Support units are the highest priority targets on the battlefield. Letting a Support live while you focus on a Charger will often result in you being overwhelmed by hyper-buffed enemies.
-
-## Base Attributes
-
 <EnemyStats variant="support" />
 
-### Mechanics
-
-- **Fleeing AI:** They actively try to maintain a **keep away distance of 330 px**. They will constantly retreat if you approach.
-- **Aura Range:** Their beneficial effects typically extend up to a **240 px radius**.
-
----
-
-## Variants
-
-<Tabs>
-  <TabItem label="Mender">
-    <ModelViewer model="support" variant="mender" />
-    <EnemyStats variant="mender" />
-    The most straightforward support. Casts a restorative aura that heals injured allies at a rate of **11 HP per second**. Will rapidly undo any poke damage you deal to heavies like the Armored.
-  </TabItem>
-
-  <TabItem label="War Priest">
-    <ModelViewer model="support" variant="priest" />
-    <EnemyStats variant="priest" />
-    Extremely dangerous. The War Priest projects a purple aura that halves all damage taken by its allies, while simultaneously boosting the damage they deal to you by 35%. A War Priest standing next to a Gravedigger makes the Gravedigger a lethal tank.
-  </TabItem>
-
-  <TabItem label="Herald">
-    <ModelViewer model="support" variant="herald" />
-    <EnemyStats variant="herald" />
-    The Herald accelerates the tempo of the fight. Allies within its orange aura move 45% faster and complete their attack windups and cooldowns 50% faster. This completely throws off your parry and dodge timings.
-  </TabItem>
-
-  <TabItem label="Anchor">
-    <ModelViewer model="support" variant="anchor" />
-    <EnemyStats variant="anchor" />
-    Unlike area-of-effect supports, the Anchor tethers itself to a single powerful ally (like an Elite or a Boss). It grants that specific ally massive 60% damage reduction and regenerates 9 HP/s. However, if you kill the Anchor, its bonded ally often suffers a massive penalty or dies with it due to shared fate.
-  </TabItem>
-</Tabs>
-
-## Strategy Summary
-
-- **Blade Throw:** With only 44 HP, a fast Blade Throw is usually enough to instantly snap a Support unit in half from across the screen.
-- **Bypass the Frontline:** Use your Dash's invulnerability frames (0.15s) to slide straight through a charging frontline and assassinate the Support hiding in the back.
-- **Isolate and Eliminate:** An Anchor's tether is visually distinct. Follow the blue line to locate the Anchor and sever the connection.
+Support enemies multiply the danger of the rest of the wave. Identify their buff role immediately and remove them before their allies can benefit from the setup.

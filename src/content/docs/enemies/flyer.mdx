@@ -1,54 +1,8 @@
 ---
-title: "Flyer"
-description: "Master aerial combat against the Flyer. View stats, variants, and learn how to swat them out of the sky."
-gameVersion: v0.1
+title: Flyer
+description: Live Flyer configuration and aerial-control guidance.
 ---
-
 import EnemyStats from '../../../components/EnemyStats.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
-<BiomeBadge stages={["The Grounds", "The Crimson Fields", "The Tear"]} />
-
-The **Flyer** entirely ignores ground friction and gravity, preferring to orbit above the battlefield before plunging in for a strike. They are exceptionally fragile and lightweight but demand you take your eyes off the ground.
-
-> [!TIP]
-> Their low weight (0.75) means that even glancing blade strikes will send them flying. Launching them into other enemies is a highly effective crowd-control technique.
-
-## Base Attributes
-
 <EnemyStats variant="flyer" />
 
-### Mechanics
-
-- **Hover:** Flyers prefer to float at a **Hover Y of 150 px** above the player.
-- **Swoop Attack:** Every **3.3s**, they will target the player's position and perform a rapid swoop at **700 px/s**.
-- **Aerial Independence:** They ignore standard platforms and floors unless knocked out of the sky by a heavy slam.
-
----
-
-## Variants
-
-<Tabs>
-  <TabItem label="Flyer (Wave 1+)">
-    <ModelViewer model="flyer" variant="swooper" />
-    The default aerial threat. It maintains the baseline 150 px hover altitude and telegraphs its 700 px/s swoop clearly. A well-timed vertical jump and upward swing will easily dispatch it.
-  </TabItem>
-
-  <TabItem label="Dive Bomber (Wave 3+)">
-    <ModelViewer model="flyer" variant="divebomber" />
-    A sharper, more aggressive variant. Dive Bombers accelerate faster during their descent and require tighter dodge timing. Throwing your blade at them mid-dive is highly effective.
-  </TabItem>
-
-  <TabItem label="Swooper (Wave 5+)">
-    <ModelViewer model="flyer" variant="highdiver" />
-    Prefers to hover much higher than standard flyers, frequently sitting off-screen or out of standard jump reach. You must use an Updraft or throw the blade upward to tag them before they initiate their dive.
-  </TabItem>
-</Tabs>
-
-## Strategy Summary
-
-- **Throw the Blade:** Since they only have 44 HP, a single thrown blade (base 22 damage + speed scaling) is often enough to instantly kill a Flyer, especially if you catch them during their descent.
-- **Aerial Raves:** Flyers are perfect targets to extend your Aerial Rave style meter. Use an Updraft to meet them in the air and juggle them.
-- **Watch the Shadows:** When a Highdiver is off-screen, watch for visual indicators or shadows on the ground to predict their dive timing.
+Flyers threaten from the air and commit during a swoop. Meet them with an updraft, launch them into a juggle, or use a throw when their movement path is predictable.
