@@ -189,6 +189,11 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
       }
     }
 
+    // Hijack performance.now() to seamlessly scale visual animations and internal logic
+    // without having to modify the synced game engine code.
+    const originalPerfNow = performance.now;
+    performance.now = () => engineTime * 1000;
+
     // Simulate engine
     enemyInstance.update(dt, window.platforms, window.player, window.projectiles);
 
@@ -213,6 +218,9 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
     if (FX.draw) FX.draw(ctx);
 
     enemyInstance.draw(ctx);
+
+    // Restore performance.now
+    performance.now = originalPerfNow;
     
     // Schematic annotations layer
     if (hoverK > 0) {
