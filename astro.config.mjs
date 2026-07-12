@@ -6,6 +6,7 @@ import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
+	site: process.env.SITE_URL || 'https://tear-wiki.pages.dev',
 	prefetch: true,
 	integrations: [
 		starlight({
@@ -17,14 +18,14 @@ export default defineConfig({
 				replacesTitle: false,
 			},
 			social: [
-				{ icon: 'github', label: 'Game Source', href: 'https://github.com' },
+				{ icon: 'github', label: 'Game Source', href: 'https://github.com/shaku1z/tear' },
 			],
 			customCss: ['./src/styles/tear-theme.css'],
 			// Versioning: tracks game patches
 			// To add a new version: npm run starlight-version <tag>
 			// (install @astrojs/starlight-versions when ready to cut v1.0)
 			editLink: {
-				baseUrl: 'https://github.com/your-repo/tear-wiki/edit/main/',
+				baseUrl: 'https://github.com/shaku1z/tear-wiki/edit/master/',
 			},
 			lastUpdated: true,
 			pagination: true,

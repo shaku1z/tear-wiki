@@ -10,6 +10,7 @@ Connect the `shaku1z/tear-wiki` repository in Cloudflare Pages and use:
 - Build command: `npm run build`
 - Build output directory: `dist`
 - Node.js version: `22`
+- Optional environment variable: `SITE_URL` set to your production custom domain. The default is `https://tear-wiki.pages.dev`.
 
 Cloudflare Pages deploys every push to `master`; pull requests can use preview deployments.
 
