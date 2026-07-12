@@ -25,7 +25,7 @@ const filtered = category
   .upgrades-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    gap: 20px;
+    gap: clamp(12px, 3vw, 24px);
     margin: 30px 0;
     font-family: system-ui, -apple-system, sans-serif;
   }
@@ -42,7 +42,7 @@ const filtered = category
     background-color: var(--sl-color-gray-6);
     border: 1px solid var(--sl-color-hairline);
     border-radius: 12px;
-    padding: 20px;
+    padding: clamp(16px, 4vw, 24px);
     color: var(--sl-color-text);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
@@ -54,6 +54,10 @@ const filtered = category
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     border-color: var(--sl-color-accent);
+  }
+
+  .upgrade-card:active {
+    transform: scale(0.98);
   }
 
   .cat-offense { border-top: 3px solid #ef4444; }

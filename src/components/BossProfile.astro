@@ -57,13 +57,13 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
 
   .boss-header {
     background-color: var(--sl-color-gray-6);
-    padding: 24px;
+    padding: clamp(16px, 4vw, 24px);
     border-bottom: 1px solid var(--sl-color-hairline);
   }
 
   .boss-header h2 {
     margin: 0;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4vw + 1rem, 2rem);
     font-weight: 900;
     text-transform: capitalize;
     letter-spacing: 2px;
@@ -73,8 +73,8 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
   .boss-content {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 24px;
+    gap: clamp(16px, 4vw, 24px);
+    padding: clamp(16px, 4vw, 24px);
   }
   
   @media (min-width: 768px) {
@@ -98,7 +98,7 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
   }
 
   .stat-value {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 5vw, 2rem);
     font-weight: 800;
   }
 
@@ -109,7 +109,7 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
   .boss-mechanics {
     background-color: var(--sl-color-gray-6);
     border-radius: 8px;
-    padding: 20px;
+    padding: clamp(16px, 4vw, 20px);
     border: 1px solid var(--sl-color-hairline);
   }
 
@@ -133,9 +133,11 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
   .boss-mechanics li {
     display: flex;
     justify-content: space-between;
-    padding-bottom: 6px;
+    align-items: center;
+    padding: 10px 0;
     border-bottom: 1px dashed var(--sl-color-hairline);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    min-height: 44px; /* Touch target minimum */
   }
 
   .mech-key { color: var(--sl-color-gray-2); }
