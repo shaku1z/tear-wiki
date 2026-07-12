@@ -6,6 +6,7 @@ Welcome to the **TEAR Wiki**. This document outlines the core vision, architectu
 The TEAR Wiki is not a standard, generic documentation site. It is designed to feel like an in-universe terminal or mechanical database. 
 
 **Key Directives:**
+- **STRICTLY FORBIDDEN:** You are strictly forbidden from altering the actual game's codebase. Your modifications must be 100% contained within this `tear-wiki` project folder. Do not attempt to fix or alter game engine logic upstream.
 - **Zero Hardcoding:** The wiki must never contain hardcoded game values (like base health, damage scalars, or upgrade properties). All data is dynamically extracted from `src/scripts/game-engine.js` so that the wiki is perpetually synchronized with the live game repository.
 - **Deep Immersion:** The design language is strictly *Brutalist, High-Contrast, and Mechanical*. Avoid soft rounded corners, pastel gradients, or corporate aesthetics ("AI slop"). Use monospace typography for data and aggressive borders (e.g., `inset 0 0 0 1px`).
 
