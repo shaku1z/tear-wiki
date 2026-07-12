@@ -36,66 +36,6 @@ export default defineConfig({
 				{
 					tag: 'script',
 					content: `(function(){
-  var ring,dot,K=150,D=7.5,rx=-200,ry=-200,vx=0,vy=0,mx=-200,my=-200,rafId=0,lastT=0,ready=false;
-
-  function init(){
-    if(ready)return;
-    // Remove any stale elements from prior navigations
-    var old=document.getElementById('tear-cursor');
-    if(old)old.remove();
-    var oldD=document.getElementById('tear-cursor-dot');
-    if(oldD)oldD.remove();
-
-    ring=document.createElement('div');ring.id='tear-cursor';
-    dot=document.createElement('div');dot.id='tear-cursor-dot';
-    document.body.appendChild(ring);
-    document.body.appendChild(dot);
-    ready=true;
-
-    cancelAnimationFrame(rafId);
-    lastT=performance.now();
-    rafId=requestAnimationFrame(frame);
-  }
-
-  // Wait for body before touching DOM
-  if(document.body){init();}
-  else{document.addEventListener('DOMContentLoaded',init,{once:true});}
-
-  // window catches moves over canvas, iframes, SVG etc.
-  window.addEventListener('mousemove',function(e){
-    mx=e.clientX;my=e.clientY;
-    if(!ring)return;
-    var el=null;
-    try{el=document.elementFromPoint(mx,my);}catch(err){}
-    var isInput=el&&(el.closest('input')||el.closest('textarea')||el.closest('select')||el.closest('option')||el.closest('[contenteditable]'));
-    if(isInput){
-      ring.classList.remove('visible');dot.classList.remove('visible');
-    }else{
-      if(!ring.classList.contains('visible')){
-        ring.classList.add('visible');dot.classList.add('visible');
-        rx=mx;ry=my; // teleport on first move (no spring lag from off-screen)
-      }
-      var onLink=el&&(el.closest('a')||el.closest('button')||el.closest('[role="button"]'));
-      ring.classList.toggle('on-link',!!onLink);
-    }
-  },{passive:true});
-
-  // Hide when mouse leaves the window entirely
-  document.addEventListener('mouseleave',function(){
-    if(!ring)return;
-    ring.classList.remove('visible');dot.classList.remove('visible');
-  });
-
-  function frame(now){
-    if(!ring){rafId=requestAnimationFrame(frame);return;}
-    var dt=Math.min((now-lastT)/1000,0.05);lastT=now;
-    var ax=(mx-rx)*K-vx*D,ay=(my-ry)*K-vy*D;
-    vx+=ax*dt;vy+=ay*dt;rx+=vx*dt;ry+=vy*dt;
-    ring.style.transform='translate('+(rx-ring.offsetWidth/2)+'px,'+(ry-ring.offsetHeight/2)+'px)';
-    dot.style.transform='translate('+(mx-1.5)+'px,'+(my-1.5)+'px)';
-    rafId=requestAnimationFrame(frame);
-  }
-
   function initHpBars(){
     document.querySelectorAll('.tear-hp-bar-fill[data-hp]').forEach(function(bar){
       var io=new IntersectionObserver(function(entries){
@@ -105,18 +45,7 @@ export default defineConfig({
     });
   }
   initHpBars();
-
-  // Re-init cursor after Astro page transitions (view transitions keep head scripts alive)
-  document.addEventListener('astro:page-load',function(){
-    ready=false;
-    cancelAnimationFrame(rafId);
-    init();
-    initHpBars();
-  });
-  document.addEventListener('astro:before-swap',function(){
-    cancelAnimationFrame(rafId);
-    ready=false;
-  });
+  document.addEventListener('astro:page-load', initHpBars);
 })()
 `,
 				},
