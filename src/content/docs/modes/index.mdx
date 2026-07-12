@@ -1,84 +1,21 @@
 ---
 title: Modes & Difficulties
-description: All game modes in Tear explained — Adventure, Endless, Gauntlet, Playground, Tutorial, Boss Test, Enemy Test — plus the difficulty modifier system.
-gameVersion: v0.1
+description: Live mode directory, pacing configuration, and difficulty protocols.
 ---
-
+import ModeDirectory from '../../../components/ModeDirectory.astro';
+import RunScalingReadout from '../../../components/RunScalingReadout.astro';
 import DifficultyTable from '../../../components/DifficultyTable.astro';
 
-Tear offers seven distinct modes catering to first-time players, veteran campaigners, competitive score-chasers, boss specialists, and those who just want to experiment freely.
+Every available mode is read from the synchronized game configuration. Choose a campaign, an endless score run, a boss endurance test, or a consequence-free training space.
 
-## Mode Overview
+<ModeDirectory />
 
-| Mode | Type | Summary |
-|------|------|---------|
-| **Adventure** | Campaign | 5 stages, 9 waves + boss each. The primary single-player campaign. |
-| **Endless** | Score-chase | Infinite waves, escalating HP, competitive leaderboard mode. |
-| **Gauntlet** | Endurance | Infinite waves with a full boss every 8 waves. |
-| **Playground** | Sandbox | Open arena — spawn anything, grab any ability. No stakes. |
-| **Tutorial** | Guided | Step-by-step skill drills covering all core mechanics. |
-| **Boss Test** | Practice | Fight any boss directly for practice runs. |
-| **Enemy Test** | Practice | Spawn isolated enemy types to study patterns. |
+## Run Pacing
 
-## Adventure
+<RunScalingReadout />
 
-The campaign. Five biomes, each containing **9 combat waves + 1 boss wave**. Between each wave you visit the upgrade shop. Defeating a boss grants an **Ability Tier-Up**, a heal, and opens the next stage.
-
-See [Adventure](/modes/adventure) for scaling details and campaign completion rewards.
-
-## Endless
-
-Waves continue indefinitely with HP scaling **+12% per wave**. Biomes cycle as you progress. The **score formula** (`6 * wave * style_multiplier`) makes this the mode for competitive play. Personal bests are tracked and displayed in the mode select.
-
-See [Endless](/modes/endless) for enemy scaling math and score strategy.
-
-## Gauntlet
-
-Like Endless, but a **full boss storms in every 8 waves**. All five bosses cycle in order, each iteration tougher than the last. Excellent for practicing boss patterns in quick succession while also maintaining combat fundamentals between appearances.
-
-See [Gauntlet](/modes/gauntlet) for the boss rotation sequence.
-
-## Playground
-
-A consequence-free sandbox. Open the ability menu and equip any upgrade at any tier. Use the enemy spawn panel to place any enemy type in any quantity. Useful for testing upgrade interactions, practicing specific enemies, or experimenting with builds before committing in a live run.
-
-## Tutorial
-
-A series of guided combat drills:
-1. Basic swing
-2. Slam introduction
-3. Power Slam timing
-4. Launch (Updraft)
-5. Juggling an airborne enemy
-6. Throw and recall
-7. Deflect
-8. Perfect parry
-
-Completing all drills unlocks the Tutorial Complete record in your profile.
-
-## Boss Test
-
-Select any of the five campaign bosses and fight them directly. HP, damage, and patterns are identical to the campaign encounter. Your HP and upgrades reset to a neutral state (base kit). Useful for memorising boss tells and practicing phase transitions.
-
-## Enemy Test
-
-Spawn any enemy type, configure their affix, and fight them in isolation. Useful for learning specific enemy patterns without the noise of a full wave. Does not award style or score — purely informational.
-
-## Difficulty Modifiers
-
-All modes support a difficulty selector that modifies several run parameters. Higher difficulties mean tougher enemies but larger rewards (score and coins).
+## Difficulty Protocols
 
 <DifficultyTable />
 
-### The Tiers
-
-| Tier | Enemy HP | Damage Taken | Enemy Count | Coin Earn | Score Earn |
-|------|----------|-------------|-------------|-----------|-----------|
-| **Easy** | 0.8x | 0.65x | 0.85x | 0.8x | 0.7x |
-| **Normal** | 1.0x | 1.0x | 1.0x | 1.0x | 1.0x |
-| **Hard** | 1.3x | 1.35x | 1.15x | 1.3x | 1.4x |
-| **Extreme** | 1.7x | 1.8x | 1.3x | 1.7x | 2.0x |
-| **One-Hit** | 0.9x | Lethal | 1.0x | 1.8x | 2.2x |
-
-> [!CAUTION] One-Hit Mode
-> **One-Hit** is a special difficulty where **a single instance of damage instantly ends the run** — no HP bar, no i-frames preventing death. Surviving wave 5 in One-Hit mode is the **Iron Will** achievement. Every action must be intentional!
+One-Hit remains a special protocol: any damaging contact ends the run immediately.
