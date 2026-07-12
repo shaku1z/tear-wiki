@@ -70,7 +70,7 @@
 /* ---- Typography -------------------------------------------- */
 :root {
   --sl-font-mono:    'JetBrains Mono', 'Courier New', monospace;
-  --sl-font:         'Inter', 'Space Grotesk', system-ui, sans-serif;
+  --sl-font:         var(--sl-font-mono);
   --sl-text-h1:      2.5rem;
   --sl-text-h2:      2rem;
   --sl-text-h3:      1.5rem;
@@ -84,17 +84,16 @@
   border-radius: 0 !important; /* NO rounded corners */
 }
 
-/* Brutalist Panels and Borders */
+/* Minimalist HUD Panels and Borders */
 .sl-container {
   max-width: 900px; /* Constrain width for better readability */
 }
 
 .content-panel {
-  border: 2px solid var(--sl-color-hairline-light);
+  border: 1px solid var(--sl-color-hairline-light);
   padding: 1.5rem;
   margin-bottom: 2rem;
   background: var(--sl-color-bg);
-  box-shadow: 4px 4px 0px var(--sl-color-accent);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -106,8 +105,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Sharp code blocks */
 .expressive-code {
-  border: 2px solid var(--sl-color-gray-5);
-  box-shadow: 4px 4px 0px var(--sl-color-gray-6);
+  border: 1px solid var(--sl-color-gray-5);
   margin: 1.5rem 0;
 }
 

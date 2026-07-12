@@ -36,10 +36,9 @@ const { name, color, variant, stats, bars = [], notes } = Astro.props;
 
 <style>
   .stat-block {
-    border: 2px solid var(--block-accent);
+    border: 1px solid var(--block-accent);
     background: var(--sl-color-bg);
     margin: 2rem 0;
-    box-shadow: 4px 4px 0px var(--block-accent);
     position: relative;
     font-family: var(--sl-font-mono);
   }
@@ -49,13 +48,13 @@ const { name, color, variant, stats, bars = [], notes } = Astro.props;
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    background: var(--block-accent);
-    color: var(--sl-color-bg);
+    color: var(--block-accent);
+    border-bottom: 1px solid var(--block-accent);
   }
   
   .stat-block__dot {
-    width: 12px; height: 12px;
-    background: var(--sl-color-bg);
+    width: 8px; height: 8px;
+    background: var(--block-accent);
   }
   
   .stat-block__name {
@@ -78,7 +77,6 @@ const { name, color, variant, stats, bars = [], notes } = Astro.props;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1px;
     background: var(--sl-color-hairline-light);
-    border-top: 2px solid var(--block-accent);
   }
 
   .stat-cell {
