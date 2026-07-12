@@ -1,0 +1,7 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Builder from '../components/builder/Builder.svelte';
+---
+<StarlightPage frontmatter={{ title: 'TEAR Builder', template: 'splash' }}>
+  <Builder client:load />
+</StarlightPage>

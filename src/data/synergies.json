@@ -1,0 +1,32 @@
+[
+  {
+    "id": "bleed_detonation",
+    "type": "positive",
+    "requires": { "rupture": 2, "impale": 3 },
+    "label": "Bleed Detonation",
+    "description": "Rupture T2+ detonates on Power Slam; Impale T3 detonates on recall — together, every throw-and-return cycle is a bleed burst."
+  },
+  {
+    "id": "mark_spread_parry",
+    "type": "positive",
+    "requires": { "sunder": 2, "backlash": 2 },
+    "label": "Mark Spread on Parry",
+    "description": "Backlash T2 marks every enemy in its AoE; Sunder T3 spreads that mark to nearby enemies on any hit — a single parry can mark a whole wave."
+  },
+  {
+    "id": "dash_refund_overlap",
+    "type": "conflict",
+    "requires_any": ["adrenaline", "phantom_dash_refund", "concussive_dash_refund"],
+    "min_count": 2,
+    "label": "Redundant Dash Refunds",
+    "description": "You have multiple dash-refund sources active. Any kill that triggers one likely triggers all — the extras provide no additional refunds. Consider drafting differently."
+  },
+  {
+    "id": "aether_step_air_dash",
+    "type": "conflict",
+    "requires": { "air_dash": 1 },
+    "shop_requires": "aether_step",
+    "label": "Dead Pick: Air Dash",
+    "description": "Aether Step (shop upgrade) already sets your dash charges to 2 via Math.max. Drafting Air Dash adds nothing. This pick was wasted."
+  }
+]
