@@ -37,9 +37,9 @@ const payload = {
   stackables: cleanStackables
 };
 
-// Encode for URL safely (Node.js Buffer for SSR)
+// Encode for URL safely (use btoa for Cloudflare Workers / web standard)
 const jsonStr = JSON.stringify(payload);
-const b64 = Buffer.from(jsonStr).toString('base64');
+const b64 = typeof Buffer !== 'undefined' ? Buffer.from(jsonStr).toString('base64') : btoa(jsonStr);
 const href = `/builder?b=${b64}`;
 ---
 
