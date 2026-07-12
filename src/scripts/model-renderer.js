@@ -25,7 +25,7 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
     window.CONFIG.world.groundY = 10000;
   }
   const simX = 5000;
-  const simY = 5000;
+  const simY = 9900;
 
   const ctx = canvas.getContext('2d');
   let rafId;
@@ -36,7 +36,6 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
   let mouseX = 0, mouseY = 0;
   
   // Camera State
-  let camScale = 1.0;
   let realCamX = simX;
   let realCamY = simY;
 

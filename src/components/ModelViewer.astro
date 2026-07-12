@@ -18,7 +18,7 @@ const { model, variant } = Astro.props;
         </div>
         
         <div class="model-zoom-container">
-          <input type="range" class="zoom-slider" min="0.4" max="2.5" step="0.1" value="1.0">
+          <input type="range" class="zoom-slider" min="0.4" max="2.5" step="0.1" value="0.4">
         </div>
         
         <div class="model-controls">
@@ -65,7 +65,7 @@ const { model, variant } = Astro.props;
       const variant = this.dataset.variant;
       
       // Setup state
-      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 1.0 };
+      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 0.4 };
 
       if (canvas && modelName) {
         this.cleanup = initModelViewer(canvas, modelName, variant, state);
