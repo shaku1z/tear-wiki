@@ -6,6 +6,7 @@ export function initModelViewer(canvas, modelName, variant) {
   let hoverK = 0; 
   let isHovered = false;
   let mouseX = 0, mouseY = 0;
+  let gridOffsetX = 0, gridOffsetY = 0;
   
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -33,6 +34,7 @@ export function initModelViewer(canvas, modelName, variant) {
     bomber: "#ef8a17",
     armored: "#3a4654",
     armoredShield: "#15c2c2",
+    warden: "#a81b2a",
     aldric: "#b01030",
     slam: "#ef8a17",
     sludge: "#6f7a35",
@@ -45,17 +47,39 @@ export function initModelViewer(canvas, modelName, variant) {
     perfect: "#13c4d6",
     eye: "#13c4d6",
     ink: "#0a0a0d",
-    grid: "rgba(255,255,255,0.04)",
-    dim: "rgba(255,255,255,0.25)"
+    grid: "rgba(255,255,255,0.06)",
+    dim: "rgba(255,255,255,0.3)"
   };
 
-  function drawGrid(w, h) {
+  function drawGrid(w, h, ox, oy, distort) {
+    ctx.save();
+    ctx.translate(w/2 + ox, h/2 + oy);
+    const scale = 1 + hoverK * 0.15;
+    ctx.scale(scale, scale);
+    ctx.translate(-w/2, -h/2);
+    
     ctx.strokeStyle = COLORS.grid;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for (let x = w/2 % 20; x <= w; x += 20) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
-    for (let y = h/2 % 20; y <= h; y += 20) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+    
+    for (let x = -w; x <= w*2; x += 20) { 
+      ctx.moveTo(x, -h); 
+      if (distort && hoverK > 0 && Math.abs(x - w/2) < 150) {
+         ctx.bezierCurveTo(x + hoverK*40 * Math.sin(time*3), h/2, x - hoverK*40 * Math.cos(time*2), h/2, x, h*2);
+      } else {
+         ctx.lineTo(x, h*2); 
+      }
+    }
+    for (let y = -h; y <= h*2; y += 20) { 
+      ctx.moveTo(-w, y); 
+      if (distort && hoverK > 0 && Math.abs(y - h/2) < 150) {
+         ctx.bezierCurveTo(w/2, y + hoverK*40 * Math.cos(time*3), w/2, y - hoverK*40 * Math.sin(time*2), w*2, y);
+      } else {
+         ctx.lineTo(w*2, y); 
+      }
+    }
     ctx.stroke();
+    ctx.restore();
   }
 
   function drawDimensions(cx, cy, w, h, labelX, labelY) {
@@ -86,17 +110,48 @@ export function initModelViewer(canvas, modelName, variant) {
     ctx.restore();
   }
 
+  function drawAnnotation(x, y, tx, ty, text, color) {
+    if (hoverK < 0.1) return;
+    const alpha = hoverK;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, y); 
+    
+    const dx = tx - x, dy = ty - y;
+    const lx = x + dx * hoverK;
+    const ly = y + dy * hoverK;
+    ctx.lineTo(lx, ly);
+    ctx.lineTo(lx + (tx > x ? 20 : -20) * hoverK, ly);
+    ctx.stroke();
+    
+    ctx.fillStyle = color;
+    ctx.font = "bold 11px monospace";
+    ctx.textAlign = tx > x ? "left" : "right";
+    const chars = Math.floor(text.length * hoverK);
+    ctx.fillText(text.substring(0, chars), lx + (tx > x ? 25 : -25), ly + 4);
+    ctx.restore();
+  }
+
   function render() {
     rafId = requestAnimationFrame(render);
     const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) return;
+    
     const width = rect.width, height = rect.height;
     const cx = width / 2, cy = height / 2;
     
     time += 0.05;
     hoverK += ( (isHovered ? 1 : 0) - hoverK ) * 0.1; 
+    
+    gridOffsetX += ( (isHovered ? (cx - mouseX)*0.1 : 0) - gridOffsetX ) * 0.1;
+    gridOffsetY += ( (isHovered ? (cy - mouseY)*0.1 : 0) - gridOffsetY ) * 0.1;
 
     ctx.clearRect(0, 0, width, height);
-    drawGrid(width, height);
+    
+    const distortGrid = (modelName === "chimera" || modelName === "wraith" || modelName === "the-source");
+    drawGrid(width, height, gridOffsetX, gridOffsetY, distortGrid);
 
     const dx = isHovered ? (mouseX - cx) / cx : 0;
     const dy = isHovered ? (mouseY - cy) / cy : 0;
@@ -104,7 +159,8 @@ export function initModelViewer(canvas, modelName, variant) {
     const modelY = cy + floatY + dy * 10;
     const modelX = cx + dx * 10;
 
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    // Shadow
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.beginPath();
     ctx.ellipse(cx + dx*2, cy + Math.abs(floatY) + 50, 20 + floatY, 5, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -122,6 +178,10 @@ export function initModelViewer(canvas, modelName, variant) {
     if (modelName === "charger") {
       const hw = 18, hh = 18;
       ctx.fillStyle = COLORS.charger;
+      
+      const lungeX = hoverK > 0 && Math.sin(time*4) > 0.5 ? faceDir * hoverK * 30 : 0;
+      ctx.translate(lungeX, 0);
+      
       ctx.fillRect(-hw, -hh, hw*2, hh*2);
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.strokeRect(-hw, -hh, hw*2, hh*2);
@@ -141,7 +201,7 @@ export function initModelViewer(canvas, modelName, variant) {
         const ext = hoverK * 12;
         ctx.fillRect(faceDir * (hw + ext) - 4, - 3, 8, 9);
       } else {
-        const wAngle = -0.5 + hoverK * 1.2; 
+        const wAngle = -0.5 + (lungeX ? 1.5 : hoverK * 1.2); 
         ctx.translate(faceDir * (hw+4), 0);
         ctx.rotate(faceDir * wAngle);
         ctx.fillStyle = ink;
@@ -155,8 +215,11 @@ export function initModelViewer(canvas, modelName, variant) {
       
       if (variant === "bull" && hoverK > 0) {
         ctx.strokeStyle = COLORS.charger; ctx.globalAlpha = 0.35 + 0.45 * hoverK; ctx.lineWidth = 5; ctx.setLineDash([7, 5]);
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * (40 + hoverK * 100), 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 100, 0); ctx.stroke();
         ctx.setLineDash([]); ctx.globalAlpha = 1;
+        drawAnnotation(0, -hh, faceDir * 40, -hh - 30, "[ARMED CHARGE]", COLORS.charger);
+      } else if (lungeX) {
+        drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[LUNGE VELOCITY: HIGH]", COLORS.charger);
       }
       
       ctx.fillStyle = "#fff";
@@ -190,19 +253,22 @@ export function initModelViewer(canvas, modelName, variant) {
            ctx.globalAlpha = 0.4 + 0.5 * hoverK;
            ctx.beginPath(); ctx.arc(0, 0, 4 + hoverK * 8, 0, Math.PI * 2); ctx.fill();
            ctx.globalAlpha = 1;
+           drawAnnotation(0, -r, faceDir * 40, -r - 30, "[SEEKER SIGHT]", COLORS.ranged);
         } else if (variant === "sentinel") {
            ctx.lineWidth = 1.2; ctx.strokeStyle = ink; ctx.globalAlpha = 0.5 + 0.4 * hoverK;
            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 100, hoverK * 30); ctx.stroke();
            ctx.globalAlpha = 1;
            ctx.fillStyle = COLORS.ranged;
-           ctx.beginPath(); ctx.arc(faceDir * (30 + hoverK * 20), hoverK * 30, 5, 0, Math.PI * 2); ctx.fill();
+           ctx.beginPath(); ctx.arc(faceDir * (30 + (time*50)%60), hoverK * 30, 5, 0, Math.PI * 2); ctx.fill();
+           drawAnnotation(0, -r, -faceDir * 40, -r - 30, "[PROJECTILE TRAJECTORY]", COLORS.ranged);
         } else {
            ctx.beginPath();
-           const px = faceDir * (r + 10 + hoverK * 20);
+           const px = faceDir * (r + 10 + (time*80)%60);
            ctx.moveTo(px + faceDir * 6, 0);
            ctx.lineTo(px, -3); ctx.lineTo(px - faceDir * 6, 0); ctx.lineTo(px, 3);
            ctx.fill();
            ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
+           drawAnnotation(0, -r, -faceDir * 40, -r - 30, "[RAPID FIRE]", COLORS.ranged);
         }
       }
       
@@ -218,8 +284,9 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.beginPath();
       ctx.moveTo(faceDir * r, 0);
       
-      const flapY = hoverK * 8;
-      const flapX = hoverK * 4;
+      const flap = Math.sin(time * 8);
+      const flapY = hoverK > 0 ? flap * 12 : 0;
+      const flapX = hoverK > 0 ? Math.abs(flap) * 4 : 0;
       ctx.lineTo(-faceDir * (r - flapX), -hh + flapY);
       ctx.lineTo(-faceDir * r * 0.4, 0);
       ctx.lineTo(-faceDir * (r - flapX), hh - flapY);
@@ -237,11 +304,16 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillStyle = "#fff";
       ctx.fillRect(faceDir * 8 - 2, -2, 4, 4);
       
-      if (variant === "divebomber" && hoverK > 0) {
-         ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = (0.35 + 0.5 * hoverK) * hoverK; ctx.lineWidth = 3;
-         ctx.beginPath(); ctx.arc(faceDir * 20, 50, 34 - 22 * hoverK, 0, Math.PI * 2); ctx.stroke();
-         ctx.beginPath(); ctx.moveTo(faceDir * 20, hh); ctx.setLineDash([4, 8]); ctx.lineTo(faceDir * 20, 50); ctx.stroke();
-         ctx.setLineDash([]); ctx.globalAlpha = 1;
+      if (hoverK > 0) {
+        if (variant === "divebomber") {
+           ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.5 * hoverK; ctx.lineWidth = 3;
+           ctx.beginPath(); ctx.arc(faceDir * 20, 50, (time*40)%30, 0, Math.PI * 2); ctx.stroke();
+           ctx.beginPath(); ctx.moveTo(faceDir * 20, hh); ctx.setLineDash([4, 8]); ctx.lineTo(faceDir * 20, 50); ctx.stroke();
+           ctx.setLineDash([]); ctx.globalAlpha = 1;
+           drawAnnotation(faceDir * 20, hh, -faceDir * 40, hh + 30, "[AERIAL BOMBARDMENT]", COLORS.slam);
+        } else {
+           drawAnnotation(faceDir * r, 0, faceDir * 60, -30, "[EVASIVE MANEUVERS]", COLORS.flyer);
+        }
       }
       drawDimensions(0, 0, r*2, hh*2, 46, 36);
 
@@ -262,27 +334,33 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillStyle = ink; ctx.fillRect(-2, -hh - 8, 4, 8);
       
       if (hoverK > 0) {
-        const px = faceDir * hoverK * 30, py = -hh - 10 - hoverK * 20 + hoverK*hoverK * 30;
+        const tCycle = (time * 2) % 1;
+        const px = faceDir * tCycle * 60, py = -hh - 10 - tCycle * 40 + tCycle*tCycle * 60;
+        
         if (variant === "trapper") {
           ctx.fillStyle = COLORS.bomber;
           ctx.beginPath(); ctx.arc(faceDir * 35, 45, 8, Math.PI, 0); ctx.fill();
           ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
           ctx.fillStyle = Math.floor(time * 10) % 2 === 0 ? COLORS.charger : ink;
           ctx.beginPath(); ctx.arc(faceDir * 35, 44, 2.5, 0, Math.PI*2); ctx.fill();
+          drawAnnotation(faceDir * 35, 40, faceDir * 70, 20, "[PROXIMITY MINE]", COLORS.bomber);
         } else if (variant === "sludge") {
           const wob = Math.sin(time*4) * 1.4;
           ctx.fillStyle = COLORS.sludge; ctx.beginPath(); ctx.ellipse(px, py, 6 + wob, 6 - wob, 0, 0, Math.PI*2); ctx.fill();
           ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
+          drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[CAUSTIC SLUDGE]", COLORS.sludge);
         } else if (variant === "geomancer") {
           ctx.fillStyle = COLORS.sludge; ctx.globalAlpha = hoverK * 0.7;
           ctx.fillRect(faceDir * 40 - 15, 45 - hoverK * 30, 30, hoverK * 30);
           ctx.globalAlpha = 1;
+          drawAnnotation(faceDir * 40, 15, faceDir * 80, -10, "[TERRAIN ERECTION]", COLORS.sludge);
         } else {
           ctx.fillStyle = COLORS.bomber;
           ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
           ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
           ctx.fillStyle = Math.floor(time * 15) % 2 === 0 ? "#fff" : COLORS.bomber;
           ctx.fillRect(px - 1, py - 9, 2, 3);
+          drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[HIGH EXPLOSIVE]", COLORS.bomber);
         }
       }
       drawDimensions(0, 0, hw*2, hw*2, 44, 44);
@@ -294,7 +372,7 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.strokeRect(-hw, -hh, hw*2, hh*2);
       
-      const gx = faceDir * (hw + 9 - hoverK*4);
+      const gx = faceDir * (hw + 9);
       ctx.fillStyle = COLORS.armoredShield;
       ctx.fillRect(gx - 4, -hh - 6, 8, hh*2 + 12);
       ctx.fillRect(gx - faceDir * 6 - 1, -hh - 6, faceDir * 7, 5);
@@ -304,9 +382,16 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillRect(faceDir * 10 - 3, -6, 6, 6);
       
       if (hoverK > 0) {
+         ctx.fillStyle = COLORS.armoredShield; ctx.globalAlpha = 0.4 * Math.abs(Math.sin(time*5));
+         ctx.fillRect(gx - 10, -hh - 16, 20, hh*2 + 32);
+         ctx.globalAlpha = 1;
+         
          ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = (0.35 + 0.5 * hoverK) * hoverK; ctx.lineWidth = 3 + hoverK * 3;
          ctx.beginPath(); ctx.moveTo(-(40 + 60 * hoverK), hh + 2); ctx.lineTo((40 + 60 * hoverK), hh + 2); ctx.stroke();
          ctx.globalAlpha = 1;
+         
+         drawAnnotation(gx, 0, faceDir * 70, -30, "[DEFLECTION BARRIER]", COLORS.armoredShield);
+         drawAnnotation(0, hh, -faceDir * 50, hh + 20, "[IMPACT STOMP]", COLORS.slam);
       }
       drawDimensions(0, 0, hw*2 + 18, hh*2, 66, 52);
 
@@ -326,26 +411,31 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.fillStyle = "#fff"; ctx.fillRect(-2, haloY - 7, 4, 14); ctx.fillRect(-6, haloY - 3, 12, 4);
         
         if (hoverK > 0) {
-           ctx.strokeStyle = COLORS.priest; ctx.globalAlpha = 0.4 + 0.2*Math.sin(time*5);
-           ctx.beginPath(); ctx.arc(0, 0, 80 * hoverK, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+           const pulse = (time * 60) % 120;
+           ctx.strokeStyle = COLORS.priest; ctx.globalAlpha = 0.6 * (1 - pulse/120); ctx.lineWidth = 3;
+           ctx.beginPath(); ctx.arc(0, 0, pulse, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+           drawAnnotation(0, -hh, faceDir * 50, -hh - 30, "[INVULNERABILITY AURA]", COLORS.priest);
         }
       } else if (t === "herald") {
         ctx.fillRect(-hw * 0.55, -hh * 0.6, hw * 1.1, hh * 1.6); ctx.strokeRect(-hw * 0.55, -hh * 0.6, hw * 1.1, hh * 1.6);
         ctx.fillStyle = ink; ctx.fillRect(hw * 0.55, -hh, 3, hh * 2); // pole
-        const wave = Math.sin(time * 3 + hoverK) * 5;
+        const wave = Math.sin(time * 6) * 6 * hoverK + Math.sin(time * 3) * 2;
         ctx.fillStyle = body; ctx.fillRect(hw * 0.55 + 3, -hh + wave, 16, 12); ctx.strokeRect(hw * 0.55 + 3, -hh + wave, 16, 12); // flag
         ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.moveTo(hw * 0.55 + 6, -hh + 3 + wave); ctx.lineTo(hw * 0.55 + 12, -hh + 6 + wave); ctx.lineTo(hw * 0.55 + 6, -hh + 9 + wave); ctx.fill();
         if (hoverK > 0) {
-           ctx.strokeStyle = COLORS.herald; ctx.globalAlpha = 0.4 + 0.2*Math.sin(time*5);
-           ctx.beginPath(); ctx.arc(0, 0, 80 * hoverK, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+           const pulse = (time * 60) % 120;
+           ctx.strokeStyle = COLORS.herald; ctx.globalAlpha = 0.6 * (1 - pulse/120); ctx.lineWidth = 3;
+           ctx.beginPath(); ctx.arc(0, 0, pulse, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+           drawAnnotation(hw * 0.55 + 10, -hh, faceDir * 60, -hh - 20, "[HASTE BANNER]", COLORS.herald);
         }
       } else if (t === "mender") {
         ctx.beginPath(); ctx.arc(0, 0, hw * 1.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = "#fff"; ctx.fillRect(-2.5, -10, 5, 20); ctx.fillRect(-9, -2.5, 18, 5);
         if (hoverK > 0) {
-          ctx.strokeStyle = COLORS.mender; ctx.globalAlpha = 0.6; ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(faceDir*50, -40); ctx.stroke(); ctx.globalAlpha = 1;
-          ctx.beginPath(); ctx.arc(faceDir*50, -46, 3, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = COLORS.mender; ctx.globalAlpha = 0.6 + 0.3*Math.sin(time*8); ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(faceDir*80, -40); ctx.stroke(); ctx.globalAlpha = 1;
+          ctx.beginPath(); ctx.arc(faceDir*80, -40, 6, 0, Math.PI*2); ctx.fill();
+          drawAnnotation(faceDir*40, -20, faceDir*70, 10, "[RESTORATION BEAM]", COLORS.mender);
         }
       } else if (t === "anchor") {
         ctx.fillRect(-hw, -hh * 0.7, hw * 2, hh * 1.7); ctx.strokeRect(-hw, -hh * 0.7, hw * 2, hh * 1.7);
@@ -354,9 +444,10 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(0, 8); ctx.stroke(); // shaft
         ctx.beginPath(); ctx.moveTo(-7, 4); ctx.quadraticCurveTo(0, 12, 7, 4); ctx.stroke(); // flukes
         if (hoverK > 0) {
-          ctx.strokeStyle = COLORS.anchor; ctx.globalAlpha = 0.5; ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(faceDir*60, 0); ctx.stroke(); ctx.globalAlpha = 0.1;
+          ctx.strokeStyle = COLORS.anchor; ctx.globalAlpha = 0.5 + 0.3*Math.sin(time*8); ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(faceDir*70, 0); ctx.stroke(); ctx.globalAlpha = 0.2;
           ctx.fillStyle = COLORS.anchor; ctx.beginPath(); ctx.arc(faceDir*70, 0, 20, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha=1; ctx.stroke();
+          drawAnnotation(faceDir*35, 0, faceDir*60, -30, "[SOUL TETHER]", COLORS.anchor);
         }
       }
       drawDimensions(0, 0, hw*2, hh*2, 32, 42);
@@ -364,11 +455,18 @@ export function initModelViewer(canvas, modelName, variant) {
     } else if (modelName === "chimera") {
       const hw = 19, hh = 24;
       ctx.shadowBlur = 0;
-      const cueCol = hoverK > 0 ? (Math.floor(time * 2) % 3 === 0 ? COLORS.charger : Math.floor(time * 2) % 3 === 1 ? COLORS.ranged : COLORS.bomber) : COLORS.chimera;
       
+      let cueCol = COLORS.chimera;
       if (hoverK > 0) {
-        ctx.strokeStyle = cueCol; ctx.globalAlpha = 0.6; ctx.setLineDash([5, 4]); ctx.lineWidth = 2.5;
+        const cycle = Math.floor(time * 3) % 4;
+        cueCol = cycle === 0 ? COLORS.charger : cycle === 1 ? COLORS.ranged : cycle === 2 ? COLORS.bomber : COLORS.slam;
+        ctx.strokeStyle = cueCol; ctx.globalAlpha = 0.8; ctx.setLineDash([5, 4]); ctx.lineWidth = 2.5;
         ctx.strokeRect(-hw - 4, -hh - 4, hw * 2 + 8, hh * 2 + 8); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      }
+      
+      ctx.save();
+      if (hoverK > 0) {
+        ctx.translate((Math.random()-0.5)*4, (Math.random()-0.5)*4); // glitch shake
       }
       
       ctx.beginPath();
@@ -392,6 +490,11 @@ export function initModelViewer(canvas, modelName, variant) {
       
       ctx.fillStyle = COLORS.eye;
       ctx.fillRect(-8, -2, 4, 5); ctx.fillRect(-1, -5, 4, 5); ctx.fillRect(5, -1, 4, 5);
+      ctx.restore();
+      
+      if (hoverK > 0) {
+        drawAnnotation(hw, 0, faceDir * 60, -30, "[ADAPTIVE MIMICRY]", cueCol);
+      }
       drawDimensions(0, 0, hw*2, hh*2, 38, 48);
 
     } else if (modelName === "wraith") {
@@ -399,7 +502,16 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.shadowBlur = 0;
       ctx.fillStyle = COLORS.wraith;
       
-      ctx.globalAlpha = 0.8 - 0.4 * hoverK; // becomes ethereal
+      ctx.globalAlpha = 1 - 0.7 * hoverK; 
+      
+      if (hoverK > 0) {
+        // Red/Cyan chromatic split
+        ctx.save(); ctx.translate(-2, 0); ctx.fillStyle = "rgba(255,0,0,0.5)";
+        ctx.beginPath(); ctx.moveTo(0, -hh); ctx.lineTo(hw, 0); ctx.lineTo(hw * 0.5, hh); ctx.lineTo(0, hh * 0.55); ctx.lineTo(-hw * 0.5, hh); ctx.lineTo(-hw, 0); ctx.closePath(); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.translate(2, 0); ctx.fillStyle = "rgba(0,255,255,0.5)";
+        ctx.beginPath(); ctx.moveTo(0, -hh); ctx.lineTo(hw, 0); ctx.lineTo(hw * 0.5, hh); ctx.lineTo(0, hh * 0.55); ctx.lineTo(-hw * 0.5, hh); ctx.lineTo(-hw, 0); ctx.closePath(); ctx.fill(); ctx.restore();
+      }
+      
       ctx.beginPath();
       ctx.moveTo(0, -hh); ctx.lineTo(hw, 0); ctx.lineTo(hw * 0.5, hh);
       ctx.lineTo(0, hh * 0.55); ctx.lineTo(-hw * 0.5, hh); ctx.lineTo(-hw, 0);
@@ -410,29 +522,46 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.lineWidth = 2; ctx.stroke();
       
       ctx.fillStyle = COLORS.eye; ctx.fillRect(-7, -4, 4, 6); ctx.fillRect(3, -4, 4, 6);
+      
+      if (hoverK > 0) {
+        drawAnnotation(hw, 0, faceDir * 50, -20, "[ETHEREAL SHIFT]", COLORS.eye);
+      }
       drawDimensions(0, 0, hw*2, hh*2, 36, 42);
 
     } else if (modelName === "warden") {
-      const hw = 30, hh = 35;
+      const hw = 30, hh = 30;
       ctx.shadowBlur = 0;
+      ctx.fillStyle = COLORS.warden;
+      
+      ctx.fillRect(-hw, -hh, hw*2, hh*2);
+      ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(-hw, -hh, hw*2, hh*2);
+      
+      // Bottom left small square
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(-hw + 8, hh - 12, 6, 6);
+      
+      // Main eye top right
+      ctx.fillRect(12, -10, 10, 8);
+      
+      // Baton top right
+      const swing = hoverK > 0 ? Math.sin(time*6)*0.5 : 0;
+      ctx.save();
+      ctx.translate(hw - 4, -hh + 6);
+      ctx.rotate(-0.3 + swing);
+      ctx.strokeStyle = ink; ctx.lineWidth = 8; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(35, 0); ctx.stroke();
+      ctx.restore();
+      
       if (hoverK > 0) {
-        ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.65; ctx.lineWidth = 4; ctx.setLineDash([8, 6]);
-        ctx.beginPath(); ctx.moveTo(-60, hh); ctx.lineTo(60, hh); ctx.stroke();
-        ctx.setLineDash([]); ctx.globalAlpha = 1;
+        const slamR = (time * 150) % 200;
+        ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.8 * (1 - slamR/200); ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.ellipse(0, hh + 20, slamR, slamR * 0.3, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.globalAlpha = 1;
+        drawAnnotation(-hw, -hh, -60, -hh - 30, "[SECTOR LOCKDOWN]", COLORS.warden);
+        drawAnnotation(0, hh, faceDir * 80, hh + 20, "[SEISMIC SHOCKWAVE]", COLORS.slam);
       }
       
-      ctx.fillStyle = COLORS.armored;
-      ctx.fillRect(-hw, -hh, hw * 2, hh * 2);
-      ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(-hw, -hh, hw * 2, hh * 2);
-      
-      const bx = faceDir * 20;
-      ctx.strokeStyle = ink; ctx.lineWidth = 9; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(bx, hh - 10 + hoverK * 10); ctx.stroke();
-      ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(bx, hh - 10 + hoverK * 10, 6, 0, Math.PI*2); ctx.fill();
-      
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(-8, -10, 16, 8);
-      drawDimensions(0, 0, hw*2, hh*2, 60, 70);
+      drawDimensions(0, 0, hw*2, hh*2, 60, 60);
 
     } else if (modelName === "iron-colossus") {
       const hw = 36, hh = 40;
@@ -442,45 +571,51 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillRect(-hw, -hh, hw*2, hh*2);
       ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(-hw, -hh, hw*2, hh*2);
       
-      ctx.fillStyle = "#fff"; ctx.fillRect(faceDir * 16 - 8, 14, 16, 11);
-      
-      const a = -0.4 + hoverK * 1.5;
-      const hx = faceDir * hw * 0.5, hy = -4, L = 64;
-      const tx = hx + faceDir * Math.cos(a) * L, ty = hy + Math.sin(a) * L;
-      
-      if (hoverK > 0) {
-        ctx.fillStyle = COLORS.charger; ctx.globalAlpha = 0.3;
-        ctx.beginPath(); ctx.moveTo(hx, hy);
-        for (let s = 0; s <= 1; s += 0.2) { 
-          const aa = -0.4 + (a - -0.4) * s; 
-          ctx.lineTo(hx + faceDir * Math.cos(aa) * L, hy + Math.sin(aa) * L); 
-        }
-        ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.fillStyle = ink;
+      for (let i = 0; i < 4; i++) { 
+        ctx.fillRect(-hw + 8 + i * ((hw*2 - 24) / 3), -hh + 8, 5, 5); 
+        ctx.fillRect(-hw + 8 + i * ((hw*2 - 24) / 3), hh - 13, 5, 5); 
       }
       
-      ctx.strokeStyle = ink; ctx.lineWidth = 7; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
-      ctx.save(); ctx.translate(tx, ty); ctx.rotate(Math.atan2(ty - hy, tx - hx)); ctx.fillStyle = ink;
-      ctx.fillRect(-6, -14, 26, 28); ctx.restore(); 
+      ctx.fillStyle = "#fff"; ctx.fillRect(16 - 8, -28 + hh, 24, 16);
+      
+      // Cyan Shield
+      ctx.fillStyle = COLORS.armoredShield;
+      ctx.fillRect(hw, -hh - 8, 12, hh*2 + 16);
+      ctx.fillRect(hw - 11, -hh - 8, 11, 8);
+      ctx.fillRect(hw - 11, hh, 11, 8);
+      
+      if (hoverK > 0) {
+        ctx.fillStyle = COLORS.armoredShield; ctx.globalAlpha = hoverK * 0.4 * Math.abs(Math.sin(time*6));
+        ctx.fillRect(hw + 16, -hh - 8, 40, hh*2 + 16);
+        ctx.globalAlpha = 1;
+        drawAnnotation(hw + 6, 0, hw + 70, -30, "[CONTAINMENT BARRIER]", COLORS.armoredShield);
+      }
+      
       drawDimensions(0, 0, hw*2, hh*2, 72, 80);
 
     } else if (modelName === "the-echo") {
       const hw = 12, hh = 18;
       ctx.shadowBlur = 0;
+      
+      if (hoverK > 0) {
+        // Splitting clone
+        const splitX = hoverK * 30 * -faceDir;
+        ctx.globalAlpha = hoverK * 0.5;
+        ctx.fillStyle = ink; ctx.fillRect(-hw + splitX, -hh, hw*2, hh*2);
+        ctx.fillStyle = COLORS.eye;
+        ctx.beginPath(); ctx.moveTo(splitX + faceDir * 6, -5); ctx.lineTo(splitX + faceDir * 12, 0); ctx.lineTo(splitX + faceDir * 6, 5); ctx.fill();
+        ctx.globalAlpha = 1;
+        drawAnnotation(splitX, -hh, -faceDir * 50, -hh - 40, "[ANOMALY REPLICATION]", COLORS.eye);
+      }
+      
       ctx.fillStyle = ink;
       ctx.fillRect(-hw, -hh, hw*2, hh*2);
       
-      ctx.fillStyle = COLORS.eye; ctx.fillRect(faceDir * 5 - 4, 12, 8, 5);
+      // Cyan Triangle Visor
+      ctx.fillStyle = COLORS.eye;
+      ctx.beginPath(); ctx.moveTo(faceDir * 6, -5); ctx.lineTo(faceDir * 12, 0); ctx.lineTo(faceDir * 6, 5); ctx.fill();
       
-      ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 22, -26); ctx.stroke();
-      
-      if (hoverK > 0) {
-        ctx.strokeStyle = COLORS.eye; ctx.globalAlpha = 0.5 + 0.4 * hoverK; ctx.lineWidth = 2 + 3 * hoverK; ctx.setLineDash([9, 7]);
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 60, -40); ctx.stroke(); ctx.setLineDash([]);
-        ctx.beginPath(); ctx.arc(faceDir * 60, -40, 18 - 9 * hoverK, 0, Math.PI * 2); ctx.stroke();
-        ctx.globalAlpha = 1;
-      }
       drawDimensions(0, 0, hw*2, hh*2, 24, 36);
 
     } else if (modelName === "the-source") {
@@ -493,7 +628,10 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.beginPath(); ctx.ellipse(0, 0, w * 1.45, h * 1.45, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       
-      const spin = time * 0.5 * (1 + hoverK * 3);
+      // Ticking spin
+      const ticks = Math.floor(time * (1 + hoverK * 4));
+      const spin = ticks * (Math.PI / 5);
+      
       ctx.rotate(spin);
       ctx.fillStyle = "#191328";
       ctx.beginPath();
@@ -510,6 +648,11 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.globalAlpha = 0.9; ctx.fillStyle = core; ctx.beginPath(); ctx.arc(0, 0, cr, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 0.7; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0, 0, cr * 0.45, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
+      
+      if (hoverK > 0) {
+        drawAnnotation(w, 0, 80, -50, "[CRITICAL OVERLOAD]", core);
+      }
+      
       drawDimensions(0, 0, w*2.9, h*2.9, 116, 116);
 
     } else if (modelName === "aldric") {
@@ -521,9 +664,16 @@ export function initModelViewer(canvas, modelName, variant) {
       
       ctx.fillStyle = "#fff"; ctx.fillRect(faceDir * 16 - 8, 14, 16, 11);
       
-      const wAngle = -0.3 + hoverK * 0.8; 
+      const swing = hoverK > 0 ? Math.sin(time*5)*0.8 : 0;
+      const wAngle = -0.3 + swing; 
       const hx = faceDir * hw * 0.5, hy = -4, L = 64;
       const tx = hx + faceDir * Math.cos(wAngle) * L, ty = hy + Math.sin(wAngle) * L;
+      
+      if (hoverK > 0) {
+         ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.4 * hoverK; ctx.lineWidth = 14; ctx.lineCap = "round";
+         ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke(); ctx.globalAlpha = 1;
+         drawAnnotation(tx, ty, faceDir * 100, -50, "[BERSERKER RAGE]", COLORS.slam);
+      }
       
       ctx.strokeStyle = ink; ctx.lineWidth = 7; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
