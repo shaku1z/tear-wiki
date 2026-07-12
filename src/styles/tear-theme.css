@@ -15,10 +15,10 @@
   --tear-gold:   #e0a326;
   --tear-slate:  #3a4654;
 
-  /* Starlight accent tokens → Tear cyan */
-  --sl-color-accent-low:    rgba(19, 196, 214, 0.15);
-  --sl-color-accent:        #13c4d6;
-  --sl-color-accent-high:   #72eeff;
+  /* Starlight accent tokens - Stark Monochrome (Anti-neon) */
+  --sl-color-accent-low:    rgba(255, 255, 255, 0.05);
+  --sl-color-accent:        #ffffff;
+  --sl-color-accent-high:   #ffffff;
 
   /* Backgrounds — The Tear void */
   --sl-color-bg:            #0a0b10;
@@ -28,7 +28,7 @@
 
   /* Text — Pure white with alpha hierarchy from DESIGN_SYSTEM.md */
   --sl-color-text:          rgba(255, 255, 255, 0.7); /* soft */
-  --sl-color-text-accent:   #13c4d6;
+  --sl-color-text-accent:   #ffffff;
   --sl-color-gray-1:        rgba(255, 255, 255, 1.0); /* full */
   --sl-color-gray-2:        rgba(255, 255, 255, 0.7); /* soft */
   --sl-color-gray-3:        rgba(255, 255, 255, 0.55); /* muted */
@@ -43,16 +43,16 @@
   --sl-color-hairline-shade: rgba(255,255,255,0.15);
 }
 
-/* Light mode — The Grounds (white / crimson) */
+/* Light mode - The Grounds (Stark Monochrome) */
 :root[data-theme='light'] {
-  --sl-color-accent-low:    rgba(192, 32, 42, 0.15);
-  --sl-color-accent:        #c0202a;
-  --sl-color-accent-high:   #8b0010;
+  --sl-color-accent-low:    rgba(0, 0, 0, 0.05);
+  --sl-color-accent:        #000000;
+  --sl-color-accent-high:   #000000;
   --sl-color-bg:            #ffffff;
   --sl-color-bg-nav:        #ffffff;
   --sl-color-bg-sidebar:    #ffffff;
   --sl-color-text:          rgba(0, 0, 0, 0.7);
-  --sl-color-text-accent:   #c0202a;
+  --sl-color-text-accent:   #000000;
   
   --sl-color-gray-1:        rgba(0, 0, 0, 1.0);
   --sl-color-gray-2:        rgba(0, 0, 0, 0.7);
@@ -119,7 +119,7 @@ body {
   font-size: 1.1rem;
   letter-spacing: 0.25em;
   font-weight: 700;
-  color: var(--tear-cyan) !important;
+  color: var(--sl-color-white) !important;
   text-transform: uppercase;
 }
 :root[data-theme='light'] .site-title {
@@ -149,9 +149,9 @@ header.header {
 
 /* Active sidebar link gets left-border highlight */
 a[aria-current='page'] {
-  border-left: 2px solid var(--sl-color-accent);
+  border-left: 2px solid var(--sl-color-white);
   background: var(--sl-color-accent-low);
-  color: var(--sl-color-accent) !important;
+  color: var(--sl-color-white) !important;
 }
 
 a:hover {
@@ -206,7 +206,7 @@ th {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--sl-color-accent);
+  color: var(--sl-color-gray-2);
   padding: 0.6rem 0.8rem;
   text-align: left;
 }
