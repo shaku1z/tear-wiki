@@ -188,47 +188,23 @@ export function initModelViewer(canvas, modelName, variant) {
     enemyInstance.y = 0;
 
     // Simulate Projectiles
-    window.projectiles = window.projectiles.filter(p => p.life > 0);
-    window.projectiles.forEach(p => {
-      // Very basic projectile update since we don't have projectile.update method in projectile.js
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      if (p.vy !== 0 || p.gravity) p.vy += (p.gravity || 0) * dt;
-      p.life -= dt;
-    });
+    window.projectiles = window.projectiles.filter(p => !p.dead && p.life > 0);
+    window.projectiles.forEach(p => p.update(dt));
 
-    // Simulate Particles
-    FX.list = FX.list.filter(p => p.life > 0);
-    FX.list.forEach(p => {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vx *= 0.95;
-      p.vy *= 0.95;
-      p.life -= dt;
-    });
+    // Simulate Particles natively
+    if (FX.update) FX.update(dt);
 
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(1.5, 1.5);
     
-    // Draw all
-    // Draw Projectiles
+    // Draw all natively
     window.projectiles.forEach(p => {
-      ctx.fillStyle = p.tint || "#e23b3b";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r || 6, 0, Math.PI*2);
-      ctx.fill();
+      if (p.draw) p.draw(ctx);
     });
 
-    // Draw Particles
-    FX.list.forEach(p => {
-      ctx.fillStyle = p.col;
-      ctx.globalAlpha = p.life / p.max;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    });
+    // Draw Particles natively
+    if (FX.draw) FX.draw(ctx);
 
     enemyInstance.draw(ctx);
     
