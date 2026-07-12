@@ -312,4 +312,53 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
     cursor: ns-resize;
     box-shadow: 0 0 10px rgba(21, 194, 194, 0.5);
   }
+
+  /* --- LIGHT MODE OVERRIDES --- */
+  :global([data-theme='light']) .model-canvas-wrapper {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+  }
+  :global([data-theme='light']) .model-grid-bg {
+    background-image: 
+      linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+  }
+  :global([data-theme='light']) .model-label, 
+  :global([data-theme='light']) .model-status {
+    background: rgba(255, 255, 255, 0.85);
+    color: #0f172a;
+    border-color: rgba(0,0,0,0.15);
+  }
+  :global([data-theme='light']) .control-group,
+  :global([data-theme='light']) .model-zoom-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  :global([data-theme='light']) .control-label {
+    color: #475569;
+  }
+  :global([data-theme='light']) .ctrl-btn {
+    color: #475569;
+  }
+  :global([data-theme='light']) .ctrl-btn:hover {
+    color: #0f172a;
+    background: rgba(0,0,0,0.05);
+  }
+  :global([data-theme='light']) .ctrl-btn.active {
+    color: #fff;
+    background: #0284c7;
+    box-shadow: 0 0 8px rgba(2, 132, 199, 0.4);
+  }
+  :global([data-theme='light']) .debug-toggle.active {
+    background: #dc2626;
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+  }
+  :global([data-theme='light']) .zoom-slider {
+    background: rgba(0,0,0,0.1);
+  }
+  :global([data-theme='light']) .zoom-slider::-webkit-slider-thumb {
+    background: #0284c7;
+    box-shadow: 0 0 8px rgba(2, 132, 199, 0.4);
+  }
 </style>
