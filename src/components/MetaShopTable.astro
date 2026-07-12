@@ -1,0 +1,74 @@
+---
+import { SHOP } from '../scripts/game-engine.js';
+
+const categoryMap = {
+  tough: 'Resilience',
+  sharp: 'Offense',
+  swift: 'Mobility',
+  recovery: 'Mobility',
+  headstart: 'Utility',
+  greed: 'Utility',
+  reach: 'Offense',
+  throwarm: 'Offense',
+  thickskin: 'Resilience',
+  warding: 'Resilience',
+  aircharge: 'Mobility',
+  lifeline: 'Resilience',
+  phoenix: 'Resilience'
+};
+
+const categories = ['Offense', 'Mobility', 'Resilience', 'Utility'];
+---
+
+<div class="meta-shop-container">
+  {categories.map((cat) => {
+    const items = SHOP.filter(item => (categoryMap[item.id] || 'Utility') === cat);
+    if (items.length === 0) return null;
+
+    return (
+      <div class="category-section">
+        <h3>{cat}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Upgrade</th>
+              <th>Level</th>
+              <th>Cost (Coins)</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(item => {
+              const maxLvl = item.maxLevel || 1;
+              const levels = Array.from({length: maxLvl}, (_, i) => i);
+              return levels.map((lv) => {
+                const isFirst = lv === 0;
+                const isLast = lv === maxLvl - 1;
+                const cost = Math.round(item.baseCost * Math.pow(item.costMult || 1, lv));
+                const lvStr = isLast ? `${lv + 1} (Max)` : `${lv + 1}`;
+
+                if (isFirst) {
+                  return (
+                    <tr>
+                      <td rowspan={maxLvl}><strong>{item.name}</strong></td>
+                      <td>{lvStr}</td>
+                      <td>{cost}</td>
+                      <td rowspan={maxLvl}>{item.desc}</td>
+                    </tr>
+                  );
+                } else {
+                  return (
+                    <tr>
+                      <td>{lvStr}</td>
+                      <td>{cost}</td>
+                    </tr>
+                  );
+                }
+              });
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  })}
+</div>

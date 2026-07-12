@@ -4,6 +4,8 @@ description: The complete guide to the Tear Meta Shop — persistent upgrades to
 gameVersion: v0.1
 ---
 
+import MetaShopTable from '../../../components/MetaShopTable.astro';
+
 The **Meta Shop** is the heart of your persistent progression in Tear. Upgrades purchased here carry over across every run, in every mode — they are permanent enhancements to your baseline capabilities.
 
 Unlike in-run drafting, Meta shop upgrades are an investment in your overall player power. The costs scale significantly per level, requiring deep mastery of [Achievements](/progression/achievements) and [Daily Challenges](/progression/daily-challenges) to acquire enough **Coins** to unlock the highest tiers.
@@ -22,103 +24,12 @@ Lifetime Coins do not expire and accumulate across all play sessions.
 
 The Meta Shop is divided into four thematic categories: **Offense**, **Mobility**, **Resilience**, and **Utility**.
 
-### Offense
-Focused on maximizing your raw damage output and the physical capabilities of your blade.
-
-| Upgrade | Level | Cost (Coins) | Effect |
-|---------|-------|--------------|--------|
-| **Sharpness** | 1 | 185 | +6% base damage. |
-|  | 2 | 296 | +12% base damage. |
-|  | 3 | 474 | +19% base damage. |
-|  | 4 | 758 | +26% base damage. |
-|  | 5 | 1212 | +34% base damage. |
-|  | 6 | 1940 | +42% base damage. |
-|  | 7 | 3104 | +50% base damage. |
-|  | 8 (Max) | 4966 | +59% base damage. |
-| **Long Arm** | 1 | 200 | +12px aim radius, +6px length. |
-|  | 2 | 300 | +24px aim radius, +12px length. |
-|  | 3 | 450 | +36px aim radius, +18px length. |
-|  | 4 | 675 | +48px aim radius, +24px length. |
-|  | 5 (Max) | 1013 | +60px aim radius, +30px length. |
-| **Throwing Arm** | 1 | 185 | +8% thrown-blade damage. |
-|  | 2 | 278 | +17% thrown-blade damage. |
-|  | 3 | 416 | +26% thrown-blade damage. |
-|  | 4 | 624 | +36% thrown-blade damage. |
-|  | 5 | 937 | +47% thrown-blade damage. |
-|  | 6 (Max) | 1405 | +59% thrown-blade damage. |
+<MetaShopTable />
 
 > [!TIP]
 > **Priority:** If you struggle with maintaining distance, prioritize **Long Arm**. The extra reach gives you a massive advantage when juggling dangerous enemies without putting yourself in harm's way.
-
----
-
-### Mobility
-Focused on enhancing your evasion mechanics, physics interactions, and aerial mastery. 
-
-| Upgrade | Level | Cost (Coins) | Effect |
-|---------|-------|--------------|--------|
-| **Swiftness** | 1 | 160 | +4% move speed. |
-|  | 2 | 240 | +8% move speed. |
-|  | 3 | 360 | +12% move speed. |
-|  | 4 | 540 | +17% move speed. |
-|  | 5 | 810 | +22% move speed. |
-|  | 6 (Max) | 1215 | +27% move speed. |
-| **Conditioning** | 1 | 170 | 6% faster dash cooldown. |
-|  | 2 | 255 | 12% faster dash cooldown. |
-|  | 3 | 383 | 17% faster dash cooldown. |
-|  | 4 | 574 | 22% faster dash cooldown. |
-|  | 5 | 861 | 27% faster dash cooldown. |
-|  | 6 (Max) | 1291 | 31% faster dash cooldown. |
-| **Aether Step** | 1 (Max) | 560 | Start with +1 mid-air dash charge. |
-
-> [!CAUTION]
-> **Aether Step** is arguably the most powerful mobility upgrade in the game. It fundamentally changes how you can navigate the arena and string together combos. Save up for this early!
-
----
-
-### Resilience
-Focused on raw survivability. Crucial for deep Gauntlet and Endless runs where enemies overwhelm the screen.
-
-| Upgrade | Level | Cost (Coins) | Effect |
-|---------|-------|--------------|--------|
-| **Toughness** | 1 | 160 | +12 starting max HP. |
-|  | 2 | 240 | +24 starting max HP. |
-|  | 3 | 360 | +36 starting max HP. |
-|  | 4 | 540 | +48 starting max HP. |
-|  | 5 | 810 | +60 starting max HP. |
-|  | 6 | 1215 | +72 starting max HP. |
-|  | 7 | 1823 | +84 starting max HP. |
-|  | 8 (Max) | 2734 | +96 starting max HP. |
-| **Thick Skin** | 1 | 220 | 4% less damage taken. |
-|  | 2 | 352 | 8% less damage taken. |
-|  | 3 | 563 | 12% less damage taken. |
-|  | 4 | 901 | 15% less damage taken. |
-|  | 5 | 1442 | 18% less damage taken. |
-|  | 6 (Max) | 2307 | 22% less damage taken. |
-| **Warding** | 1 | 400 | Begin each run with 1 one-hit shield(s). |
-|  | 2 (Max) | 720 | Begin each run with 2 one-hit shield(s). |
-| **Lifeline** | 1 | 270 | Recover +5 HP on each wave clear. |
-|  | 2 | 405 | Recover +10 HP on each wave clear. |
-|  | 3 | 608 | Recover +15 HP on each wave clear. |
-|  | 4 (Max) | 911 | Recover +20 HP on each wave clear. |
-| **Second Wind** | 1 (Max) | 850 | Revive once per run with 35% HP. |
-
----
-
-### Utility
-Focused on accelerating your in-run economy and getting a head start.
-
-| Upgrade | Level | Cost (Coins) | Effect |
-|---------|-------|--------------|--------|
-| **Head Start** | 1 (Max) | 420 | Begin each run with a random upgrade. |
-| **Coin Magnet** | 1 | 200 | +15% coins earned. |
-|  | 2 | 320 | +30% coins earned. |
-|  | 3 | 512 | +45% coins earned. |
-|  | 4 | 819 | +60% coins earned. |
-|  | 5 (Max) | 1311 | +75% coins earned. |
-
-> [!NOTE]
-> **Economy Scaling:** If you want to accelerate your meta-progression, maxing out **Coin Magnet** early is highly recommended. More coins directly translate to buying more meta upgrades!
+>
+> **Economy Scaling:** Maxing out **Coin Magnet** early is highly recommended. More coins directly translate to buying more meta upgrades!
 
 ---
 

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const BASE_URL = 'https://raw.githubusercontent.com/shaku1z/tear/master/js/';
-const FILES = ['utils.js', 'config.js', 'particles.js', 'projectile.js', 'variants.js', 'enemy.js'];
+const FILES = ['utils.js', 'config.js', 'particles.js', 'projectile.js', 'variants.js', 'enemy.js', 'meta.js'];
 const DEST_PATH = path.join(process.cwd(), 'src', 'scripts', 'game-engine.js');
 
 function fetchFile(filename) {
@@ -33,7 +33,8 @@ export {
   CONFIG,
   FX, Projectile,
   VARIANTS, applyVariant,
-  Enemy, Charger, Ranged, Flyer, Bomber, Armored, Boss, Support, Wraith, Chimera, Warden, Colossus, Aldric, Echo, Source
+  Enemy, Charger, Ranged, Flyer, Bomber, Armored, Boss, Support, Wraith, Chimera, Warden, Colossus, Aldric, Echo, Source,
+  SHOP
 };
 `;
     combined += exports;
