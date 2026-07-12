@@ -1,5 +1,6 @@
 ---
 import gameManifest from '../data/game-manifest.json';
+import TierPath from './TierPath.astro';
 
 const { category } = Astro.props;
 const filtered = category === 'stackable'
@@ -19,22 +20,15 @@ const labels = { offense: 'OFFENSE', resilience: 'RESILIENCE', mobility: 'MOBILI
   </div>
   <div class="upgrades-grid">
     {filtered.map((upgrade) => (
-      <article class:list={['upgrade-module', `cat-${upgrade.cat}`, upgrade.rare && 'rare']}>
+      <div role="article" data-wiki-card class:list={['upgrade-module', `cat-${upgrade.cat}`, upgrade.rare && 'rare']}>
         <header>
           <span class="module-type">{upgrade.tiers.length ? 'SPECIAL' : upgrade.unique ? 'UNIQUE' : 'STACKS'}</span>
           <span class="module-domain">{labels[upgrade.cat] || upgrade.cat}</span>
         </header>
         <h3>{upgrade.name}</h3>
         <p>{upgrade.desc}</p>
-        {upgrade.tiers.length > 0 && (
-          <details>
-            <summary>EVOLUTION PATH / {upgrade.tiers.length} TIERS</summary>
-            <ol>
-              {upgrade.tiers.map((tier, index) => <li><b>T{index + 1}</b> {tier.desc}</li>)}
-            </ol>
-          </details>
-        )}
-      </article>
+        {upgrade.progression === 'tiered' && <TierPath upgrade={upgrade} />}
+      </div>
     ))}
   </div>
 </section>
@@ -43,18 +37,15 @@ const labels = { offense: 'OFFENSE', resilience: 'RESILIENCE', mobility: 'MOBILI
   .upgrade-catalogue { --cyan: #13c4d6; --red: #e23b3b; --blue: #2f6df0; --purple: #8b3bd6; --orange: #ef8a17; --green: #1faf5a; --gold: #e0a326; margin: 1.5rem 0; }
   .catalogue-signal { border: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; font-family: var(--sl-font-mono); font-size: .65rem; font-weight: 800; gap: 1rem; letter-spacing: .1em; padding: .55rem .7rem; text-transform: uppercase; }
   .catalogue-signal code { color: var(--cyan); font: inherit; margin-left: auto; }
-  .upgrades-grid { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fill, minmax(225px, 1fr)); margin-top: .6rem; }
-  .upgrade-module { --accent: var(--cyan); background: var(--sl-color-bg); border: 1px solid var(--sl-color-hairline); border-left: 4px solid var(--accent); display: flex; flex-direction: column; min-height: 11rem; padding: .85rem; }
+  .upgrades-grid { align-items: stretch; display: grid; gap: .6rem; grid-template-columns: repeat(auto-fill, minmax(225px, 1fr)); margin-top: .6rem; }
+  .upgrades-grid > [data-wiki-card] { align-self: stretch; margin: 0; }
+  .upgrade-module { --accent: var(--cyan); background: var(--sl-color-bg); border: 1px solid var(--sl-color-hairline); border-left: 4px solid var(--accent); display: flex; flex-direction: column; min-height: 13.5rem; padding: .85rem; }
   .upgrade-module:hover { background: var(--sl-color-gray-6); border-color: var(--accent); }
   .upgrade-module header { display: flex; justify-content: space-between; }
   .module-type, .module-domain { color: var(--sl-color-gray-3); font-family: var(--sl-font-mono); font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
   .module-domain { color: var(--accent); }
   .upgrade-module h3 { border: 0; color: var(--sl-color-white); font-size: .95rem; letter-spacing: .06em; margin: .65rem 0 .4rem; padding: 0; }
   .upgrade-module p { color: var(--sl-color-gray-2); font-size: .82rem; line-height: 1.5; margin: 0; }
-  details { border-top: 1px solid var(--sl-color-hairline); margin-top: auto; padding-top: .7rem; }
-  summary { color: var(--accent); cursor: pointer; font-family: var(--sl-font-mono); font-size: .63rem; font-weight: 800; letter-spacing: .08em; }
-  ol { color: var(--sl-color-gray-2); font-size: .78rem; line-height: 1.45; margin: .65rem 0 0; padding-left: 1rem; }
-  li + li { margin-top: .4rem; } li b { color: var(--accent); font-family: var(--sl-font-mono); }
   .cat-offense { --accent: var(--red); } .cat-resilience { --accent: var(--green); } .cat-mobility { --accent: var(--blue); } .cat-throw { --accent: var(--orange); } .cat-parry { --accent: var(--cyan); } .cat-utility { --accent: var(--purple); } .rare { --accent: var(--gold); }
   @media (max-width: 560px) { .upgrades-grid { grid-template-columns: 1fr; } .catalogue-signal { flex-wrap: wrap; } .catalogue-signal code { margin-left: 0; } }
 </style>

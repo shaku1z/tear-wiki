@@ -19,6 +19,7 @@ export const selectedAbilities = derived(loadout, $l => {
       const u = SPECIALS.find(x => x.id === id);
       if (u) {
         const originalApply = u.apply;
+        const evolutionApplies = (u.tiers || []).slice(0, Math.max(0, tier - 1)).map((evolution) => evolution.apply).filter(Boolean);
         list.push({
           ...u,
           tier,
@@ -26,6 +27,7 @@ export const selectedAbilities = derived(loadout, $l => {
             if (!ctx.mods.tier) ctx.mods.tier = {};
             ctx.mods.tier[id] = tier;
             if (originalApply) originalApply(ctx);
+            evolutionApplies.forEach((applyEvolution) => applyEvolution(ctx));
           }
         });
       }

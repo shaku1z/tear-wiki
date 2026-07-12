@@ -34,6 +34,18 @@
   });
   $: activeCount = selectedEntries.length;
 
+  function selectedTier(ability) {
+    return $loadout.specials[ability.id] || 0;
+  }
+
+  function selectedTierLevel(ability) {
+    return ability.tierLevels?.[selectedTier(ability) - 1];
+  }
+
+  function nextTierLevel(ability) {
+    return ability.tierLevels?.[selectedTier(ability)] || null;
+  }
+
   function isSelected(ability, currentLoadout) {
     return (ability.type === 'special' && (currentLoadout.specials[ability.id] || 0) > 0)
       || (ability.type === 'unique' && currentLoadout.uniques.includes(ability.id))
@@ -155,18 +167,30 @@
       {#if visibleAbilities.length}
         <div class="ability-grid">
           {#each visibleAbilities as ability}
-            <article class:selected={isSelected(ability, $loadout)} class="ability-module cat-{ability.cat}">
+            <div role="article" data-wiki-card class:selected={isSelected(ability, $loadout)} class="ability-module cat-{ability.cat}">
               <div class="module-head">
                 <span class="module-class">{ability.type === 'special' ? 'SPECIAL' : ability.type === 'unique' ? 'UNIQUE' : 'STACKS'}</span>
                 <span class="module-domain">{ability.cat}</span>
               </div>
+              {#if ability.type === 'special'}
+                <div class="tier-identity"><span>T1 → T{ability.maxTier}</span><span>EVOLVABLE</span></div>
+              {/if}
               <h3>{ability.name}</h3>
-              <p>{ability.type === 'special' && ($loadout.specials[ability.id] || 0) > 0 ? ability.tiers[$loadout.specials[ability.id] - 1]?.desc : ability.desc}</p>
+              <p>{ability.type === 'special' && selectedTier(ability) > 0 ? selectedTierLevel(ability)?.desc : ability.desc}</p>
 
               {#if ability.type === 'special'}
+                <div class="evolution-state" aria-live="polite">
+                  {#if selectedTier(ability) > 0}
+                    <span>SIMULATING T{selectedTier(ability)} / {selectedTier(ability) === 1 ? 'DRAFT PICKUP' : 'BOSS EVOLUTION'}</span>
+                    {#if nextTierLevel(ability)}<b>NEXT: T{nextTierLevel(ability).level} / BOSS</b>{/if}
+                  {:else}
+                    <span>SELECT A TIER TO SIMULATE</span><b>T1 / DRAFT PICKUP</b>
+                  {/if}
+                </div>
                 <div class="tier-rail" aria-label={`${ability.name} tier selector`}>
-                  {#each Array.from({ length: ability.tiers.length + 1 }, (_, tier) => tier) as tier}
-                    <button class:active={($loadout.specials[ability.id] || 0) === tier} on:click={() => setSpecialTier(ability.id, tier)}>{tier === 0 ? 'OFF' : `T${tier}`}</button>
+                  <button class="clear-tier" class:active={selectedTier(ability) === 0} on:click={() => setSpecialTier(ability.id, 0)}>CLEAR</button>
+                  {#each ability.tierLevels as tier}
+                    <button class:active={selectedTier(ability) === tier.level} on:click={() => setSpecialTier(ability.id, tier.level)} aria-label={`${ability.name} Tier ${tier.level}: ${tier.source === 'draft' ? 'draft pickup' : 'boss evolution'}`}>T{tier.level}</button>
                   {/each}
                 </div>
               {:else if ability.type === 'unique'}
@@ -180,7 +204,7 @@
                   <button aria-label={`Add ${ability.name} stack`} on:click={() => adjustStackable(ability.id, 1)}>+</button>
                 </div>
               {/if}
-            </article>
+            </div>
           {/each}
         </div>
       {:else}
@@ -238,16 +262,23 @@
   .domain-tab { align-items: center; background: transparent; color: var(--sl-color-gray-3); display: flex; font-size: .65rem; font-weight: 800; gap: .55rem; justify-content: space-between; min-width: 5.5rem; padding: .55rem .6rem; }
   .domain-tab b { color: var(--cat-color, var(--lab-ink)); font-size: .62rem; }
   .domain-tab:hover, .domain-tab.active { background: var(--sl-color-gray-6); border-color: var(--cat-color, var(--lab-cyan)); color: var(--lab-ink); }
-  .ability-grid { display: grid; gap: .65rem; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
-  .ability-module { --cat-color: var(--lab-cyan); background: var(--lab-paper); border: 1px solid var(--lab-line); border-left: 4px solid var(--cat-color); display: flex; flex-direction: column; min-height: 13.5rem; padding: .8rem; position: relative; }
+  .ability-grid { align-items: stretch; display: grid; gap: .65rem; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  .ability-grid > [data-wiki-card] { align-self: stretch; margin: 0; }
+  .ability-module { --cat-color: var(--lab-cyan); background: var(--lab-paper); border: 1px solid var(--lab-line); border-left: 4px solid var(--cat-color); display: flex; flex-direction: column; min-height: 16.5rem; padding: .8rem; position: relative; }
   .ability-module.selected { border-color: var(--cat-color); background: color-mix(in srgb, var(--cat-color) 7%, var(--lab-paper)); }
   .module-head { display: flex; justify-content: space-between; }
   .module-domain { color: var(--cat-color); }
+  .tier-identity { color: var(--cat-color); display: flex; font-size: .55rem; font-weight: 800; justify-content: space-between; letter-spacing: .1em; margin-top: .5rem; text-transform: uppercase; }
+  .tier-identity span:last-child { color: var(--sl-color-gray-3); }
   .ability-module h3 { font-size: .95rem; line-height: 1.15; margin: .65rem 0 .45rem; text-transform: uppercase; }
   .ability-module p { color: var(--sl-color-gray-2); font-family: var(--sl-font); font-size: .78rem; line-height: 1.5; margin: 0 0 1rem; }
+  .evolution-state { border-top: 1px solid var(--lab-line); color: var(--sl-color-gray-3); display: flex; font-size: .52rem; font-weight: 800; gap: .35rem; justify-content: space-between; letter-spacing: .07em; margin-top: auto; padding-top: .5rem; text-transform: uppercase; }
+  .evolution-state b { color: var(--cat-color); font: inherit; text-align: right; }
   .tier-rail, .stack-control { border-top: 1px solid var(--lab-line); display: flex; gap: .25rem; margin-top: auto; padding-top: .6rem; }
+  .evolution-state + .tier-rail { margin-top: .45rem; }
   .tier-rail button { background: transparent; color: var(--sl-color-gray-3); flex: 1; font-size: .62rem; font-weight: 800; padding: .48rem .25rem; }
   .tier-rail button.active { background: var(--cat-color); border-color: var(--cat-color); color: #071012; }
+  .tier-rail .clear-tier { flex: 1.25; }
   .module-toggle { background: transparent; color: var(--cat-color); font-size: .64rem; font-weight: 800; margin-top: auto; padding: .62rem; }
   .module-toggle:hover, .module-toggle.active { background: var(--cat-color); border-color: var(--cat-color); color: #071012; }
   .stack-control { align-items: center; justify-content: space-between; }

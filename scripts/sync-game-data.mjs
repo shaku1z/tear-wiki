@@ -8,3 +8,4 @@ function run(script) {
 run('scripts/sync-config.js');
 run('scripts/generate-game-data.mjs');
 run('scripts/verify-game-data.mjs');
+run('scripts/verify-tier-system.mjs');

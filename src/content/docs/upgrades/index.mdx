@@ -4,7 +4,7 @@ description: How the draft system, upgrade categories, tiers, and draft weightin
 gameVersion: v0.1
 ---
 
-import UpgradeCard from '../../../components/UpgradeCard.astro';
+import TierSystemReadout from '../../../components/TierSystemReadout.astro';
 
 Tear's upgrade system allows you to build powerful, synergetic loadouts. After every wave, you are presented with **3 upgrade choices**. The draft pool is highly curated, weighing rarity against impact.
 
@@ -33,6 +33,8 @@ The draft algorithm weights upgrades based on their type:
 
 Special abilities (those with a `tiers` property) start at **Tier 1**.
 Each time you **defeat a Boss**, you earn an **Ability Tier-Up**. This allows you to permanently evolve one of your Special abilities to Tier 2, and eventually Tier 3.
+
+<TierSystemReadout />
 
 ---
 

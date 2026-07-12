@@ -13,12 +13,24 @@ function json(value) {
 }
 
 const manifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   source,
   config: json(CONFIG),
-  upgrades: UPGRADES.map(({ id, name, cat, desc, unique = false, rare = false, tiers }) => ({
-    id, name, cat, desc, unique, rare, tiers: json(tiers || []),
-  })),
+  upgrades: UPGRADES.map(({ id, name, cat, desc, unique = false, rare = false, tiers }) => {
+    const evolutions = json(tiers || []);
+    const progression = evolutions.length ? 'tiered' : unique ? 'single' : 'stackable';
+    const tierLevels = evolutions.length
+      ? [{ level: 1, source: 'draft', desc }, ...evolutions.map((tier, index) => ({ level: index + 2, source: 'boss', desc: tier.desc }))]
+      : [];
+
+    return {
+      id, name, cat, desc, unique, rare,
+      progression,
+      maxTier: tierLevels.length || null,
+      tierLevels,
+      tiers: evolutions,
+    };
+  }),
   stages: json(STAGES),
   variants: json(VARIANTS),
   affixes: { list: AFFIXES.map(({ id, color }) => ({ id, color })), presets: json(PRESETS) },
@@ -32,6 +44,11 @@ assert.ok(Array.isArray(manifest.upgrades) && manifest.upgrades.length > 0, 'No 
 assert.ok(Array.isArray(manifest.stages) && manifest.stages.length > 0, 'No stages were extracted.');
 assert.ok(manifest.config.colors?.perfect, 'The engine palette was not extracted.');
 assert.equal(new Set(manifest.upgrades.map((upgrade) => upgrade.id)).size, manifest.upgrades.length, 'Upgrade IDs must be unique.');
+for (const upgrade of manifest.upgrades.filter((item) => item.progression === 'tiered')) {
+  assert.equal(upgrade.maxTier, upgrade.tierLevels.length, `${upgrade.id} tier count must be explicit.`);
+  assert.deepEqual(upgrade.tierLevels.map((tier) => tier.level), [1, 2, 3], `${upgrade.id} must expose Tier 1 through Tier 3.`);
+  assert.equal(upgrade.tierLevels[0].desc, upgrade.desc, `${upgrade.id} Tier 1 must match the draft pickup.`);
+}
 
 fs.writeFileSync(output, JSON.stringify(manifest, null, 2) + '\n');
 console.log(`Generated ${path.relative(root, output)} from ${manifest.source.repository}@${manifest.source.commit}.`);

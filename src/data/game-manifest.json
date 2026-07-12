@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
     "repository": "shaku1z/tear",
     "commit": "ef562820e13c0afbf1779f73ed0327e4d3a56af7"
@@ -645,6 +645,9 @@
       "desc": "+30 max HP, and heal 30.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -654,6 +657,9 @@
       "desc": "+12% swing damage.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -663,6 +669,9 @@
       "desc": "+8% move speed, higher jump.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -672,6 +681,9 @@
       "desc": "-25% dash cooldown.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -681,6 +693,9 @@
       "desc": "+ blade reach and length.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -690,6 +705,9 @@
       "desc": "+25% knockback, stronger launches.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -699,6 +717,9 @@
       "desc": "+20% thrown-blade damage, and it flies faster.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -708,6 +729,9 @@
       "desc": "Swings trickle back a sliver of HP (once per swing).",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -717,6 +741,9 @@
       "desc": "+15% damage while airborne.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -726,6 +753,9 @@
       "desc": "Take 12% less damage.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -735,6 +765,9 @@
       "desc": "Gain a second dash you can use in mid-air. Charges refill when you land.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -744,6 +777,9 @@
       "desc": "+20% score from kills.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -753,6 +789,9 @@
       "desc": "+30% ALL damage (swing + throw), but you take +25% more.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -762,6 +801,25 @@
       "desc": "Skill kills (slam, spike, perfect-parry) restore HP.",
       "unique": true,
       "rare": true,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Skill kills (slam, spike, perfect-parry) restore HP."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Skill kills (slam, spike, perfect-parry) restore much more HP and grant 1s of invincibility."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Skill kills (slam, spike, perfect-parry) restore massive HP and grant 1s of invincibility. Plus, EVERY normal kill now trickles HP back."
+        }
+      ],
       "tiers": [
         {
           "desc": "Skill kills (slam, spike, perfect-parry) restore much more HP and grant 1s of invincibility."
@@ -778,6 +836,25 @@
       "desc": "After a perfect parry, take 60% less damage for 1.2s.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "After a perfect parry, take 60% less damage for 1.2s."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "After a perfect parry, restore HP and take 75% less damage for 1.8s."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "After a perfect parry, restore HP and become completely INVINCIBLE for 2.3s."
+        }
+      ],
       "tiers": [
         {
           "desc": "After a perfect parry, restore HP and take 75% less damage for 1.8s."
@@ -794,6 +871,25 @@
       "desc": "Take 30% less damage while your trick rank is BRUTAL (x3) or higher.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Take 30% less damage while your trick rank is BRUTAL (x3) or higher."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Take 50% less damage while your trick rank is BRUTAL (x3) or higher."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Take 50% less damage starting at STYLISH (x2). At BRUTAL (x3) or higher, you also rapidly REGENERATE HP."
+        }
+      ],
       "tiers": [
         {
           "desc": "Take 50% less damage while your trick rank is BRUTAL (x3) or higher."
@@ -810,6 +906,25 @@
       "desc": "Slam kills grant a shield that blocks the next hit (max 2 shields).",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Slam kills grant a shield that blocks the next hit (max 2 shields)."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Slam and Perfect-Parry kills grant a shield that blocks the next hit (max 3)."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Slam and Perfect-Parry kills grant a blocking shield (max 4). When a shield breaks, it erupts in a damaging shockwave."
+        }
+      ],
       "tiers": [
         {
           "desc": "Slam and Perfect-Parry kills grant a shield that blocks the next hit (max 3)."
@@ -826,6 +941,9 @@
       "desc": "Dash through an enemy shot to deflect it — turn defense into offense.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -835,6 +953,9 @@
       "desc": "Your reflected shots STUN the enemies they strike.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -844,6 +965,9 @@
       "desc": "Power Slams erupt in a shockwave that grows with your descent speed.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -853,6 +977,25 @@
       "desc": "Staying airborne ramps up your swing damage over time (up to +50%).",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Staying airborne ramps up your swing damage over time (up to +50%)."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Staying airborne ramps up your swing damage much faster (up to +80%)."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Staying airborne ramps up your swing damage incredibly fast (up to +130%)."
+        }
+      ],
       "tiers": [
         {
           "desc": "Staying airborne ramps up your swing damage much faster (up to +80%)."
@@ -869,6 +1012,9 @@
       "desc": "Slams blast nearby enemies for 22.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -878,6 +1024,9 @@
       "desc": "Kills explode for 18 to nearby foes.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -887,6 +1036,9 @@
       "desc": "Kills instantly refresh your dash.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -896,6 +1048,25 @@
       "desc": "A thrown blade grows faster and stronger for every enemy it pierces.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "A thrown blade grows faster and stronger for every enemy it pierces."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "A thrown blade ramps up speed and damage much harder for every pierce."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "A thrown blade heavily ramps up speed and damage. Each pierce also briefly STUNS the target."
+        }
+      ],
       "tiers": [
         {
           "desc": "A thrown blade ramps up speed and damage much harder for every pierce."
@@ -912,6 +1083,9 @@
       "desc": "The blade becomes huge while thrown (normal size in hand).",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -921,6 +1095,9 @@
       "desc": "Parried projectiles pierce through every enemy.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -930,6 +1107,9 @@
       "desc": "Parried projectiles split into 3 that ricochet up to 3 times.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -939,6 +1119,9 @@
       "desc": "Rising updrafts also launch all nearby enemies skyward.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -948,6 +1131,25 @@
       "desc": "Recalling the blade tears through enemies for +85% damage.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Recalling the blade tears through enemies for +85% damage."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Recalling the blade tears through enemies for +140% damage."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Recalling the blade tears through enemies for +200% damage. Catching it unleashes a shockwave."
+        }
+      ],
       "tiers": [
         {
           "desc": "Recalling the blade tears through enemies for +140% damage."
@@ -964,6 +1166,25 @@
       "desc": "Dashing directly through enemies unleashes a damaging phase-slice.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Dashing directly through enemies unleashes a damaging phase-slice."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Dashing directly through enemies unleashes a much heavier phase-slice."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Dashing directly through enemies unleashes a devastating phase-slice. If the slice kills, your dash instantly REFUNDS."
+        }
+      ],
       "tiers": [
         {
           "desc": "Dashing directly through enemies unleashes a much heavier phase-slice."
@@ -980,6 +1201,9 @@
       "desc": "Recall the thrown blade from any distance.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -989,6 +1213,9 @@
       "desc": "A thrown blade curves to a new target after each enemy it pierces — chain a whole crowd.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -998,6 +1225,9 @@
       "desc": "The returning blade drags every enemy it passes toward you — cluster them, then punish.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1007,6 +1237,9 @@
       "desc": "For a moment after a dash, your hits land for +35% — dash in, strike hard.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1016,6 +1249,9 @@
       "desc": "+25% damage while below half HP.",
       "unique": true,
       "rare": false,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1025,6 +1261,9 @@
       "desc": "Once per run, refuse to fall — rise from a killing blow with 40% HP.",
       "unique": true,
       "rare": true,
+      "progression": "single",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1034,6 +1273,9 @@
       "desc": "The RETURNING blade (recall) cuts +25% harder — make the catch a finisher.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1043,6 +1285,9 @@
       "desc": "The thrown blade flies and returns 12% faster.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1052,6 +1297,9 @@
       "desc": "+ recall range, and the blade snaps back faster.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1061,6 +1309,9 @@
       "desc": "Perfect parries land more easily — a more forgiving window.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1070,6 +1321,9 @@
       "desc": "Deflect shots even with slower swings.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1079,6 +1333,9 @@
       "desc": "Reflected shots fly faster and hit +18% harder.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1088,6 +1345,9 @@
       "desc": "Higher jump and sharper air control.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1097,6 +1357,9 @@
       "desc": "+9% dash distance, and longer dash i-frames.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1106,6 +1369,9 @@
       "desc": "Recover an extra 10 HP each time you clear a wave.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1115,6 +1381,9 @@
       "desc": "Your trick meter lingers — it drains 25% slower.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1124,6 +1393,9 @@
       "desc": "+18% coins earned this run.",
       "unique": false,
       "rare": false,
+      "progression": "stackable",
+      "maxTier": null,
+      "tierLevels": [],
       "tiers": []
     },
     {
@@ -1133,6 +1405,25 @@
       "desc": "Cuts inflict BLEED—a stacking wound that damages over time.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Cuts inflict BLEED—a stacking wound that damages over time."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Cuts inflict 2 BLEED stacks. Power Slams instantly DETONATE nearby bleed for a burst of damage."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Cuts inflict 3 BLEED stacks. Slams DETONATE bleed, and dying bleeding enemies splash their stacks onto the nearby crowd."
+        }
+      ],
       "tiers": [
         {
           "desc": "Cuts inflict 2 BLEED stacks. Power Slams instantly DETONATE nearby bleed for a burst of damage."
@@ -1149,6 +1440,25 @@
       "desc": "Hits MARK enemies, making them take +30% damage from all sources for 4s.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Hits MARK enemies, making them take +30% damage from all sources for 4s."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "MARKED enemies take +40% damage. Marking armored or shielded foes instantly SHATTERS their guard."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "MARKED enemies take +50% damage. Marks SHATTER guards, and striking a marked foe SPREADS the mark to nearby enemies."
+        }
+      ],
       "tiers": [
         {
           "desc": "MARKED enemies take +40% damage. Marking armored or shielded foes instantly SHATTERS their guard."
@@ -1165,6 +1475,25 @@
       "desc": "A thrown blade PINS the first enemy hit in place, applying deep BLEED.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "A thrown blade PINS the first enemy hit in place, applying deep BLEED."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "A thrown blade PINS EVERY enemy it pierces in place, applying heavier BLEED."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "A thrown blade PINS EVERY enemy pierced with massive BLEED. The returning blade RIPS the wounds open, detonating the bleed."
+        }
+      ],
       "tiers": [
         {
           "desc": "A thrown blade PINS EVERY enemy it pierces in place, applying heavier BLEED."
@@ -1181,6 +1510,25 @@
       "desc": "Perfect parries grant TEMPO (+25% damage, faster speed, refreshes dash) for 4s.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Perfect parries grant TEMPO (+25% damage, faster speed, refreshes dash) for 4s."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Perfect parries grant TEMPO (+30% damage, faster speed, refreshes dash) for 6s. Stacks up to 2 times."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Perfect parries plunge the room into deep slow-mo and grant TEMPO (+34% damage per stack, max 2, faster speed, refreshes dash)."
+        }
+      ],
       "tiers": [
         {
           "desc": "Perfect parries grant TEMPO (+30% damage, faster speed, refreshes dash) for 6s. Stacks up to 2 times."
@@ -1197,6 +1545,25 @@
       "desc": "A perfect parry erupts a COUNTER-SHOCK, damaging and stunning nearby enemies.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "A perfect parry erupts a COUNTER-SHOCK, damaging and stunning nearby enemies."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "A perfect parry erupts a larger COUNTER-SHOCK, damaging, stunning, and MARKING nearby enemies."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "A perfect parry erupts a massive COUNTER-SHOCK (damages, stuns, marks), and leaves you completely INVINCIBLE for a beat."
+        }
+      ],
       "tiers": [
         {
           "desc": "A perfect parry erupts a larger COUNTER-SHOCK, damaging, stunning, and MARKING nearby enemies."
@@ -1213,6 +1580,25 @@
       "desc": "Dashing ignites enemies passed through, inflicting BURN damage over time.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Dashing ignites enemies passed through, inflicting BURN damage over time."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Dashing inflicts a hotter BURN that damages and SLOWS enemies over time."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Dashing inflicts a massive, slowing BURN. Dying burned enemies erupt, igniting everything nearby."
+        }
+      ],
       "tiers": [
         {
           "desc": "Dashing inflicts a hotter BURN that damages and SLOWS enemies over time."
@@ -1229,6 +1615,25 @@
       "desc": "Ending a dash erupts a shockwave that deals damage and knockback.",
       "unique": true,
       "rare": false,
+      "progression": "tiered",
+      "maxTier": 3,
+      "tierLevels": [
+        {
+          "level": 1,
+          "source": "draft",
+          "desc": "Ending a dash erupts a shockwave that deals damage and knockback."
+        },
+        {
+          "level": 2,
+          "source": "boss",
+          "desc": "Ending a dash erupts a heavier shockwave that deals damage, knockback, and STUNS."
+        },
+        {
+          "level": 3,
+          "source": "boss",
+          "desc": "Ending a dash erupts a massive stunning shockwave. Hitting 2+ enemies instantly REFUNDS your dash."
+        }
+      ],
       "tiers": [
         {
           "desc": "Ending a dash erupts a heavier shockwave that deals damage, knockback, and STUNS."

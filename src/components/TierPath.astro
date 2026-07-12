@@ -1,0 +1,31 @@
+---
+const { upgrade, compact = false } = Astro.props;
+const levels = upgrade?.tierLevels || [];
+---
+
+{levels.length > 0 && (
+  <ol class:list={['tier-path', compact && 'tier-path--compact']} aria-label={`${upgrade.name} Tier 1 through Tier ${upgrade.maxTier} evolution path`}>
+    {levels.map((tier) => (
+      <li class:list={[tier.level === 1 ? 'draft' : 'boss']}>
+        <span class="tier-number">T{tier.level}</span>
+        <span class="tier-source">{tier.level === 1 ? 'DRAFT PICKUP' : 'BOSS EVOLUTION'}</span>
+        {!compact && <p>{tier.desc}</p>}
+      </li>
+    ))}
+  </ol>
+)}
+
+<style>
+  .tier-path { display: grid; gap: .4rem; list-style: none; margin: .75rem 0 0; padding: 0; }
+  .tier-path li { border: 1px solid var(--sl-color-hairline); display: grid; gap: .22rem .55rem; grid-template-columns: auto 1fr; margin: 0; padding: .5rem .55rem; }
+  .tier-path .draft { border-left: 3px solid var(--accent, var(--tear-cyan)); }
+  .tier-path .boss { border-left: 3px solid color-mix(in srgb, var(--accent, var(--tear-cyan)) 55%, var(--sl-color-gray-3)); }
+  .tier-number, .tier-source { font-family: var(--sl-font-mono); font-size: .61rem; font-weight: 800; letter-spacing: .08em; }
+  .tier-number { color: var(--accent, var(--tear-cyan)); }
+  .tier-source { color: var(--sl-color-gray-3); }
+  p { color: var(--sl-color-gray-2); font-family: var(--sl-font); font-size: .74rem; grid-column: 1 / -1; line-height: 1.4; margin: .1rem 0 0; }
+  .tier-path--compact { grid-template-columns: repeat(3, 1fr); }
+  .tier-path--compact li { display: flex; flex-direction: column; min-width: 0; }
+  .tier-path--compact .tier-source { font-size: .52rem; }
+  @media (max-width: 480px) { .tier-path--compact { grid-template-columns: 1fr; } }
+</style>

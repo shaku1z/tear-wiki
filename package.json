@@ -5,6 +5,7 @@
   "scripts": {
     "sync:game": "node scripts/sync-game-data.mjs",
     "verify:game": "node scripts/verify-game-data.mjs",
+    "verify:tiers": "node scripts/verify-tier-system.mjs",
     "dev": "npm run sync:game && astro dev",
     "start": "npm run sync:game && astro dev",
     "build": "npm run sync:game && astro build",
