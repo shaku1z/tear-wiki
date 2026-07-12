@@ -85,16 +85,7 @@
 }
 
 /* Minimalist HUD Panels and Borders */
-.sl-container {
-  max-width: 900px; /* Constrain width for better readability */
-}
 
-.content-panel {
-  border: 1px solid var(--sl-color-hairline-light);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  background: var(--sl-color-bg);
-}
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--sl-font-mono);
@@ -159,9 +150,7 @@ a:hover {
 }
 
 /* ---- Content area ---------------------------------------- */
-.content-panel {
-  max-width: 860px;
-}
+
 
 /* Headings — monospace feel like the in-game UI */
 h1, h2, h3, h4, h5 {
