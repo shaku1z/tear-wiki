@@ -38,7 +38,7 @@
   function adjustStackable(id, delta) {
     loadout.update(l => {
       const current = l.stackables[id] || 0;
-      l.stackables[id] = Math.max(0, Math.min(5, current + delta));
+      l.stackables[id] = Math.max(0, current + delta);
       return l;
     });
   }
@@ -130,7 +130,7 @@
                     <span class="badge">Special</span>
                   </div>
                   <div class="mech-switch-group">
-                    {#each [0, 1, 2, 3] as t}
+                    {#each Array.from({length: (u.tiers ? u.tiers.length : 0) + 1}, (_, i) => i) as t}
                       <button 
                         class="mech-switch" 
                         class:on={$loadout.specials[u.id] === t || (t===0 && !$loadout.specials[u.id])} 
