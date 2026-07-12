@@ -1,4 +1,4 @@
-﻿/* ================================================================
+/* ================================================================
    T E A R  Wiki � Design System
    Faithful to the game's own design language.
 
@@ -61,28 +61,28 @@
   --sl-color-hairline:       rgba(17,17,17,0.10);
 }
 
-/* -- DARK = The Tear (the void) ------------------- */
+/* -- DARK = The Tear (the void) — neutral black, no purple tint -- */
 :root[data-theme='dark'] {
-  --sl-color-bg:             #0e0b1a;
-  --sl-color-bg-nav:         #0e0b1a;
-  --sl-color-bg-sidebar:     #0e0b1a;
-  --sl-color-bg-inline-code: rgba(201,196,224,0.07);
-  --sl-color-text:           rgba(201,196,224,0.72);
-  --sl-color-text-accent:    #c9c4e0;
-  --sl-color-white:          #c9c4e0;
-  --sl-color-black:          #0e0b1a;
-  --sl-color-gray-1:         rgba(201,196,224,1.00);
-  --sl-color-gray-2:         rgba(201,196,224,0.72);
-  --sl-color-gray-3:         rgba(201,196,224,0.52);
-  --sl-color-gray-4:         rgba(201,196,224,0.38);
-  --sl-color-gray-5:         rgba(201,196,224,0.22);
-  --sl-color-gray-6:         rgba(201,196,224,0.07);
+  --sl-color-bg:             #0a0a0d;
+  --sl-color-bg-nav:         #0a0a0d;
+  --sl-color-bg-sidebar:     #0a0a0d;
+  --sl-color-bg-inline-code: rgba(226,226,226,0.07);
+  --sl-color-text:           rgba(226,226,226,0.72);
+  --sl-color-text-accent:    #e2e2e2;
+  --sl-color-white:          #e2e2e2;
+  --sl-color-black:          #0a0a0d;
+  --sl-color-gray-1:         rgba(226,226,226,1.00);
+  --sl-color-gray-2:         rgba(226,226,226,0.72);
+  --sl-color-gray-3:         rgba(226,226,226,0.52);
+  --sl-color-gray-4:         rgba(226,226,226,0.38);
+  --sl-color-gray-5:         rgba(226,226,226,0.22);
+  --sl-color-gray-6:         rgba(226,226,226,0.07);
   --sl-color-accent-low:     rgba(19,196,214,0.10);
   --sl-color-accent:         #13c4d6;
   --sl-color-accent-high:    #72eeff;
-  --sl-color-hairline-light: rgba(201,196,224,0.14);
-  --sl-color-hairline-shade: rgba(201,196,224,0.14);
-  --sl-color-hairline:       rgba(201,196,224,0.14);
+  --sl-color-hairline-light: rgba(226,226,226,0.12);
+  --sl-color-hairline-shade: rgba(226,226,226,0.12);
+  --sl-color-hairline:       rgba(226,226,226,0.12);
 }
 
 /* -- Typography ----------------------------------- */
@@ -99,10 +99,11 @@
   box-shadow: none !important;
 }
 
-/* -- Cursor � spring-physics blade reticle -------- */
-body { cursor: none; }
-a, button, [role='button'], input, select, label,
-[tabindex]:not([tabindex='-1']) { cursor: none; }
+/* -- Cursor — spring-physics blade reticle -------- */
+/* Exclude inputs/textareas/selects so native text selection / typing cursor is visible */
+*:not(input):not(textarea):not(select):not(option):not([contenteditable]) {
+  cursor: none !important;
+}
 
 #tear-cursor {
   position: fixed;
@@ -110,7 +111,7 @@ a, button, [role='button'], input, select, label,
   width: 16px; height: 16px;
   border: 1.5px solid var(--sl-color-white);
   pointer-events: none;
-  z-index: 99999;
+  z-index: 2147483646; /* maximum possible z-index */
   transform: translate(-50%, -50%);
   transition: width 0.12s, height 0.12s, border-color 0.12s, opacity 0.3s;
   will-change: transform;
@@ -127,7 +128,7 @@ a, button, [role='button'], input, select, label,
   width: 3px; height: 3px;
   background: var(--sl-color-accent);
   pointer-events: none;
-  z-index: 100000;
+  z-index: 2147483647; /* maximum possible z-index */
   transform: translate(-50%, -50%);
   will-change: transform;
   opacity: 0;
@@ -260,6 +261,14 @@ site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-c
 [data-has-hero] .hero { display: none !important; }
 [data-has-hero] main { padding: 0 !important; }
 [data-has-hero] .content-panel:first-of-type { padding: 0 !important; border: none !important; }
+
+.tear-splash-body {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem var(--sl-content-pad-x, 1.5rem) 6rem;
+  box-sizing: border-box;
+}
 
 /* -- Biome navigator ------------------------------- */
 .biome-nav { margin: 2rem 0; }
