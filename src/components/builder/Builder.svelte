@@ -135,7 +135,7 @@
                         class="mech-switch" 
                         class:on={$loadout.specials[u.id] === t || (t===0 && !$loadout.specials[u.id])} 
                         on:click={() => setSpecialTier(u.id, t)}>
-                        T{t}
+                        {t === 0 ? 'OFF' : 'T' + t}
                       </button>
                     {/each}
                   </div>
