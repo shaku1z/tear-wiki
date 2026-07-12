@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CONFIG, UPGRADES, STAGES, VARIANTS, ACH, SHOP } from '../src/scripts/game-engine.js';
+import { CONFIG, UPGRADES, STAGES, VARIANTS, AFFIXES, PRESETS, ACH, SHOP } from '../src/scripts/game-engine.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const source = JSON.parse(fs.readFileSync(path.join(root, 'src/scripts/game-source.json'), 'utf8'));
@@ -21,6 +21,7 @@ const manifest = {
   })),
   stages: json(STAGES),
   variants: json(VARIANTS),
+  affixes: { list: AFFIXES.map(({ id, color }) => ({ id, color })), presets: json(PRESETS) },
   achievements: json(ACH),
   shop: json(SHOP),
 };

@@ -1771,6 +1771,57 @@
       }
     ]
   },
+  "affixes": {
+    "list": [
+      {
+        "id": "tank",
+        "color": "#6b4a2a"
+      },
+      {
+        "id": "swift",
+        "color": "#2fa0f0"
+      },
+      {
+        "id": "rapid",
+        "color": "#ef5520"
+      },
+      {
+        "id": "volley",
+        "color": "#d65bd6"
+      },
+      {
+        "id": "armed",
+        "color": "#cc2030"
+      },
+      {
+        "id": "warded",
+        "color": "#13c4d6"
+      }
+    ],
+    "presets": [
+      {
+        "type": "ranged",
+        "affixes": [
+          "rapid",
+          "volley"
+        ]
+      },
+      {
+        "type": "charger",
+        "affixes": [
+          "tank",
+          "armed"
+        ]
+      },
+      {
+        "type": "armored",
+        "affixes": [
+          "warded",
+          "tank"
+        ]
+      }
+    ]
+  },
   "achievements": {
     "RARITY": {
       "common": {
