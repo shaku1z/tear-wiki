@@ -222,6 +222,8 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
     display: flex;
     align-items: center;
     height: 40px;
+    margin: 0;
+    box-sizing: border-box;
     background: rgba(15, 15, 20, 0.85);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.12);
@@ -235,6 +237,7 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
     height: 100%;
     font-family: var(--sl-font-mono);
     font-size: 0.65rem;
+    line-height: 1;
     color: var(--sl-color-gray-3);
     padding: 0 0.75rem;
     letter-spacing: 0.15em;
@@ -251,6 +254,7 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
     color: var(--sl-color-gray-3);
     font-family: var(--sl-font-mono);
     font-size: 0.75rem;
+    line-height: 1;
     padding: 0 0.85rem;
     margin: 0 0.15rem;
     cursor: pointer;
