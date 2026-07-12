@@ -4,9 +4,6 @@ export interface Props {
   variant?: string;
 }
 const { model, variant } = Astro.props;
-
-const isBoss = (model === "warden" || model === "aldric" || model === "iron-colossus" || model === "the-echo" || model === "the-source");
-const defaultZoom = isBoss ? 0.4 : 1.0;
 ---
 
 <tear-model-viewer data-model={model} data-variant={variant || ''} class="tear-model-viewer">
@@ -21,7 +18,7 @@ const defaultZoom = isBoss ? 0.4 : 1.0;
         </div>
         
         <div class="model-zoom-container">
-          <input type="range" class="zoom-slider" min="0.4" max="2.5" step="0.1" value={defaultZoom}>
+          <input type="range" class="zoom-slider" min="0" max="1" step="0.01" value="0">
         </div>
         
         <div class="model-controls">
@@ -122,7 +119,14 @@ const defaultZoom = isBoss ? 0.4 : 1.0;
       const zoomSlider = this.querySelector('.zoom-slider') as HTMLInputElement;
       if (zoomSlider) {
         zoomSlider.addEventListener('input', () => {
-          state.camScale = parseFloat(zoomSlider.value);
+          const val = parseFloat(zoomSlider.value);
+          if (isBossModel) {
+            // Bosses scale from 0.4 up to 1.5
+            state.camScale = 0.4 + val * (1.5 - 0.4);
+          } else {
+            // Enemies scale from 1.0 up to 2.5
+            state.camScale = 1.0 + val * (2.5 - 1.0);
+          }
         });
       }
     }
