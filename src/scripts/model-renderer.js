@@ -2,6 +2,7 @@ export function initModelViewer(canvas, modelName, variant) {
   const ctx = canvas.getContext('2d');
   let rafId;
   let time = 0;
+  let lastTime = performance.now();
   
   let hoverK = 0; 
   let isHovered = false;
@@ -65,7 +66,7 @@ export function initModelViewer(canvas, modelName, variant) {
     for (let x = -w; x <= w*2; x += 20) { 
       ctx.moveTo(x, -h); 
       if (distort && hoverK > 0 && Math.abs(x - w/2) < 150) {
-         ctx.bezierCurveTo(x + hoverK*40 * Math.sin(time*3), h/2, x - hoverK*40 * Math.cos(time*2), h/2, x, h*2);
+         ctx.bezierCurveTo(x + hoverK*40 * Math.sin(time*2), h/2, x - hoverK*40 * Math.cos(time*1.5), h/2, x, h*2);
       } else {
          ctx.lineTo(x, h*2); 
       }
@@ -73,7 +74,7 @@ export function initModelViewer(canvas, modelName, variant) {
     for (let y = -h; y <= h*2; y += 20) { 
       ctx.moveTo(-w, y); 
       if (distort && hoverK > 0 && Math.abs(y - h/2) < 150) {
-         ctx.bezierCurveTo(w/2, y + hoverK*40 * Math.cos(time*3), w/2, y - hoverK*40 * Math.sin(time*2), w*2, y);
+         ctx.bezierCurveTo(w/2, y + hoverK*40 * Math.cos(time*2), w/2, y - hoverK*40 * Math.sin(time*1.5), w*2, y);
       } else {
          ctx.lineTo(w*2, y); 
       }
@@ -134,19 +135,23 @@ export function initModelViewer(canvas, modelName, variant) {
     ctx.restore();
   }
 
-  function render() {
+  function render(timestamp) {
     rafId = requestAnimationFrame(render);
+    
+    const dt = Math.min((timestamp - lastTime) / 1000, 0.1) || 0;
+    lastTime = timestamp;
+    time += dt;
+
     const rect = canvas.getBoundingClientRect();
     if (rect.width === 0) return;
     
     const width = rect.width, height = rect.height;
     const cx = width / 2, cy = height / 2;
     
-    time += 0.05;
-    hoverK += ( (isHovered ? 1 : 0) - hoverK ) * 0.1; 
+    hoverK += ( (isHovered ? 1 : 0) - hoverK ) * 8 * dt; 
     
-    gridOffsetX += ( (isHovered ? (cx - mouseX)*0.1 : 0) - gridOffsetX ) * 0.1;
-    gridOffsetY += ( (isHovered ? (cy - mouseY)*0.1 : 0) - gridOffsetY ) * 0.1;
+    gridOffsetX += ( (isHovered ? (cx - mouseX)*0.2 : 0) - gridOffsetX ) * 5 * dt;
+    gridOffsetY += ( (isHovered ? (cy - mouseY)*0.2 : 0) - gridOffsetY ) * 5 * dt;
 
     ctx.clearRect(0, 0, width, height);
     
@@ -155,7 +160,7 @@ export function initModelViewer(canvas, modelName, variant) {
 
     const dx = isHovered ? (mouseX - cx) / cx : 0;
     const dy = isHovered ? (mouseY - cy) / cy : 0;
-    const floatY = Math.sin(time * 0.5) * (4 - hoverK * 2);
+    const floatY = Math.sin(time * 2.5) * (4 - hoverK * 2);
     const modelY = cy + floatY + dy * 10;
     const modelX = cx + dx * 10;
 
@@ -179,7 +184,7 @@ export function initModelViewer(canvas, modelName, variant) {
       const hw = 18, hh = 18;
       ctx.fillStyle = COLORS.charger;
       
-      const lungeX = hoverK > 0 && Math.sin(time*4) > 0.5 ? faceDir * hoverK * 30 : 0;
+      const lungeX = hoverK > 0 && Math.sin(time*6) > 0.5 ? faceDir * hoverK * 30 : 0;
       ctx.translate(lungeX, 0);
       
       ctx.fillRect(-hw, -hh, hw*2, hh*2);
@@ -223,7 +228,7 @@ export function initModelViewer(canvas, modelName, variant) {
       }
       
       ctx.fillStyle = "#fff";
-      ctx.fillRect(faceDir * 7 - 3, Math.sin(time)*2 - 2, 6, 6);
+      ctx.fillRect(faceDir * 7 - 3, Math.sin(time*2.5)*2 - 2, 6, 6);
       drawDimensions(0, 0, hw*2, hh*2, 36, 36);
 
     } else if (modelName === "ranged") {
@@ -259,11 +264,11 @@ export function initModelViewer(canvas, modelName, variant) {
            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 100, hoverK * 30); ctx.stroke();
            ctx.globalAlpha = 1;
            ctx.fillStyle = COLORS.ranged;
-           ctx.beginPath(); ctx.arc(faceDir * (30 + (time*50)%60), hoverK * 30, 5, 0, Math.PI * 2); ctx.fill();
+           ctx.beginPath(); ctx.arc(faceDir * (30 + (time*300)%60), hoverK * 30, 5, 0, Math.PI * 2); ctx.fill();
            drawAnnotation(0, -r, -faceDir * 40, -r - 30, "[PROJECTILE TRAJECTORY]", COLORS.ranged);
         } else {
            ctx.beginPath();
-           const px = faceDir * (r + 10 + (time*80)%60);
+           const px = faceDir * (r + 10 + (time*400)%60);
            ctx.moveTo(px + faceDir * 6, 0);
            ctx.lineTo(px, -3); ctx.lineTo(px - faceDir * 6, 0); ctx.lineTo(px, 3);
            ctx.fill();
@@ -274,7 +279,7 @@ export function initModelViewer(canvas, modelName, variant) {
       
       if (variant !== "sentinel") {
         ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.arc(faceDir * 6, Math.sin(time)*2, 4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(faceDir * 6, Math.sin(time*2.5)*2, 4, 0, Math.PI*2); ctx.fill();
       }
       drawDimensions(0, 0, r*2, r*2, 40, 40);
 
@@ -284,7 +289,7 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.beginPath();
       ctx.moveTo(faceDir * r, 0);
       
-      const flap = Math.sin(time * 8);
+      const flap = Math.sin(time * 15);
       const flapY = hoverK > 0 ? flap * 12 : 0;
       const flapX = hoverK > 0 ? Math.abs(flap) * 4 : 0;
       ctx.lineTo(-faceDir * (r - flapX), -hh + flapY);
@@ -307,7 +312,7 @@ export function initModelViewer(canvas, modelName, variant) {
       if (hoverK > 0) {
         if (variant === "divebomber") {
            ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.5 * hoverK; ctx.lineWidth = 3;
-           ctx.beginPath(); ctx.arc(faceDir * 20, 50, (time*40)%30, 0, Math.PI * 2); ctx.stroke();
+           ctx.beginPath(); ctx.arc(faceDir * 20, 50, (time*150)%30, 0, Math.PI * 2); ctx.stroke();
            ctx.beginPath(); ctx.moveTo(faceDir * 20, hh); ctx.setLineDash([4, 8]); ctx.lineTo(faceDir * 20, 50); ctx.stroke();
            ctx.setLineDash([]); ctx.globalAlpha = 1;
            drawAnnotation(faceDir * 20, hh, -faceDir * 40, hh + 30, "[AERIAL BOMBARDMENT]", COLORS.slam);
@@ -320,7 +325,7 @@ export function initModelViewer(canvas, modelName, variant) {
     } else if (modelName === "bomber") {
       const hw = 22, hh = 22;
       ctx.fillStyle = COLORS.bomber;
-      const pulse = Math.sin(time*2) * 2 * (1 + hoverK);
+      const pulse = Math.sin(time*5) * 2 * (1 + hoverK);
       ctx.beginPath(); ctx.arc(0, 0, hw + pulse, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.stroke();
@@ -334,18 +339,18 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillStyle = ink; ctx.fillRect(-2, -hh - 8, 4, 8);
       
       if (hoverK > 0) {
-        const tCycle = (time * 2) % 1;
+        const tCycle = (time * 1.5) % 1;
         const px = faceDir * tCycle * 60, py = -hh - 10 - tCycle * 40 + tCycle*tCycle * 60;
         
         if (variant === "trapper") {
           ctx.fillStyle = COLORS.bomber;
           ctx.beginPath(); ctx.arc(faceDir * 35, 45, 8, Math.PI, 0); ctx.fill();
           ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
-          ctx.fillStyle = Math.floor(time * 10) % 2 === 0 ? COLORS.charger : ink;
+          ctx.fillStyle = Math.floor(time * 3) % 2 === 0 ? COLORS.charger : ink;
           ctx.beginPath(); ctx.arc(faceDir * 35, 44, 2.5, 0, Math.PI*2); ctx.fill();
           drawAnnotation(faceDir * 35, 40, faceDir * 70, 20, "[PROXIMITY MINE]", COLORS.bomber);
         } else if (variant === "sludge") {
-          const wob = Math.sin(time*4) * 1.4;
+          const wob = Math.sin(time*12) * 1.4;
           ctx.fillStyle = COLORS.sludge; ctx.beginPath(); ctx.ellipse(px, py, 6 + wob, 6 - wob, 0, 0, Math.PI*2); ctx.fill();
           ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
           drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[CAUSTIC SLUDGE]", COLORS.sludge);
@@ -358,7 +363,7 @@ export function initModelViewer(canvas, modelName, variant) {
           ctx.fillStyle = COLORS.bomber;
           ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
           ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
-          ctx.fillStyle = Math.floor(time * 15) % 2 === 0 ? "#fff" : COLORS.bomber;
+          ctx.fillStyle = Math.floor(time * 8) % 2 === 0 ? "#fff" : COLORS.bomber;
           ctx.fillRect(px - 1, py - 9, 2, 3);
           drawAnnotation(0, -hh, -faceDir * 40, -hh - 30, "[HIGH EXPLOSIVE]", COLORS.bomber);
         }
@@ -382,7 +387,7 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillRect(faceDir * 10 - 3, -6, 6, 6);
       
       if (hoverK > 0) {
-         ctx.fillStyle = COLORS.armoredShield; ctx.globalAlpha = 0.4 * Math.abs(Math.sin(time*5));
+         ctx.fillStyle = COLORS.armoredShield; ctx.globalAlpha = 0.4 * Math.abs(Math.sin(time*3));
          ctx.fillRect(gx - 10, -hh - 16, 20, hh*2 + 32);
          ctx.globalAlpha = 1;
          
@@ -411,7 +416,7 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.fillStyle = "#fff"; ctx.fillRect(-2, haloY - 7, 4, 14); ctx.fillRect(-6, haloY - 3, 12, 4);
         
         if (hoverK > 0) {
-           const pulse = (time * 60) % 120;
+           const pulse = (time * 120) % 120;
            ctx.strokeStyle = COLORS.priest; ctx.globalAlpha = 0.6 * (1 - pulse/120); ctx.lineWidth = 3;
            ctx.beginPath(); ctx.arc(0, 0, pulse, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
            drawAnnotation(0, -hh, faceDir * 50, -hh - 30, "[INVULNERABILITY AURA]", COLORS.priest);
@@ -419,11 +424,11 @@ export function initModelViewer(canvas, modelName, variant) {
       } else if (t === "herald") {
         ctx.fillRect(-hw * 0.55, -hh * 0.6, hw * 1.1, hh * 1.6); ctx.strokeRect(-hw * 0.55, -hh * 0.6, hw * 1.1, hh * 1.6);
         ctx.fillStyle = ink; ctx.fillRect(hw * 0.55, -hh, 3, hh * 2); // pole
-        const wave = Math.sin(time * 6) * 6 * hoverK + Math.sin(time * 3) * 2;
+        const wave = Math.sin(time * 15) * 6 * hoverK + Math.sin(time * 8) * 2;
         ctx.fillStyle = body; ctx.fillRect(hw * 0.55 + 3, -hh + wave, 16, 12); ctx.strokeRect(hw * 0.55 + 3, -hh + wave, 16, 12); // flag
         ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.moveTo(hw * 0.55 + 6, -hh + 3 + wave); ctx.lineTo(hw * 0.55 + 12, -hh + 6 + wave); ctx.lineTo(hw * 0.55 + 6, -hh + 9 + wave); ctx.fill();
         if (hoverK > 0) {
-           const pulse = (time * 60) % 120;
+           const pulse = (time * 120) % 120;
            ctx.strokeStyle = COLORS.herald; ctx.globalAlpha = 0.6 * (1 - pulse/120); ctx.lineWidth = 3;
            ctx.beginPath(); ctx.arc(0, 0, pulse, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
            drawAnnotation(hw * 0.55 + 10, -hh, faceDir * 60, -hh - 20, "[HASTE BANNER]", COLORS.herald);
@@ -432,7 +437,7 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.beginPath(); ctx.arc(0, 0, hw * 1.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = "#fff"; ctx.fillRect(-2.5, -10, 5, 20); ctx.fillRect(-9, -2.5, 18, 5);
         if (hoverK > 0) {
-          ctx.strokeStyle = COLORS.mender; ctx.globalAlpha = 0.6 + 0.3*Math.sin(time*8); ctx.lineWidth = 4;
+          ctx.strokeStyle = COLORS.mender; ctx.globalAlpha = 0.6 + 0.3*Math.sin(time*15); ctx.lineWidth = 4;
           ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(faceDir*80, -40); ctx.stroke(); ctx.globalAlpha = 1;
           ctx.beginPath(); ctx.arc(faceDir*80, -40, 6, 0, Math.PI*2); ctx.fill();
           drawAnnotation(faceDir*40, -20, faceDir*70, 10, "[RESTORATION BEAM]", COLORS.mender);
@@ -444,7 +449,7 @@ export function initModelViewer(canvas, modelName, variant) {
         ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(0, 8); ctx.stroke(); // shaft
         ctx.beginPath(); ctx.moveTo(-7, 4); ctx.quadraticCurveTo(0, 12, 7, 4); ctx.stroke(); // flukes
         if (hoverK > 0) {
-          ctx.strokeStyle = COLORS.anchor; ctx.globalAlpha = 0.5 + 0.3*Math.sin(time*8); ctx.lineWidth = 4;
+          ctx.strokeStyle = COLORS.anchor; ctx.globalAlpha = 0.5 + 0.3*Math.sin(time*10); ctx.lineWidth = 4;
           ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(faceDir*70, 0); ctx.stroke(); ctx.globalAlpha = 0.2;
           ctx.fillStyle = COLORS.anchor; ctx.beginPath(); ctx.arc(faceDir*70, 0, 20, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha=1; ctx.stroke();
           drawAnnotation(faceDir*35, 0, faceDir*60, -30, "[SOUL TETHER]", COLORS.anchor);
@@ -458,7 +463,7 @@ export function initModelViewer(canvas, modelName, variant) {
       
       let cueCol = COLORS.chimera;
       if (hoverK > 0) {
-        const cycle = Math.floor(time * 3) % 4;
+        const cycle = Math.floor(time * 1.5) % 4;
         cueCol = cycle === 0 ? COLORS.charger : cycle === 1 ? COLORS.ranged : cycle === 2 ? COLORS.bomber : COLORS.slam;
         ctx.strokeStyle = cueCol; ctx.globalAlpha = 0.8; ctx.setLineDash([5, 4]); ctx.lineWidth = 2.5;
         ctx.strokeRect(-hw - 4, -hh - 4, hw * 2 + 8, hh * 2 + 8); ctx.setLineDash([]); ctx.globalAlpha = 1;
@@ -466,7 +471,7 @@ export function initModelViewer(canvas, modelName, variant) {
       
       ctx.save();
       if (hoverK > 0) {
-        ctx.translate((Math.random()-0.5)*4, (Math.random()-0.5)*4); // glitch shake
+        ctx.translate((Math.random()-0.5)*4, (Math.random()-0.5)*4); 
       }
       
       ctx.beginPath();
@@ -505,7 +510,6 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.globalAlpha = 1 - 0.7 * hoverK; 
       
       if (hoverK > 0) {
-        // Red/Cyan chromatic split
         ctx.save(); ctx.translate(-2, 0); ctx.fillStyle = "rgba(255,0,0,0.5)";
         ctx.beginPath(); ctx.moveTo(0, -hh); ctx.lineTo(hw, 0); ctx.lineTo(hw * 0.5, hh); ctx.lineTo(0, hh * 0.55); ctx.lineTo(-hw * 0.5, hh); ctx.lineTo(-hw, 0); ctx.closePath(); ctx.fill(); ctx.restore();
         ctx.save(); ctx.translate(2, 0); ctx.fillStyle = "rgba(0,255,255,0.5)";
@@ -536,15 +540,12 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillRect(-hw, -hh, hw*2, hh*2);
       ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(-hw, -hh, hw*2, hh*2);
       
-      // Bottom left small square
       ctx.fillStyle = "#fff";
       ctx.fillRect(-hw + 8, hh - 12, 6, 6);
       
-      // Main eye top right
       ctx.fillRect(12, -10, 10, 8);
       
-      // Baton top right
-      const swing = hoverK > 0 ? Math.sin(time*6)*0.5 : 0;
+      const swing = hoverK > 0 ? Math.sin(time*5)*0.5 : 0;
       ctx.save();
       ctx.translate(hw - 4, -hh + 6);
       ctx.rotate(-0.3 + swing);
@@ -553,7 +554,7 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.restore();
       
       if (hoverK > 0) {
-        const slamR = (time * 150) % 200;
+        const slamR = (time * 250) % 200;
         ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = 0.8 * (1 - slamR/200); ctx.lineWidth = 4;
         ctx.beginPath(); ctx.ellipse(0, hh + 20, slamR, slamR * 0.3, 0, 0, Math.PI*2); ctx.stroke();
         ctx.globalAlpha = 1;
@@ -579,14 +580,13 @@ export function initModelViewer(canvas, modelName, variant) {
       
       ctx.fillStyle = "#fff"; ctx.fillRect(16 - 8, -28 + hh, 24, 16);
       
-      // Cyan Shield
       ctx.fillStyle = COLORS.armoredShield;
       ctx.fillRect(hw, -hh - 8, 12, hh*2 + 16);
       ctx.fillRect(hw - 11, -hh - 8, 11, 8);
       ctx.fillRect(hw - 11, hh, 11, 8);
       
       if (hoverK > 0) {
-        ctx.fillStyle = COLORS.armoredShield; ctx.globalAlpha = hoverK * 0.4 * Math.abs(Math.sin(time*6));
+        ctx.fillStyle = COLORS.armoredShield; ctx.globalAlpha = hoverK * 0.4 * Math.abs(Math.sin(time*2));
         ctx.fillRect(hw + 16, -hh - 8, 40, hh*2 + 16);
         ctx.globalAlpha = 1;
         drawAnnotation(hw + 6, 0, hw + 70, -30, "[CONTAINMENT BARRIER]", COLORS.armoredShield);
@@ -599,7 +599,6 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.shadowBlur = 0;
       
       if (hoverK > 0) {
-        // Splitting clone
         const splitX = hoverK * 30 * -faceDir;
         ctx.globalAlpha = hoverK * 0.5;
         ctx.fillStyle = ink; ctx.fillRect(-hw + splitX, -hh, hw*2, hh*2);
@@ -612,7 +611,6 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.fillStyle = ink;
       ctx.fillRect(-hw, -hh, hw*2, hh*2);
       
-      // Cyan Triangle Visor
       ctx.fillStyle = COLORS.eye;
       ctx.beginPath(); ctx.moveTo(faceDir * 6, -5); ctx.lineTo(faceDir * 12, 0); ctx.lineTo(faceDir * 6, 5); ctx.fill();
       
@@ -624,12 +622,11 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.shadowBlur = 0;
       
       ctx.save();
-      ctx.globalAlpha = 0.22 + 0.1 * Math.sin(time); ctx.fillStyle = ink;
+      ctx.globalAlpha = 0.22 + 0.1 * Math.sin(time*1.5); ctx.fillStyle = ink;
       ctx.beginPath(); ctx.ellipse(0, 0, w * 1.45, h * 1.45, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       
-      // Ticking spin
-      const ticks = Math.floor(time * (1 + hoverK * 4));
+      const ticks = Math.floor(time * (1 + hoverK * 3));
       const spin = ticks * (Math.PI / 5);
       
       ctx.rotate(spin);
@@ -637,14 +634,14 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.beginPath();
       const pts = 10;
       for (let i = 0; i < pts; i++) { 
-        const a = i / pts * Math.PI * 2, r = (i % 2 ? w : w * 0.6) * (1 + 0.07 * Math.sin(time * 3 + i)); 
+        const a = i / pts * Math.PI * 2, r = (i % 2 ? w : w * 0.6) * (1 + 0.07 * Math.sin(time * 6 + i)); 
         ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); 
       }
       ctx.closePath(); ctx.fill();
       ctx.strokeStyle = core; ctx.lineWidth = 3; ctx.stroke();
       ctx.rotate(-spin);
       
-      const cr = w * 0.34 * (0.8 + 0.2 * Math.sin(time * 3));
+      const cr = w * 0.34 * (0.8 + 0.2 * Math.sin(time * 4));
       ctx.globalAlpha = 0.9; ctx.fillStyle = core; ctx.beginPath(); ctx.arc(0, 0, cr, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 0.7; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0, 0, cr * 0.45, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
@@ -664,7 +661,7 @@ export function initModelViewer(canvas, modelName, variant) {
       
       ctx.fillStyle = "#fff"; ctx.fillRect(faceDir * 16 - 8, 14, 16, 11);
       
-      const swing = hoverK > 0 ? Math.sin(time*5)*0.8 : 0;
+      const swing = hoverK > 0 ? Math.sin(time*8)*0.8 : 0;
       const wAngle = -0.3 + swing; 
       const hx = faceDir * hw * 0.5, hy = -4, L = 64;
       const tx = hx + faceDir * Math.cos(wAngle) * L, ty = hy + Math.sin(wAngle) * L;
