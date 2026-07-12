@@ -1,20 +1,11 @@
 ---
 title: Stackable Upgrades
-description: All 23 stackable upgrades in Tear — numeric boosts that can be picked multiple times.
-gameVersion: v0.1
+description: Live repeatable upgrades from the game configuration.
 ---
-
 import InRunUpgrades from '../../../components/InRunUpgrades.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
-Stackable upgrades are the most common draft picks. They have a base draft weight of **1.0** and can be picked multiple times in a run. Because these upgrades modify the physics engine's base variables directly, stacking them can produce exponential benefits.
-
-> [!NOTE]
-> For example, stacking **Fleet Foot** increases your `player.moveSpeed` (base 430 px/s), which directly increases the `commitModifier`, guaranteeing higher baseline damage for every swing.
-
----
+Stackable upgrades are repeatable numeric modifiers. Their exact descriptions are read from the synchronized upgrade catalogue, so a game balance change appears here automatically.
 
 <InRunUpgrades category="stackable" />
-
 <ModelViewer model="chimera" variant="default" />
-*Chimeras copy their forms every 0.55s (`copyDelay`). High movement speed (Fleet Foot) allows you to outrun their tracking while building momentum.*

@@ -1,23 +1,11 @@
 ---
-title: "Mobility Abilities"
-description: "Upgrades focused on movement speed, dashing, and maintaining positioning."
-gameVersion: v0.1
+title: Mobility Abilities
+description: Live mobility upgrades for movement, dash control, and positioning.
 ---
-
 import InRunUpgrades from '../../../components/InRunUpgrades.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
-Mobility upgrades are essential for maintaining your `commitModifier` at 1.0x (which requires the player hilt to move at ≥ 620 px/s). They also enhance the dash, giving you more invincibility frames (0.15s) and repositioning tools.
-
----
-
-## The Upgrades
+Mobility upgrades preserve commitment, expand positioning options, and make the dash an offensive tool. See [Dash](/mechanics/dash) for live movement parameters.
 
 <InRunUpgrades category="mobility" />
----
-
-> [!TIP]
-> **Momentum** and **Slipstream** synergize incredibly well with the blade's spring physics. Moving faster naturally stretches the `maxReach` (120px) of the blade leash, resulting in violent snaps and massive `tipSpeed`!
-
 <ModelViewer model="elite" variant="default" />
-*Elite enemies move 30% faster (`speedMult: 1.3`). Mobility upgrades are almost mandatory to kite them effectively.*
