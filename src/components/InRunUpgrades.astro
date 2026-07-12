@@ -39,43 +39,41 @@ const filtered = category
   }
 
   .upgrade-card {
-    background-color: #1a1e24;
-    border: 1px solid #333b46;
+    background-color: var(--sl-color-bg-nav);
+    border: 1px solid var(--sl-color-hairline);
     border-radius: 12px;
     padding: 20px;
-    color: #e5e7eb;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    color: var(--sl-color-text);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(10px);
   }
   
   .upgrade-card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    opacity: 0.1;
+    opacity: 0.05;
     pointer-events: none;
+    transition: opacity 0.2s ease;
   }
 
   .upgrade-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: var(--sl-color-accent);
   }
 
-  .cat-offense { border-color: rgba(239, 68, 68, 0.4); }
+  .upgrade-card:hover::before {
+    opacity: 0.15;
+  }
+
   .cat-offense::before { background: linear-gradient(135deg, #ef4444, transparent); }
-  
-  .cat-resilience { border-color: rgba(16, 185, 129, 0.4); }
   .cat-resilience::before { background: linear-gradient(135deg, #10b981, transparent); }
-  
-  .cat-mobility { border-color: rgba(59, 130, 246, 0.4); }
   .cat-mobility::before { background: linear-gradient(135deg, #3b82f6, transparent); }
-  
-  .cat-utility { border-color: rgba(168, 85, 247, 0.4); }
   .cat-utility::before { background: linear-gradient(135deg, #a855f7, transparent); }
-  
-  .cat-throw { border-color: rgba(245, 158, 11, 0.4); }
   .cat-throw::before { background: linear-gradient(135deg, #f59e0b, transparent); }
 
   .card-header {
@@ -89,13 +87,14 @@ const filtered = category
     margin: 0;
     font-size: 1.15rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--sl-color-white);
     line-height: 1.2;
   }
 
   .badge {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fcd34d;
+    background: var(--sl-color-accent-low);
+    color: var(--sl-color-accent-high);
+    border: 1px solid var(--sl-color-accent);
     font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -107,7 +106,7 @@ const filtered = category
   .upgrade-card p {
     margin: 0;
     font-size: 0.95rem;
-    color: #9ca3af;
+    color: var(--sl-color-gray-3);
     line-height: 1.5;
   }
 </style>

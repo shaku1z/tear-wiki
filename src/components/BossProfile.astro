@@ -45,20 +45,21 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
 
 <style>
   .boss-profile {
-    background-color: #0f172a;
-    border: 1px solid #334155;
+    background-color: var(--sl-color-bg-nav);
+    border: 1px solid var(--sl-color-hairline);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     margin: 30px 0;
-    color: #f8fafc;
+    color: var(--sl-color-text);
     font-family: system-ui, -apple-system, sans-serif;
+    backdrop-filter: blur(10px);
   }
 
   .boss-header {
-    background: linear-gradient(135deg, #7f1d1d, #0f172a);
+    background-color: var(--sl-color-gray-6);
     padding: 24px;
-    border-bottom: 2px solid #991b1b;
+    border-bottom: 1px solid var(--sl-color-hairline);
   }
 
   .boss-header h2 {
@@ -67,8 +68,7 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
     font-weight: 900;
     text-transform: capitalize;
     letter-spacing: 2px;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    color: var(--sl-color-white);
   }
 
   .boss-content {
@@ -95,7 +95,7 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #94a3b8;
+    color: var(--sl-color-gray-3);
   }
 
   .stat-value {
@@ -104,21 +104,22 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
   }
 
   .hp-color { color: #f87171; }
-  .speed-color { color: #e2e8f0; }
+  .speed-color { color: var(--sl-color-text-accent); }
   .dmg-color { color: #fb923c; }
 
   .boss-mechanics {
-    background-color: #1e293b;
+    background-color: var(--sl-color-gray-6);
     border-radius: 8px;
     padding: 20px;
-    border: 1px solid #334155;
+    border: 1px solid var(--sl-color-hairline);
   }
 
   .boss-mechanics h4 {
     margin: 0 0 16px 0;
     padding-bottom: 8px;
-    border-bottom: 1px solid #475569;
+    border-bottom: 1px solid var(--sl-color-hairline);
     font-size: 1.1rem;
+    color: var(--sl-color-white);
   }
 
   .boss-mechanics ul {
@@ -134,13 +135,13 @@ const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
     display: flex;
     justify-content: space-between;
     padding-bottom: 6px;
-    border-bottom: 1px dashed #334155;
+    border-bottom: 1px dashed var(--sl-color-hairline);
     font-size: 0.9rem;
   }
 
-  .mech-key { color: #cbd5e1; }
+  .mech-key { color: var(--sl-color-gray-2); }
   .mech-val { 
-    color: #67e8f9; 
+    color: var(--sl-color-accent-high); 
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
   }
 </style>

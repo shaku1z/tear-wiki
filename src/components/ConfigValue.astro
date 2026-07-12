@@ -9,12 +9,12 @@ const value = path.split('.').reduce((acc, part) => acc && acc[part], CONFIG);
 
 <style>
   .config-value {
-    color: var(--theme-accent, #13c4d6);
+    color: var(--sl-color-accent-high);
     font-weight: bold;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    background: rgba(19, 196, 214, 0.1);
+    background-color: var(--sl-color-accent-low);
     padding: 0.1em 0.3em;
     border-radius: 4px;
-    border: 1px solid rgba(19, 196, 214, 0.3);
+    border: 1px solid var(--sl-color-accent);
   }
 </style>
