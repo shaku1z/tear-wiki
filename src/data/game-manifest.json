@@ -2705,5 +2705,108 @@
       }
     ],
     "pending": []
-  }
+  },
+  "shop": [
+    {
+      "id": "tough",
+      "name": "Toughness",
+      "desc": "+12 starting max HP per level.",
+      "baseCost": 160,
+      "costMult": 1.5,
+      "maxLevel": 8
+    },
+    {
+      "id": "sharp",
+      "name": "Sharpness",
+      "desc": "+6% damage per level.",
+      "baseCost": 185,
+      "costMult": 1.6,
+      "maxLevel": 8
+    },
+    {
+      "id": "swift",
+      "name": "Swiftness",
+      "desc": "+4% move speed per level.",
+      "baseCost": 160,
+      "costMult": 1.5,
+      "maxLevel": 6
+    },
+    {
+      "id": "recovery",
+      "name": "Conditioning",
+      "desc": "-6% dash cooldown per level.",
+      "baseCost": 170,
+      "costMult": 1.5,
+      "maxLevel": 6
+    },
+    {
+      "id": "headstart",
+      "name": "Head Start",
+      "desc": "Begin each run with a random upgrade.",
+      "baseCost": 420,
+      "maxLevel": 1
+    },
+    {
+      "id": "greed",
+      "name": "Coin Magnet",
+      "desc": "+15% coins earned per level.",
+      "baseCost": 200,
+      "costMult": 1.6,
+      "maxLevel": 5
+    },
+    {
+      "id": "reach",
+      "name": "Long Arm",
+      "desc": "+ blade reach & length per level.",
+      "baseCost": 200,
+      "costMult": 1.5,
+      "maxLevel": 5
+    },
+    {
+      "id": "throwarm",
+      "name": "Throwing Arm",
+      "desc": "+8% thrown-blade damage per level.",
+      "baseCost": 185,
+      "costMult": 1.5,
+      "maxLevel": 6
+    },
+    {
+      "id": "thickskin",
+      "name": "Thick Skin",
+      "desc": "Take -4% damage per level.",
+      "baseCost": 220,
+      "costMult": 1.6,
+      "maxLevel": 6
+    },
+    {
+      "id": "warding",
+      "name": "Warding",
+      "desc": "Begin each run with a one-hit shield per level.",
+      "baseCost": 400,
+      "costMult": 1.8,
+      "maxLevel": 2
+    },
+    {
+      "id": "aircharge",
+      "name": "Aether Step",
+      "desc": "Start with an extra mid-air dash charge.",
+      "baseCost": 560,
+      "maxLevel": 1
+    },
+    {
+      "id": "lifeline",
+      "name": "Lifeline",
+      "desc": "Recover +5 HP on each wave clear per level.",
+      "baseCost": 270,
+      "costMult": 1.5,
+      "maxLevel": 4
+    },
+    {
+      "id": "phoenix",
+      "name": "Second Wind",
+      "desc": "Once per run, revive with 35% HP when you would fall.",
+      "baseCost": 850,
+      "maxLevel": 1
+    }
+  ]
 }
