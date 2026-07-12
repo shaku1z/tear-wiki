@@ -4,7 +4,7 @@ description: "How to defeat The Echo, the Stage 4 boss in Tear. Phase breakdowns
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import BossProfile from '../../../components/BossProfile.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
@@ -17,21 +17,7 @@ Defeating The Echo grants an **Ability Tier-Up**.
 
 <ModelViewer model="the-echo" />
 
-<StatBlock
-  name="The Echo"
-  color="#8b3bd6"
-  stats={{
-    'HP': '3000',
-    'Speed': '280 px/s',
-    'Contact Damage': '18',
-    'Weight': '4',
-    'Copy Delay': '0.55s',
-    'Shock Damage': '16',
-    'Projectile Damage': '14',
-    'Invis Cycle': '10s visible / 3.5s invisible',
-    'Lunge Speed': '1500 px/s',
-  }}
-/>
+<BossProfile name="the-echo" />
 
 ## Phases
 

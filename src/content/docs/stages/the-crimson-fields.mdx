@@ -4,7 +4,7 @@ description: "Red and gold, and old rage. — Stage 3 of the Tear campaign."
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import StageEnvironment from '../../../components/StageEnvironment.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
@@ -14,26 +14,7 @@ import ModelViewer from '../../../components/ModelViewer.astro';
 
 **Stage 3 of 5.** 9 waves, then [**Aldric (Berserker King)**](/bosses/aldric).
 
-## Environment
-
-| Property | Value |
-|---|---|
-| Background | `#f7e3e3` |
-| Platform Colour | `#5a1320` |
-| Accent | `#e23b3b` |
-| Platform Count | 5 one-way platforms |
-
-## Enemy Pool
-
-The Crimson Fields test your crowd control. Fast flyers and hybrid Chimera units demand constant adaptation.
-
-| Enemy Type | Spawn Chance | Available From | Base HP | Speed |
-|---|---|---|---|---|
-| **Charger** | 100% | Wave 1+ | 86 | 150 px/s |
-| **Flyer** | 60% | Wave 1+ | 44 | 230 px/s |
-| **Bomber** | 30% | Wave 2+ | 40 | 165 px/s |
-| **Herald** | 30% | Wave 3+ | 44 | 125 px/s |
-| **Chimera** | 35% | Wave 5+ | 84 | 150 px/s |
+<StageEnvironment id="The Crimson Fields" />
 
 > [!NOTE] Support Targeting
 > **Heralds** buff enemy speed by 1.45x and attack rate by 1.5x. Take them out first!

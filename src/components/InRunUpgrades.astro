@@ -1,0 +1,113 @@
+---
+import { UPGRADES } from '../scripts/game-engine.js';
+const { category } = Astro.props;
+
+const filtered = category 
+  ? UPGRADES.filter(u => u.cat === category)
+  : UPGRADES;
+---
+
+<div class="upgrades-grid">
+  {filtered.map(upg => {
+    return (
+      <div class={`upgrade-card cat-${upg.cat}`}>
+        <div class="card-header">
+          <h4>{upg.name}</h4>
+          {upg.unique && <span class="badge">Unique</span>}
+        </div>
+        <p>{upg.desc}</p>
+      </div>
+    );
+  })}
+</div>
+
+<style>
+  .upgrades-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 20px;
+    margin: 30px 0;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  
+  @media (min-width: 640px) {
+    .upgrades-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  @media (min-width: 1024px) {
+    .upgrades-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .upgrade-card {
+    background-color: #1a1e24;
+    border: 1px solid #333b46;
+    border-radius: 12px;
+    padding: 20px;
+    color: #e5e7eb;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .upgrade-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .upgrade-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  }
+
+  .cat-offense { border-color: rgba(239, 68, 68, 0.4); }
+  .cat-offense::before { background: linear-gradient(135deg, #ef4444, transparent); }
+  
+  .cat-resilience { border-color: rgba(16, 185, 129, 0.4); }
+  .cat-resilience::before { background: linear-gradient(135deg, #10b981, transparent); }
+  
+  .cat-mobility { border-color: rgba(59, 130, 246, 0.4); }
+  .cat-mobility::before { background: linear-gradient(135deg, #3b82f6, transparent); }
+  
+  .cat-utility { border-color: rgba(168, 85, 247, 0.4); }
+  .cat-utility::before { background: linear-gradient(135deg, #a855f7, transparent); }
+  
+  .cat-throw { border-color: rgba(245, 158, 11, 0.4); }
+  .cat-throw::before { background: linear-gradient(135deg, #f59e0b, transparent); }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .card-header h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .badge {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .upgrade-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #9ca3af;
+    line-height: 1.5;
+  }
+</style>

@@ -4,7 +4,7 @@ description: "Learn how to counter the Bomber's explosives, deflect their payloa
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import EnemyStats from '../../../components/EnemyStats.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -18,18 +18,7 @@ The **Bomber** specializes in area denial. By lobbing heavy explosives that are 
 
 ## Base Attributes
 
-<StatBlock
-  name="Bomber"
-  color="#ef8a17"
-  stats={{
-    'HP': 40,
-    'Speed': '165 px/s',
-    'Contact Damage': 8,
-    'Knockback Taken': 11,
-    'Weight': 1,
-    'Dimensions': '34x34 px'
-  }}
-/>
+<EnemyStats variant="bomber" />
 
 ### Mechanics
 
@@ -50,15 +39,7 @@ The **Bomber** specializes in area denial. By lobbing heavy explosives that are 
 
   <TabItem label="Trapper (Wave 3+)">
     <ModelViewer model="bomber" variant="trapper" />
-    <StatBlock
-      name="Trapper"
-      color="#ef8a17"
-      stats={{
-        'Mine Arm Time': '1.3s',
-        'Mine Trigger Radius': '66 px',
-        'Mine Interval': '2.2s'
-      }}
-    />
+    <EnemyStats variant="trapper" />
     Instead of throwing bombs at you, the Trapper plants proximity mines. The mines take **1.3s** to arm, and will detonate if you step within **66 px**. Clear them with a thrown blade or avoid the area entirely.
   </TabItem>
 
@@ -69,32 +50,13 @@ The **Bomber** specializes in area denial. By lobbing heavy explosives that are 
 
   <TabItem label="Sludge (Wave 5+)">
     <ModelViewer model="bomber" variant="sludge" />
-    <StatBlock
-      name="Sludge"
-      color="#6f7a35"
-      stats={{
-        'Sludge Speed': '360 px/s',
-        'Puddle Radius': '72 px',
-        'Puddle Life': '5s',
-        'Slow Effect': '-45% Speed'
-      }}
-    />
+    <EnemyStats variant="sludge" />
     Lobs toxic mud at a slower speed (**360 px/s**). On impact, it creates a **72 px radius puddle** that lasts for **5 seconds**. Walking through this puddle reduces your movement speed by **45%**.
   </TabItem>
 
   <TabItem label="Geomancer (Wave 7+)">
     <ModelViewer model="bomber" variant="geomancer" />
-    <StatBlock
-      name="Geomancer"
-      color="#ef8a17"
-      stats={{
-        'HP': '48 (+20%)',
-        'Wall Dimensions': '26x155 px',
-        'Wall Life': '9s',
-        'Cast Range': '540 px',
-        'Channel Time': '1.8s'
-      }}
-    />
+    <EnemyStats variant="geomancer" />
     Drastically shifts the battlefield by raising temporary rock walls. The Geomancer channels for **1.8s** before erecting a **155 px high wall** that blocks movement and projectiles for **9 seconds**. 
   </TabItem>
 </Tabs>

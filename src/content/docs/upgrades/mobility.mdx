@@ -4,7 +4,7 @@ description: "Upgrades focused on movement speed, dashing, and maintaining posit
 gameVersion: v0.1
 ---
 
-import UpgradeCard from '../../../components/UpgradeCard.astro';
+import InRunUpgrades from '../../../components/InRunUpgrades.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
 Mobility upgrades are essential for maintaining your `commitModifier` at 1.0x (which requires the player hilt to move at ≥ 620 px/s). They also enhance the dash, giving you more invincibility frames (0.15s) and repositioning tools.
@@ -13,38 +13,7 @@ Mobility upgrades are essential for maintaining your `commitModifier` at 1.0x (w
 
 ## The Upgrades
 
-<UpgradeCard
-  name="Air Dash"
-  cat="mobility"
-  desc={"Gain a second dash in mid-air. Charges refill on landing."}
-/>
-
-<UpgradeCard
-  name="Ghost Step"
-  cat="mobility"
-  desc={"Dashing through enemies damages them for 15."}
-/>
-
-<UpgradeCard
-  name="Momentum"
-  cat="mobility"
-  unique desc={"Sprinting uninterrupted for 2s grants HASTE (+40% Speed)."}
-  tiers={[
-    { level: 2, desc: "Haste grants +60% Speed and charges in 1.5s." },
-    { level: 3, desc: "Haste grants +80% Speed. While hasted, blade swings deal +25% damage." }
-  ]}
-/>
-
-<UpgradeCard
-  name="Slipstream"
-  cat="mobility"
-  unique desc={"Killing an enemy grants a 1s burst of speed (+30%)."}
-  tiers={[
-    { level: 2, desc: "Burst lasts 2s, grants +45% speed." },
-    { level: 3, desc: "Burst lasts 3s, grants +60% speed. During burst, you are immune to projectiles." }
-  ]}
-/>
-
+<InRunUpgrades category="mobility" />
 ---
 
 > [!TIP]

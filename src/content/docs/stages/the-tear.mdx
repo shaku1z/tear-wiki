@@ -4,7 +4,7 @@ description: "Everything, all at once. — Stage 5 of the Tear campaign."
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import StageEnvironment from '../../../components/StageEnvironment.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
@@ -17,32 +17,7 @@ import ModelViewer from '../../../components/ModelViewer.astro';
 > [!WARNING] Dark Biome
 > The HUD and player silhouette flip to light colours here — the only stage where the arena itself is dark. Watch for the luminous rims on enemies!
 
-## Environment
-
-| Property | Value |
-|---|---|
-| Background | `#0e0b1a` |
-| Platform Colour | `#c9c4e0` |
-| Accent | `#13c4d6` |
-| Platform Count | 5 one-way platforms |
-
-## Enemy Pool
-
-The final battleground. The enemy pool is utterly unleashed, pulling from every single unit type.
-
-| Enemy Type | Spawn Chance | Available From | Base HP | Speed |
-|---|---|---|---|---|
-| **Charger** | 100% | Wave 1+ | 86 | 150 px/s |
-| **Ranged** | 60% | Wave 1+ | 60 | 175 px/s |
-| **Flyer** | 50% | Wave 1+ | 44 | 230 px/s |
-| **Bomber** | 40% | Wave 1+ | 40 | 165 px/s |
-| **Armored** | 40% | Wave 1+ | 154 | 95 px/s |
-| **Wraith** | 40% | Wave 1+ | 64 | 170 px/s |
-| **Chimera** | 40% | Wave 1+ | 84 | 150 px/s |
-| **Herald** | 20% | Wave 1+ | 44 | 125 px/s |
-| **Anchor** | 20% | Wave 1+ | 44 | 125 px/s |
-| **Priest** | 20% | Wave 1+ | 44 | 125 px/s |
-| **Mender** | 18% | Wave 1+ | 44 | 125 px/s |
+<StageEnvironment id="The Tear" />
 
 > [!CAUTION] Stage 5 Scaling
 > Enemy HP and damage scale massively in this final stretch, featuring an accumulated **+136% base health** from stage scaling before per-wave multipliers even apply.

@@ -4,7 +4,7 @@ description: "Upgrades that enhance the rewards and mechanics of parrying and de
 gameVersion: v0.1
 ---
 
-import UpgradeCard from '../../../components/UpgradeCard.astro';
+import InRunUpgrades from '../../../components/InRunUpgrades.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
 Parry upgrades turn your defense into overwhelming offense. Mastering parries (requiring a blade tip speed of **≥ 700 px/s** to intercept) is highly rewarded. 
@@ -16,38 +16,7 @@ Parry upgrades turn your defense into overwhelming offense. Mastering parries (r
 
 ## The Upgrades
 
-<UpgradeCard
-  name="Counter"
-  cat="parry"
-  desc={"Parries send a piercing shockwave forward for 25 damage."}
-/>
-
-<UpgradeCard
-  name="Reflect"
-  cat="parry"
-  desc={"Deflected projectiles split into 3."}
-/>
-
-<UpgradeCard
-  name="Reversal"
-  cat="parry"
-  unique desc={"Parries heal you for 4 HP and grant a 1-hit shield (2s)."}
-  tiers={[
-    { level: 2, desc: "Heals 8 HP. Shield lasts 4s." },
-    { level: 3, desc: "Heals 12 HP. Shield lasts 6s and detonates for 30 damage when broken." }
-  ]}
-/>
-
-<UpgradeCard
-  name="Flow State"
-  cat="parry"
-  unique desc={"Parrying grants max Style (TEARING!) for 3s."}
-  tiers={[
-    { level: 2, desc: "Lasts 5s. Your attacks during Flow cannot be interrupted." },
-    { level: 3, desc: "Lasts 7s. During Flow, you take 50% less damage and deal +30% more." }
-  ]}
-/>
-
+<InRunUpgrades category="parry" />
 ---
 
 ### Projectile Deflection

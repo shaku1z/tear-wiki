@@ -4,7 +4,7 @@ description: "Defeat the Ranged enemy in Tear. View stats, variants like the Mar
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import EnemyStats from '../../../components/EnemyStats.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -18,18 +18,7 @@ The **Ranged** class (often appearing as snipers, casters, or gunners) prefers t
 
 ## Base Attributes
 
-<StatBlock
-  name="Ranged"
-  color="#2f6df0"
-  stats={{
-    'HP': 60,
-    'Speed': '175 px/s',
-    'Contact Damage': 8,
-    'Knockback Taken': 12,
-    'Weight': 1,
-    'Dimensions': '34x44 px'
-  }}
-/>
+<EnemyStats variant="ranged" />
 
 ### Mechanics
 
@@ -54,43 +43,19 @@ The **Ranged** class (often appearing as snipers, casters, or gunners) prefers t
 
   <TabItem label="Marksman (Wave 5+)">
     <ModelViewer model="ranged" variant="marksman" />
-    <StatBlock
-      name="Marksman"
-      color="#2f6df0"
-      stats={{
-        'HP': '66 (+10%)',
-        'Shot Damage': 30,
-        'Shot Speed': '1900 px/s',
-        'Windup': '1.4s'
-      }}
-    />
+    <EnemyStats variant="marksman" />
     The deadliest sniper in the game. It uses a **1.4s** laser-sighted telegraph before snapping off a **1900 px/s** bolt. The extreme speed makes it nearly impossible to dodge on reaction, but flawlessly parrying this bolt back at the Marksman is intensely rewarding.
   </TabItem>
 
   <TabItem label="Warlock (Wave 6+)">
     <ModelViewer model="ranged" variant="warlock" />
-    <StatBlock
-      name="Warlock"
-      color="#2f6df0"
-      stats={{
-        'Shot Damage': 12,
-        'Shot Speed': '430 px/s'
-      }}
-    />
+    <EnemyStats variant="warlock" />
     Fires a slower, eerie projectile that **curves aggressively toward you** at exactly 42% of its flight path. This delayed tracking forces you to dodge late or parry with precision, as early dodges will simply cause the bolt to track your new location.
   </TabItem>
 
   <TabItem label="Chain Caster (Wave 7+)">
     <ModelViewer model="ranged" variant="chain" />
-    <StatBlock
-      name="Chain Caster"
-      color="#2f6df0"
-      stats={{
-        'Shot Damage': 8,
-        'Shot Speed': '560 px/s',
-        'Root Duration': '1.4s'
-      }}
-    />
+    <EnemyStats variant="chain" />
     Fires a specialized chain bolt (12 px radius) that deals low damage but **roots you in place for 1.4s** on hit. In late-game swarms, getting caught by a chain is often a death sentence as heavier enemies close in.
   </TabItem>
 </Tabs>

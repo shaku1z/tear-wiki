@@ -4,7 +4,7 @@ description: "How to defeat The Source, the Stage 5 boss in Tear. Phase breakdow
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import BossProfile from '../../../components/BossProfile.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
@@ -17,23 +17,7 @@ Defeating The Source grants an **Ability Tier-Up**.
 
 <ModelViewer model="the-source" />
 
-<StatBlock
-  name="The Source"
-  color="#13c4d6"
-  stats={{
-    'HP': '4200',
-    'Speed': '125 px/s',
-    'Contact Damage': '22',
-    'Weight': '7',
-    'Mechanic Cycle CD': '2.5s',
-    'Floor Collapse CD': '1.3s (Phase 2)',
-    'Fake Death Threshold': '34% HP',
-    'Regen Rate': '5%/s to 46%',
-    'Shock Damage': '18',
-    'Sweeper Damage': '18',
-    'Cross Damage': '16',
-  }}
-/>
+<BossProfile name="the-source" />
 
 ## Phases
 

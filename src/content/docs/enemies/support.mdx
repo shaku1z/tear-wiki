@@ -4,7 +4,7 @@ description: "Identify and eliminate Support targets. Learn about the Priest, He
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import EnemyStats from '../../../components/EnemyStats.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -18,18 +18,7 @@ The **Support** class possesses no real offensive threat. Instead, their sole pu
 
 ## Base Attributes
 
-<StatBlock
-  name="Support"
-  color="#1faf5a"
-  stats={{
-    'HP': 44,
-    'Speed': '125 px/s',
-    'Contact Damage': 6,
-    'Knockback Taken': 13,
-    'Weight': 1,
-    'Dimensions': '32x42 px'
-  }}
-/>
+<EnemyStats variant="support" />
 
 ### Mechanics
 
@@ -43,50 +32,25 @@ The **Support** class possesses no real offensive threat. Instead, their sole pu
 <Tabs>
   <TabItem label="Mender">
     <ModelViewer model="support" variant="mender" />
-    <StatBlock
-      name="Mender"
-      color="#1faf5a"
-      stats={{ 'Heal Rate': '11 HP/s' }}
-    />
+    <EnemyStats variant="mender" />
     The most straightforward support. Casts a restorative aura that heals injured allies at a rate of **11 HP per second**. Will rapidly undo any poke damage you deal to heavies like the Armored.
   </TabItem>
 
   <TabItem label="War Priest">
     <ModelViewer model="support" variant="priest" />
-    <StatBlock
-      name="War Priest"
-      color="#a64dd6"
-      stats={{
-        'Damage Reduction': '50% (x0.5)',
-        'Damage Buff': '+35% (x1.35)'
-      }}
-    />
+    <EnemyStats variant="priest" />
     Extremely dangerous. The War Priest projects a purple aura that halves all damage taken by its allies, while simultaneously boosting the damage they deal to you by 35%. A War Priest standing next to a Gravedigger makes the Gravedigger a lethal tank.
   </TabItem>
 
   <TabItem label="Herald">
     <ModelViewer model="support" variant="herald" />
-    <StatBlock
-      name="Herald"
-      color="#e0902f"
-      stats={{
-        'Movement Speed Buff': '+45% (x1.45)',
-        'Attack Speed Buff': '+50% (x1.50)'
-      }}
-    />
+    <EnemyStats variant="herald" />
     The Herald accelerates the tempo of the fight. Allies within its orange aura move 45% faster and complete their attack windups and cooldowns 50% faster. This completely throws off your parry and dodge timings.
   </TabItem>
 
   <TabItem label="Anchor">
     <ModelViewer model="support" variant="anchor" />
-    <StatBlock
-      name="Anchor"
-      color="#1597c2"
-      stats={{
-        'Target DR': '60% (x0.4)',
-        'Target Regen': '9 HP/s'
-      }}
-    />
+    <EnemyStats variant="anchor" />
     Unlike area-of-effect supports, the Anchor tethers itself to a single powerful ally (like an Elite or a Boss). It grants that specific ally massive 60% damage reduction and regenerates 9 HP/s. However, if you kill the Anchor, its bonded ally often suffers a massive penalty or dies with it due to shared fate.
   </TabItem>
 </Tabs>

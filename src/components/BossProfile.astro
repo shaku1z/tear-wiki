@@ -1,0 +1,146 @@
+---
+import { CONFIG } from '../scripts/game-engine.js';
+
+const { name } = Astro.props;
+const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
+---
+
+<div class="boss-profile">
+  <div class="boss-header">
+    <h2>{name}</h2>
+  </div>
+  
+  <div class="boss-content">
+    <div class="boss-main-stats">
+      <div class="stat-block">
+        <h4>Base Health</h4>
+        <div class="stat-value hp-color">{bossConfig.hp}</div>
+      </div>
+      <div class="stat-block">
+        <h4>Speed</h4>
+        <div class="stat-value speed-color">{bossConfig.speed} px/s</div>
+      </div>
+      <div class="stat-block">
+        <h4>Contact Damage</h4>
+        <div class="stat-value dmg-color">{bossConfig.contactDmg}</div>
+      </div>
+    </div>
+    
+    <div class="boss-mechanics">
+      <h4>Mechanics & Stats</h4>
+      <ul>
+        {Object.entries(bossConfig).map(([k, v]) => {
+          if(['w', 'h', 'hp', 'speed', 'contactDmg', 'weight', 'knockbackTaken'].includes(k)) return null;
+          return (
+            <li>
+              <span class="mech-key">{k}</span>
+              <span class="mech-val">{typeof v === 'number' ? Math.round(v * 100) / 100 : v.toString()}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .boss-profile {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    margin: 30px 0;
+    color: #f8fafc;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .boss-header {
+    background: linear-gradient(135deg, #7f1d1d, #0f172a);
+    padding: 24px;
+    border-bottom: 2px solid #991b1b;
+  }
+
+  .boss-header h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: capitalize;
+    letter-spacing: 2px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  }
+
+  .boss-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
+  
+  @media (min-width: 768px) {
+    .boss-content {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .boss-main-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .stat-block h4 {
+    margin: 0 0 4px 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .hp-color { color: #f87171; }
+  .speed-color { color: #e2e8f0; }
+  .dmg-color { color: #fb923c; }
+
+  .boss-mechanics {
+    background-color: #1e293b;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #334155;
+  }
+
+  .boss-mechanics h4 {
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #475569;
+    font-size: 1.1rem;
+  }
+
+  .boss-mechanics ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .boss-mechanics li {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed #334155;
+    font-size: 0.9rem;
+  }
+
+  .mech-key { color: #cbd5e1; }
+  .mech-val { 
+    color: #67e8f9; 
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
+  }
+</style>

@@ -4,7 +4,7 @@ description: "Master aerial combat against the Flyer. View stats, variants, and 
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import EnemyStats from '../../../components/EnemyStats.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -18,18 +18,7 @@ The **Flyer** entirely ignores ground friction and gravity, preferring to orbit 
 
 ## Base Attributes
 
-<StatBlock
-  name="Flyer"
-  color="#8b3bd6"
-  stats={{
-    'HP': 44,
-    'Speed': '230 px/s',
-    'Contact Damage': 10,
-    'Knockback Taken': 14,
-    'Weight': 0.75,
-    'Dimensions': '36x26 px'
-  }}
-/>
+<EnemyStats variant="flyer" />
 
 ### Mechanics
 

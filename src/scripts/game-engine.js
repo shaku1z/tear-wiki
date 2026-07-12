@@ -3060,11 +3060,714 @@ const SHOP = [
 ];
 
 
+// --- upgrades.js ---
+// ------- draft upgrades -------
+// Two categories:
+//   UPGRADES (unique:false) — stackable numeric/heal boosts, can be drafted repeatedly.
+//   UNIQUE ABILITIES (unique:true) — qualitative mechanics, offered/owned only once.
+// Stat upgrades mutate CONFIG / the live player. Ability upgrades set flags on `mods`
+// (read by the combat loop) or push handlers into hook arrays.
+
+function newMods() {
+  return {
+    onHit: [], onKill: [], onParry: [], onSlam: [],
+    owned: {}, ownedList: [],
+    // unique-ability flags, read by the combat loop:
+    throwRamp: 0,         // per-pierce damage/speed ramp on a thrown blade
+    deflectPierce: false, // deflected shots pass through enemies
+    deflectSplit: false,  // deflected shots split into 3 bouncing shards
+    airBonus: 0,          // +damage fraction while airborne (Air Superiority)
+    tempest: false,       // empowered updraft launches nearby enemies too
+    stormRecall: false,   // the returning blade deals heavy damage
+    phantomDash: 0,       // dash damages enemies you pass through (dmg amount)
+    berserk: false,       // +25% damage while below half HP
+    // ---- resilience (healing rework): survivability earned through skill ----
+    lifesteal: 0,         // Vampiric Edge: HP per swing (capped per-swing in the loop)
+    parryGuard: false,    // Riposte: damage-reduction window after a perfect parry
+    flowGuard: false,     // Flow Guard: damage reduction while the trick rank is high
+    slamShield: false,    // Aegis: slam kills grant a one-hit absorb pip
+    bloodrite: false,     // Bloodrite: skill kills heal a little HP
+    // ---- skill-expression abilities ----
+    phaseStep: false,     // Phase Step: dashing through a shot deflects it
+    crater: false,        // Crater: empowered Power Slams erupt in a scaling shockwave
+    aerialRave: 0,        // Aerial Rave: swing damage grows the longer you stay airborne
+    // ---- reworked throw / dash kit ----
+    ricochet: false,      // Ricochet: thrown blade redirects to a new target after each pierce
+    vortexRecall: false,  // Vortex Recall: the returning blade drags pierced enemies toward you
+    slipstream: false,    // Slipstream: +damage briefly after a dash ends
+    // ---- ability tiers (evolved on boss kills) ----
+    tier: {},             // id -> current tier (1 when acquired, up to 3)
+    stormMult: 1.85,      // Storm Recall multiplier (raised by its tiers)
+    killHeal: 0,          // Bloodrite T3: heal on any kill
+    bloodGuard: false,    // Bloodrite T2: skill kills also grant a brief DR window
+    flowRegen: false,     // Flow Guard T3: regenerate HP while the trick rank is high
+    aegisParry: false,    // Aegis T2: perfect-parry kills also grant a shield
+    shieldBurst: false,   // Aegis T3: an absorbed hit erupts in a shockwave
+    razorStun: false,     // Razor Momentum T3: each pierce briefly stuns
+    stormBurst: false,    // Storm Recall T3: catching the returning blade releases a shockwave
+    phantomRefund: false, // Phantom Dash T3: a phantom-dash kill refreshes your dash
+    // ---- new Special abilities (status-effect kit) ----
+    bleedHit: 0,          // Rupture: bleed stacks applied per cut
+    bleedDetonate: false, // Rupture T2: a Power Slam detonates nearby bleed for a burst
+    bleedNova: false,     // Rupture T3: a bleeding enemy's death spreads bleed
+    sunderHit: false,     // Sunder: your hits MARK enemies (+30% damage taken)
+    sunderShatter: false, // Sunder T2: marking an armored foe shatters its guard
+    sunderSpread: false,  // Sunder T3: hitting a marked enemy spreads the mark
+    impale: 0,            // Impale: bleed stacks on a thrown-blade hit (+ pins the target)
+    impaleAll: false,     // Impale T2: pins every enemy the blade pierces
+    impaleRecall: false,  // Impale T3: the returning blade detonates bleed it passes through
+    tempo: 0,             // Tempo: +damage per stack during the post-parry window
+    tempoMax: 1,          // Tempo T2: max stacks
+    tempoSurge: false,    // Tempo T3: a perfect parry also heals + extends slow-mo
+    backlash: 0,          // Backlash: counter-shock damage on a perfect parry (0 = off)
+    backlashMark: false,  // Backlash T2: the shock also MARKS
+    backlashSurge: false, // Backlash T3: bigger shock + brief invulnerability
+    cinder: false,        // Cinder Trail: dashing ignites enemies you pass (BURN)
+    cinderSlow: false,    // Cinder T2: hotter burn that also slows
+    cinderNova: false,    // Cinder T3: a burning enemy's death erupts in fire
+    concussive: 0,        // Concussive Dash: shockwave damage when a dash ends (0 = off)
+    concStun: false,      // Concussive T2: the shockwave stuns
+    concRefund: false,    // Concussive T3: a dash that catches 2+ enemies refunds itself
+    parryStun: false,     // Backfire (parry unique): reflected shots stun what they strike
+    waveHeal: 0,          // Bulwark (resilience stack): extra HP healed on each wave clear
+  };
+}
+
+const UPGRADES = [
+  // ===== stackable upgrades =====
+  { id: "vitality", name: "Vitality", unique: false, cat: "resilience", desc: "+30 max HP, and heal 30.",
+    apply: ({ player }) => { player.maxHp += 30; player.heal(30); } },
+  { id: "keen_edge", name: "Keen Edge", unique: false, cat: "offense", desc: "+12% swing damage.",
+    apply: () => { CONFIG.blade.damageScale *= 1.12; CONFIG.blade.maxDamage = Math.round(CONFIG.blade.maxDamage * 1.06); } },
+  { id: "fleet", name: "Fleet Foot", unique: false, cat: "mobility", desc: "+8% move speed, higher jump.",
+    apply: () => { CONFIG.player.moveSpeed *= 1.08; CONFIG.player.jumpSpeed *= 1.03; } },
+  { id: "quick_recovery", name: "Quick Recovery", unique: false, cat: "mobility", desc: "-25% dash cooldown.",
+    apply: () => { CONFIG.dash.cooldown *= 0.75; } },
+  { id: "long_reach", name: "Long Reach", unique: false, cat: "utility", desc: "+ blade reach and length.",
+    apply: () => { CONFIG.blade.aimRadius += 18; CONFIG.blade.length += 8; CONFIG.blade.maxReach += 18; } },
+  { id: "heavy_swing", name: "Heavy Swing", unique: false, cat: "offense", desc: "+25% knockback, stronger launches.",
+    apply: () => { CONFIG.enemy.knockbackTaken *= 1.25; CONFIG.ranged.knockbackTaken *= 1.25; CONFIG.blade.launchPower *= 1.10; } },
+  { id: "deadly_throw", name: "Deadly Throw", unique: false, cat: "throw", desc: "+20% thrown-blade damage, and it flies faster.",
+    apply: () => { CONFIG.blade.throw.damage *= 1.20; CONFIG.blade.throw.damageFromSpeed *= 1.15; CONFIG.blade.throw.speed *= 1.08; } },
+  { id: "vampiric", name: "Vampiric Edge", unique: false, cat: "resilience", desc: "Swings trickle back a sliver of HP (once per swing).",
+    apply: ({ mods }) => { mods.lifesteal += CONFIG.resilience.lifestealPerSwing; } },
+  { id: "air_superiority", name: "Air Superiority", unique: false, cat: "offense", desc: "+15% damage while airborne.",
+    apply: ({ mods }) => { mods.airBonus += 0.15; } },
+  { id: "tough_hide", name: "Tough Hide", unique: false, cat: "resilience", desc: "Take 12% less damage.",
+    apply: () => { CONFIG.player.dmgTakenMult *= 0.88; } },
+  { id: "air_dash", name: "Air Dash", unique: true, cat: "mobility",
+    desc: "Gain a second dash you can use in mid-air. Charges refill when you land.",
+    // additive so it STACKS with Aether Step (meta shop) instead of both flat-capping at 2.
+    // Safe as +=: unique (picked once per run) and applied to a fresh player (base 1).
+    apply: ({ player }) => { player.maxDashCharges += 1; player.dashCharges = player.maxDashCharges; } },
+  { id: "bounty", name: "Bounty Hunter", unique: false, cat: "utility", desc: "+20% score from kills.",
+    apply: () => { CONFIG.run.scoreMult *= 1.2; } },
+  { id: "glass_cannon", name: "Glass Cannon", unique: false, cat: "offense", desc: "+30% ALL damage (swing + throw), but you take +25% more.",
+    apply: () => {
+      CONFIG.blade.damageScale *= 1.30; CONFIG.blade.maxDamage = Math.round(CONFIG.blade.maxDamage * 1.20);
+      CONFIG.blade.throw.damage *= 1.30; CONFIG.blade.throw.damageFromSpeed *= 1.30;
+      CONFIG.player.dmgTakenMult *= 1.25;
+    } },
+
+  // ===== unique abilities =====
+  // ---- resilience: the healing rework's "earned survivability" set ----
+  { id: "bloodrite", name: "Bloodrite", unique: true, rare: true, cat: "resilience",
+    desc: "Skill kills (slam, spike, perfect-parry) restore HP.",
+    apply: ({ mods }) => { mods.bloodrite = true; mods.onKill.push((ev) => { if (ev.cause === "skill") { ev.player.heal(CONFIG.resilience.bloodriteHeal); if (mods.bloodGuard) ev.player.guardT = Math.max(ev.player.guardT, 1.0); } else if (mods.killHeal) ev.player.heal(mods.killHeal); }); },
+    tiers: [
+      { desc: "Skill kills (slam, spike, perfect-parry) restore much more HP and grant 1s of invincibility.", apply: ({ mods }) => { CONFIG.resilience.bloodriteHeal = 16; mods.bloodGuard = true; } },
+      { desc: "Skill kills (slam, spike, perfect-parry) restore massive HP and grant 1s of invincibility. Plus, EVERY normal kill now trickles HP back.", apply: ({ mods }) => { CONFIG.resilience.bloodriteHeal = 22; mods.killHeal = 4; } },
+    ] },
+  { id: "riposte", name: "Riposte", unique: true, cat: "parry",
+    desc: "After a perfect parry, take 60% less damage for 1.2s.",
+    apply: ({ mods }) => { mods.parryGuard = true; },
+    tiers: [
+      { desc: "After a perfect parry, restore HP and take 75% less damage for 1.8s.", apply: ({ mods }) => { CONFIG.resilience.parryGuardTime = 1.8; CONFIG.resilience.parryGuardMult = 0.25; mods.onParry.push((ev) => ev.player.heal(6)); } },
+      { desc: "After a perfect parry, restore HP and become completely INVINCIBLE for 2.3s.", apply: () => { CONFIG.resilience.parryGuardTime = 2.3; CONFIG.resilience.parryGuardMult = 0.0; } },
+    ] },
+  { id: "flow_guard", name: "Flow Guard", unique: true, cat: "resilience",
+    desc: "Take 30% less damage while your trick rank is BRUTAL (x3) or higher.",
+    apply: ({ mods }) => { mods.flowGuard = true; },
+    tiers: [
+      { desc: "Take 50% less damage while your trick rank is BRUTAL (x3) or higher.", apply: () => { CONFIG.resilience.flowGuardMult = 0.5; } },
+      { desc: "Take 50% less damage starting at STYLISH (x2). At BRUTAL (x3) or higher, you also rapidly REGENERATE HP.", apply: ({ mods }) => { CONFIG.resilience.flowGuardMult = 0.5; CONFIG.resilience.flowGuardTier = 2; mods.flowRegen = true; } },
+    ] },
+  { id: "aegis", name: "Aegis", unique: true, cat: "resilience",
+    desc: "Slam kills grant a shield that blocks the next hit (max 2 shields).",
+    apply: ({ player, mods }) => { mods.slamShield = true; player.maxShield = CONFIG.resilience.maxShield; },
+    tiers: [
+      { desc: "Slam and Perfect-Parry kills grant a shield that blocks the next hit (max 3).", apply: ({ player, mods }) => { CONFIG.resilience.maxShield = 3; player.maxShield = 3; mods.aegisParry = true; } },
+      { desc: "Slam and Perfect-Parry kills grant a blocking shield (max 4). When a shield breaks, it erupts in a damaging shockwave.", apply: ({ player, mods }) => { CONFIG.resilience.maxShield = 4; player.maxShield = 4; mods.shieldBurst = true; } },
+    ] },
+
+  // ---- skill-expression abilities ----
+  { id: "phase_step", name: "Phase Step", unique: true, cat: "parry",
+    desc: "Dash through an enemy shot to deflect it — turn defense into offense.",
+    apply: ({ mods }) => { mods.phaseStep = true; } },
+  { id: "backfire", name: "Backfire", unique: true, cat: "parry", desc: "Your reflected shots STUN the enemies they strike.",
+    apply: ({ mods }) => { mods.parryStun = true; } },
+  { id: "crater", name: "Crater", unique: true, cat: "offense",
+    desc: "Power Slams erupt in a shockwave that grows with your descent speed.",
+    apply: ({ mods }) => { mods.crater = true; } },
+  { id: "aerial_rave", name: "Aerial Rave", unique: true, cat: "offense",
+    desc: "Staying airborne ramps up your swing damage over time (up to +50%).",
+    apply: ({ mods }) => { mods.aerialRave = 0.25; },
+    tiers: [
+      { desc: "Staying airborne ramps up your swing damage much faster (up to +80%).", apply: ({ mods }) => { mods.aerialRave = 0.42; CONFIG.skill.aerialRaveCap = 0.8; } },
+      { desc: "Staying airborne ramps up your swing damage incredibly fast (up to +130%).", apply: ({ mods }) => { mods.aerialRave = 0.6; CONFIG.skill.aerialRaveCap = 1.3; } },
+    ] },
+
+  { id: "seismic_slam", name: "Seismic Slam", unique: true, cat: "offense", desc: "Slams blast nearby enemies for 22.",
+    apply: ({ mods }) => { mods.onSlam.push((ev) => { ev.dealAoE(ev.x, ev.y, 130, 22); ev.fx.explode(ev.x, ev.y, CONFIG.colors.slam, 0.9); }); } },
+  { id: "detonate", name: "Detonate", unique: true, cat: "offense", desc: "Kills explode for 18 to nearby foes.",
+    apply: ({ mods }) => { mods.onKill.push((ev) => { ev.dealAoE(ev.x, ev.y, 120, 18); ev.fx.explode(ev.x, ev.y, CONFIG.colors.bomber, 0.7); }); } },
+  { id: "adrenaline", name: "Adrenaline", unique: true, cat: "mobility", desc: "Kills instantly refresh your dash.",
+    apply: ({ mods }) => { mods.onKill.push((ev) => { ev.player.dashCd = 0; }); } },
+
+  // (Razor Momentum) per-pierce ramp, capped in the combat loop so it can't snowball
+  { id: "throw_momentum", name: "Razor Momentum", unique: true, cat: "throw",
+    desc: "A thrown blade grows faster and stronger for every enemy it pierces.",
+    apply: ({ mods }) => { mods.throwRamp = 0.1; },
+    tiers: [
+      { desc: "A thrown blade ramps up speed and damage much harder for every pierce.", apply: ({ mods }) => { mods.throwRamp = 0.18; } },
+      { desc: "A thrown blade heavily ramps up speed and damage. Each pierce also briefly STUNS the target.", apply: ({ mods }) => { mods.throwRamp = 0.26; mods.razorStun = true; } },
+    ] },
+  { id: "throw_giant", name: "Greatblade", unique: true, cat: "throw",
+    desc: "The blade becomes huge while thrown (normal size in hand).",
+    apply: ({ blade }) => { blade.throwSizeMult = 1.7; } },
+  { id: "parry_pierce", name: "Piercing Parry", unique: true, cat: "parry",
+    desc: "Parried projectiles pierce through every enemy.",
+    apply: ({ mods }) => { mods.deflectPierce = true; } },
+  { id: "parry_split", name: "Scatter Parry", unique: true, cat: "parry",
+    desc: "Parried projectiles split into 3 that ricochet up to 3 times.",
+    apply: ({ mods }) => { mods.deflectSplit = true; } },
+
+  { id: "tempest", name: "Tempest", unique: true, cat: "offense",
+    desc: "Rising updrafts also launch all nearby enemies skyward.",
+    apply: ({ mods }) => { mods.tempest = true; } },
+  { id: "storm_recall", name: "Storm Recall", unique: true, cat: "throw",
+    desc: "Recalling the blade tears through enemies for +85% damage.",
+    apply: ({ mods }) => { mods.stormRecall = true; },
+    tiers: [
+      { desc: "Recalling the blade tears through enemies for +140% damage.", apply: ({ mods }) => { mods.stormMult = 2.4; } },
+      { desc: "Recalling the blade tears through enemies for +200% damage. Catching it unleashes a shockwave.", apply: ({ mods }) => { mods.stormMult = 3.0; mods.stormBurst = true; } },
+    ] },
+  { id: "phantom_dash", name: "Phantom Dash", unique: true, cat: "mobility",
+    desc: "Dashing directly through enemies unleashes a damaging phase-slice.",
+    apply: ({ mods }) => { mods.phantomDash = 26; },
+    tiers: [
+      { desc: "Dashing directly through enemies unleashes a much heavier phase-slice.", apply: ({ mods }) => { mods.phantomDash = 44; } },
+      { desc: "Dashing directly through enemies unleashes a devastating phase-slice. If the slice kills, your dash instantly REFUNDS.", apply: ({ mods }) => { mods.phantomDash = 64; mods.phantomRefund = true; } },
+    ] },
+  { id: "boomerang", name: "Boomerang", unique: true, cat: "throw",
+    desc: "Recall the thrown blade from any distance.",
+    apply: ({ blade }) => { blade.freeRecall = true; } },
+  { id: "ricochet", name: "Ricochet", unique: true, cat: "throw",
+    desc: "A thrown blade curves to a new target after each enemy it pierces — chain a whole crowd.",
+    apply: ({ mods }) => { mods.ricochet = true; } },
+  { id: "vortex_recall", name: "Vortex Recall", unique: true, cat: "throw",
+    desc: "The returning blade drags every enemy it passes toward you — cluster them, then punish.",
+    apply: ({ mods }) => { mods.vortexRecall = true; } },
+  { id: "slipstream", name: "Slipstream", unique: true, cat: "mobility",
+    desc: "For a moment after a dash, your hits land for +35% — dash in, strike hard.",
+    apply: ({ mods }) => { mods.slipstream = true; } },
+  { id: "berserk", name: "Berserker", unique: true, cat: "offense",
+    desc: "+25% damage while below half HP.",
+    apply: ({ mods }) => { mods.berserk = true; } },
+  { id: "last_stand", name: "Last Stand", unique: true, rare: true, cat: "resilience",
+    desc: "Once per run, refuse to fall — rise from a killing blow with 40% HP.",
+    apply: ({ player }) => { player.abilityRevives += 1; } },
+
+  // ===== more stackable upgrades — keep every category at 4+ =====
+  { id: "whetstone", name: "Whetstone", unique: false, cat: "throw", desc: "The RETURNING blade (recall) cuts +25% harder — make the catch a finisher.",
+    apply: () => { CONFIG.blade.throw.recallMult *= 1.25; } },
+  { id: "gyroblade", name: "Gyroblade", unique: false, cat: "throw", desc: "The thrown blade flies and returns 12% faster.",
+    apply: () => { CONFIG.blade.throw.speed *= 1.12; CONFIG.blade.throw.returnSpeed *= 1.12; } },
+  { id: "quickdraw", name: "Quickdraw", unique: false, cat: "throw", desc: "+ recall range, and the blade snaps back faster.",
+    apply: () => { CONFIG.blade.throw.reclaimDistance += 80; CONFIG.blade.throw.returnSpeed *= 1.10; } },
+  { id: "steady_hand", name: "Steady Hand", unique: false, cat: "parry", desc: "Perfect parries land more easily — a more forgiving window.",
+    apply: () => { CONFIG.blade.perfectSpeed *= 0.93; } },
+  { id: "wide_guard", name: "Wide Guard", unique: false, cat: "parry", desc: "Deflect shots even with slower swings.",
+    apply: () => { CONFIG.blade.deflectMinSpeed *= 0.87; } },
+  { id: "counterforce", name: "Counterforce", unique: false, cat: "parry", desc: "Reflected shots fly faster and hit +18% harder.",
+    apply: () => { CONFIG.blade.deflectBoost *= 1.10; CONFIG.blade.deflectDmgMult *= 1.18; } },
+  { id: "tailwind", name: "Tailwind", unique: false, cat: "mobility", desc: "Higher jump and sharper air control.",
+    apply: () => { CONFIG.player.jumpSpeed *= 1.05; CONFIG.player.airAccel *= 1.16; } },
+  { id: "kinetic", name: "Kinetic Charge", unique: false, cat: "mobility", desc: "+9% dash distance, and longer dash i-frames.",
+    apply: () => { CONFIG.dash.speed *= 1.09; CONFIG.dash.iframe *= 1.16; } },
+  { id: "bulwark", name: "Bulwark", unique: false, cat: "resilience", desc: "Recover an extra 10 HP each time you clear a wave.",
+    apply: ({ mods }) => { mods.waveHeal += 10; } },
+  { id: "showtime", name: "Showtime", unique: false, cat: "utility", desc: "Your trick meter lingers — it drains 25% slower.",
+    apply: () => { CONFIG.trick.decay *= 1.3; CONFIG.trick.drainRate *= 0.8; } },
+  { id: "fortune", name: "Fortune", unique: false, cat: "utility", desc: "+18% coins earned this run.",
+    apply: () => { CONFIG.run.coinMult *= 1.18; } },
+
+  // ===== more SPECIAL abilities (tiered; keep every combat category at 3+) =====
+  // --- OFFENSE ---
+  { id: "rupture", name: "Rupture", unique: true, cat: "offense",
+    desc: "Cuts inflict BLEED—a stacking wound that damages over time.",
+    apply: ({ mods }) => { mods.bleedHit = 1; mods.onHit.push((ev) => { if (mods.bleedHit && ev.enemy && ev.enemy.applyBleed) ev.enemy.applyBleed(mods.bleedHit); }); },
+    tiers: [
+      { desc: "Cuts inflict 2 BLEED stacks. Power Slams instantly DETONATE nearby bleed for a burst of damage.", apply: ({ mods }) => { mods.bleedHit = 2; mods.bleedDetonate = true; } },
+      { desc: "Cuts inflict 3 BLEED stacks. Slams DETONATE bleed, and dying bleeding enemies splash their stacks onto the nearby crowd.", apply: ({ mods }) => { mods.bleedHit = 3; mods.bleedNova = true; } },
+    ] },
+  { id: "sunder", name: "Sunder", unique: true, cat: "offense",
+    desc: "Hits MARK enemies, making them take +30% damage from all sources for 4s.",
+    apply: ({ mods }) => { mods.sunderHit = true; mods.onHit.push((ev) => {
+      const e = ev.enemy; if (!mods.sunderHit || !e || !e.applyMark) return;
+      if (mods.sunderSpread && e.markT > 0) for (const o of ev.enemies) { if (o !== e && !o.dead && o.applyMark && len(o.x - e.x, o.y - e.y) < 150) o.applyMark(); }
+      e.applyMark();
+      if (mods.sunderShatter && e.cfg && e.cfg.breakSpeed && !e.enraged) { e.enraged = true; e.stun = Math.max(e.stun, 0.5); }
+    }); },
+    tiers: [
+      { desc: "MARKED enemies take +40% damage. Marking armored or shielded foes instantly SHATTERS their guard.", apply: ({ mods }) => { CONFIG.status.markMult = 1.40; mods.sunderShatter = true; } },
+      { desc: "MARKED enemies take +50% damage. Marks SHATTER guards, and striking a marked foe SPREADS the mark to nearby enemies.", apply: ({ mods }) => { CONFIG.status.markMult = 1.50; mods.sunderSpread = true; } },
+    ] },
+  // --- THROW ---
+  { id: "impale", name: "Impale", unique: true, cat: "throw",
+    desc: "A thrown blade PINS the first enemy hit in place, applying deep BLEED.",
+    apply: ({ mods }) => { mods.impale = 3; },
+    tiers: [
+      { desc: "A thrown blade PINS EVERY enemy it pierces in place, applying heavier BLEED.", apply: ({ mods }) => { mods.impale = 4; mods.impaleAll = true; } },
+      { desc: "A thrown blade PINS EVERY enemy pierced with massive BLEED. The returning blade RIPS the wounds open, detonating the bleed.", apply: ({ mods }) => { mods.impale = 5; mods.impaleRecall = true; } },
+    ] },
+  // --- PARRY ---
+  { id: "tempo", name: "Tempo", unique: true, cat: "parry",
+    desc: "Perfect parries grant TEMPO (+25% damage, faster speed, refreshes dash) for 4s.",
+    apply: ({ mods }) => { mods.tempo = 0.25; mods.onParry.push((ev) => { const p = ev.player; p.tempoStk = Math.min(mods.tempoMax, (p.tempoT > 0 ? p.tempoStk : 0) + 1); p.tempoT = 4; p.dashCd = 0; p.dashCharges = p.maxDashCharges; }); },
+    tiers: [
+      { desc: "Perfect parries grant TEMPO (+30% damage, faster speed, refreshes dash) for 6s. Stacks up to 2 times.", apply: ({ mods }) => { mods.tempo = 0.3; mods.tempoMax = 2; } },
+      { desc: "Perfect parries plunge the room into deep slow-mo and grant TEMPO (+34% damage per stack, max 2, faster speed, refreshes dash).", apply: ({ mods }) => { mods.tempo = 0.34; mods.tempoSurge = true; } },
+    ] },
+  { id: "backlash", name: "Backlash", unique: true, cat: "parry",
+    desc: "A perfect parry erupts a COUNTER-SHOCK, damaging and stunning nearby enemies.",
+    apply: ({ mods }) => { mods.backlash = 26; mods.onParry.push((ev) => {
+      if (!mods.backlash) return;
+      const r = mods.backlashSurge ? 250 : 175;
+      ev.dealAoE(ev.x, ev.y, r, mods.backlash);
+      for (const e of ev.enemies) { if (!e.dead && len(e.x - ev.x, e.y - ev.y) < r) { if (!e.isBoss) e.stun = Math.max(e.stun, mods.backlashSurge ? 1.1 : 0.55); if (mods.backlashMark && e.applyMark) e.applyMark(); } }
+      ev.fx.ring(ev.x, ev.y, mods.backlashSurge ? 16 : 11, CONFIG.colors.perfect);
+      if (mods.backlashSurge) ev.player.iframe = Math.max(ev.player.iframe, 1.0);
+    }); },
+    tiers: [
+      { desc: "A perfect parry erupts a larger COUNTER-SHOCK, damaging, stunning, and MARKING nearby enemies.", apply: ({ mods }) => { mods.backlash = 44; mods.backlashMark = true; } },
+      { desc: "A perfect parry erupts a massive COUNTER-SHOCK (damages, stuns, marks), and leaves you completely INVINCIBLE for a beat.", apply: ({ mods }) => { mods.backlash = 70; mods.backlashSurge = true; } },
+    ] },
+  // --- MOBILITY ---
+  { id: "cinder", name: "Cinder Trail", unique: true, cat: "mobility",
+    desc: "Dashing ignites enemies passed through, inflicting BURN damage over time.",
+    apply: ({ mods }) => { mods.cinder = true; },
+    tiers: [
+      { desc: "Dashing inflicts a hotter BURN that damages and SLOWS enemies over time.", apply: ({ mods }) => { CONFIG.status.burnDps = 30; CONFIG.status.burnDur = 3.4; mods.cinderSlow = true; } },
+      { desc: "Dashing inflicts a massive, slowing BURN. Dying burned enemies erupt, igniting everything nearby.", apply: ({ mods }) => { CONFIG.status.burnDps = 34; mods.cinderNova = true; } },
+    ] },
+  { id: "concussive", name: "Concussive Dash", unique: true, cat: "mobility",
+    desc: "Ending a dash erupts a shockwave that deals damage and knockback.",
+    apply: ({ mods }) => { mods.concussive = 24; },
+    tiers: [
+      { desc: "Ending a dash erupts a heavier shockwave that deals damage, knockback, and STUNS.", apply: ({ mods }) => { mods.concussive = 42; mods.concStun = true; } },
+      { desc: "Ending a dash erupts a massive stunning shockwave. Hitting 2+ enemies instantly REFUNDS your dash.", apply: ({ mods }) => { mods.concussive = 60; mods.concRefund = true; } },
+    ] },
+];
+
+// draft weighting:
+//   STACKS  (w 1)    — the frequent baseline; repeat them freely
+//   UNIQUE  (w 0.6)  — slightly rarer than stacks, but still common (each only once)
+//   SPECIAL (w 0.28) — the prized tiered abilities; deliberately uncommon, but the
+//                      game GUARANTEES at least 2 are offered per stage (see opts.forceSpecial)
+function upWeight(u) {
+  if (u.tiers) return u.rare ? 0.16 : 0.28;
+  if (u.unique) return 0.6;
+  return 1;
+}
+// roll N distinct choices; owned unique/special abilities are excluded.
+function rollUpgrades(n, mods, opts) {
+  opts = opts || {};
+  const owned = (mods && mods.owned) || {};
+  const pool = UPGRADES
+    .filter((u) => !(u.unique && owned[u.id]))
+    .map((u) => ({ u, w: upWeight(u) }));
+  const out = [];
+  while (out.length < n && pool.length) {
+    let total = 0; for (const e of pool) total += e.w;
+    let r = Math.random() * total, idx = 0;
+    for (let i = 0; i < pool.length; i++) { if ((r -= pool[i].w) <= 0) { idx = i; break; } }
+    out.push(pool.splice(idx, 1)[0].u);
+  }
+  // per-stage guarantee: if asked to force a Special and none rolled, swap one in
+  if (opts.forceSpecial && !out.some((u) => u.tiers)) {
+    const specials = UPGRADES.filter((u) => u.tiers && !owned[u.id] && !out.includes(u));
+    if (specials.length) {
+      let ri = out.findIndex((u) => !u.tiers && !u.unique);   // replace a stack if possible
+      if (ri < 0) ri = out.findIndex((u) => !u.tiers);
+      if (ri < 0) ri = out.length - 1;
+      out[ri] = specials[Math.floor(Math.random() * specials.length)];
+    }
+  }
+  return out;
+}
+
+function applyUpgrade(up, ctx) {
+  ctx.mods.owned[up.id] = (ctx.mods.owned[up.id] || 0) + 1;
+  ctx.mods.ownedList.push(up.id);
+  if (!ctx.mods.tier[up.id]) ctx.mods.tier[up.id] = 1;   // acquired at tier 1
+  up.apply(ctx);
+}
+
+// ---- ability tiers (evolved on boss kills) ----
+// owned abilities that define a next tier and haven't maxed out yet
+function availableTierUps(mods) {
+  const out = [];
+  for (const id in mods.owned) {
+    const up = UPGRADES.find((u) => u.id === id);
+    if (!up || !up.tiers) continue;
+    const cur = mods.tier[id] || 1;       // current tier (1..3)
+    if (cur - 1 < up.tiers.length) out.push(up);   // a further tier exists
+  }
+  return out;
+}
+function nextTierDesc(up, mods) {
+  const cur = mods.tier[up.id] || 1;
+  const t = up.tiers && up.tiers[cur - 1];
+  return t ? t.desc : "";
+}
+function tierUp(id, ctx) {
+  const up = UPGRADES.find((u) => u.id === id);
+  if (!up || !up.tiers) return;
+  const cur = ctx.mods.tier[id] || 1;
+  const t = up.tiers[cur - 1];
+  if (!t) return;
+  t.apply(ctx);
+  ctx.mods.tier[id] = cur + 1;
+}
+
+
+// --- stages.js ---
+// ------- stages / biomes -------
+// The campaign is a sequence of stages ("worlds"). Each stage is a biome: its own
+// background tint, platform colour, and platform LAYOUT, plus a name used for the
+// transition banner. Enemy variety still scales with the global wave number, so later
+// stages naturally field the nastier variants. Bosses (wave 10, 20, ...) come later.
+//
+// Backgrounds are kept light-ish on purpose for now so the black player + HUD stay
+// readable; dramatic inversions (e.g. a true dark Voidspire) are a later polish pass.
+
+const STAGES = [
+  {
+    name: "The Grounds", blurb: "Where order is kept.",
+    boss: "warden",
+    lore: "The Warden's badge lies in pieces. Etched inside, worn almost smooth: \"Appointed by the Council of First Light. Directive: none shall reach the Undercroft.\" Below it, scratched by hand: \"I never asked what was down there.\"",
+    bg: "#ffffff", plat: "#111111", accent: "#e23b3b",
+    // disciplined guards: melee front line, a few archers; heavy units only later
+    pool: [["charger", 1.0, 1], ["ranged", 0.5, 2], ["bomber", 0.3, 4], ["armored", 0.3, 5]],
+    layout: [
+      { x: 230, y: 650, w: 280, h: 24, oneway: true },
+      { x: 1090, y: 650, w: 280, h: 24, oneway: true },
+      { x: 640, y: 500, w: 320, h: 24, oneway: true },
+      { x: 150, y: 360, w: 250, h: 24, oneway: true },
+      { x: 1200, y: 360, w: 250, h: 24, oneway: true },
+    ],
+  },
+  {
+    name: "The Undercroft", blurb: "Gray industry, deep below.",
+    boss: "colossus",
+    lore: "In the deepest wall of the Undercroft, beneath the mechanism that is now still, words are carved into the original stone — older than the machine: \"Built to contain the Tide of Crimson. Should the Colossus fall, know this — we tried to stop it before it reached the Fields. We failed then too.\"",
+    bg: "#dbe0e6", plat: "#2a2f37", accent: "#15c2c2",
+    // industrial: heavy plating + ordnance, with anchors that pin you down
+    pool: [["armored", 0.8, 1], ["bomber", 0.7, 1], ["charger", 0.6, 1], ["ranged", 0.5, 2], ["anchor", 0.25, 4]],
+    layout: [
+      { x: 120, y: 600, w: 250, h: 24, oneway: true },
+      { x: 1230, y: 600, w: 250, h: 24, oneway: true },
+      { x: 600, y: 620, w: 400, h: 24, oneway: true },
+      { x: 330, y: 430, w: 240, h: 24, oneway: true },
+      { x: 1030, y: 430, w: 240, h: 24, oneway: true },
+      { x: 700, y: 300, w: 200, h: 24, oneway: true },
+    ],
+  },
+  {
+    name: "The Crimson Fields", blurb: "Red and gold, and old rage.",
+    boss: "aldric",
+    lore: "Among Aldric's belongings, tucked inside the wrapping of his broken cleaver's handle: a small painted portrait, almost worn through. Two children, laughing. On the back, in handwriting read so many times the ink is barely there: \"Elan and Mira — before the first Tear opened.\" And, in another hand: \"Aldric. Come home.\" He never did.",
+    bg: "#f7e3e3", plat: "#5a1320", accent: "#e23b3b",
+    // old rage: relentless melee + flyers, heralds whipping them into a frenzy
+    pool: [["charger", 1.0, 1], ["flyer", 0.6, 1], ["bomber", 0.3, 2], ["herald", 0.3, 3], ["chimera", 0.35, 5]],
+    layout: [
+      { x: 180, y: 560, w: 300, h: 24, oneway: true },
+      { x: 1120, y: 560, w: 300, h: 24, oneway: true },
+      { x: 640, y: 660, w: 340, h: 24, oneway: true },
+      { x: 430, y: 390, w: 260, h: 24, oneway: true },
+      { x: 910, y: 390, w: 260, h: 24, oneway: true },
+    ],
+  },
+  {
+    name: "The Voidspire", blurb: "Where the rules thin out.",
+    boss: "echo",
+    lore: "The Voidspire is quiet for the first time. On the wall behind where The Echo stood, scratched deep over what must have been years: your name. Over and over — hundreds of times. Below them all, fresher, still sharp: \"I remember what it was like to be going somewhere.\" And at the very bottom: \"Go finish it. One of us should.\"",
+    bg: "#e7e3f3", plat: "#382c54", accent: "#8b3bd6",
+    // where the rules thin: wraiths, shifting casters, and support that warps the fight
+    pool: [["wraith", 0.7, 1], ["flyer", 0.5, 1], ["ranged", 0.4, 1], ["priest", 0.3, 2], ["chimera", 0.5, 3], ["mender", 0.25, 4]],
+    layout: [
+      { x: 280, y: 630, w: 220, h: 24, oneway: true },
+      { x: 1100, y: 630, w: 220, h: 24, oneway: true },
+      { x: 690, y: 540, w: 220, h: 24, oneway: true },
+      { x: 170, y: 410, w: 220, h: 24, oneway: true },
+      { x: 1210, y: 410, w: 220, h: 24, oneway: true },
+      { x: 690, y: 320, w: 220, h: 24, oneway: true },
+    ],
+  },
+  {
+    name: "The Tear", blurb: "Everything, all at once.",
+    dark: true,   // the void at the end of everything — HUD + player flip to light here
+    boss: "source",
+    lore: "There is nothing left to carve the words into — only the quiet where the Tear used to be. You understand it now: the Source was never an enemy, only the wound the world kept reopening, wearing the shape of everyone who ever tried to close it. It wore your shape last. The blade is lighter than it has ever been. Somewhere, far above, something that has not been able to for a very long time begins, tentatively, to heal.",
+    bg: "#0e0b1a", plat: "#c9c4e0", accent: "#13c4d6",
+    // everything you have faced, together
+    pool: [["charger", 1.0, 1], ["ranged", 0.6, 1], ["flyer", 0.5, 1], ["bomber", 0.4, 1], ["armored", 0.4, 1], ["wraith", 0.4, 1], ["chimera", 0.4, 1], ["herald", 0.2, 1], ["anchor", 0.2, 1], ["priest", 0.2, 1], ["mender", 0.18, 1]],
+    layout: [
+      { x: 230, y: 650, w: 280, h: 24, oneway: true },
+      { x: 1090, y: 650, w: 280, h: 24, oneway: true },
+      { x: 640, y: 500, w: 320, h: 24, oneway: true },
+      { x: 150, y: 360, w: 250, h: 24, oneway: true },
+      { x: 1200, y: 360, w: 250, h: 24, oneway: true },
+    ],
+  },
+];
+
+// build a fresh platforms array (floor + the stage's one-way platforms, cloned so
+// temporary Geomancer walls never pollute the source layout)
+function stagePlatforms(i) {
+  const s = STAGES[((i % STAGES.length) + STAGES.length) % STAGES.length];
+  const DW = CONFIG.view.designW || 1600, DH = CONFIG.view.designH || 900;
+  const vw = CONFIG.view.w, vh = CONFIG.view.h;
+  // Floor spans the full dynamic viewport
+  const floor = { x: 0, y: CONFIG.world.groundY, w: vw, h: vh - CONFIG.world.groundY, floor: true };
+  // Platforms are authored for 1600×900 — center them in the dynamic viewport
+  const ox = (vw - DW) / 2;
+  const oy = (vh - DH) / 2;
+  return [floor, ...s.layout.map((p) => ({ ...p, x: p.x + ox, y: p.y + oy }))];
+}
+function stageAt(i) { return STAGES[((i % STAGES.length) + STAGES.length) % STAGES.length]; }
+
+
+// --- achievements.js ---
+// ------- achievements: data-driven feats that grant Shards -------
+// Each achievement watches a lifetime stat in PROFILE (or a custom check). ACH.check()
+// runs after gameplay events, unlocks any newly-met feats, grants their Shards, and
+// queues a toast. Most are `stat >= goal`; `check(P)` allows anything bespoke.
+// Rarity sets the Shard payout; the Achievements menu (Phase 2) reads these too.
+const ACH = {
+  RARITY: {
+    common:    { name: "COMMON",    color: "#8a93a6", shards: 5, coins: 100 },
+    uncommon:  { name: "UNCOMMON",  color: "#2f9e6b", shards: 12, coins: 300 },
+    rare:      { name: "RARE",      color: "#2f7bd6", shards: 25, coins: 700 },
+    epic:      { name: "EPIC",      color: "#9b53d6", shards: 50, coins: 1500 },
+    legendary: { name: "LEGENDARY", color: "#e0a326", shards: 100, coins: 4000 },
+  },
+  CATS: {
+    combat:   { name: "Combat",      color: "#e23b3b", icon: "⚔" },
+    skill:    { name: "Skill",       color: "#13c4d6", icon: "✦" },
+    progress: { name: "Progression", color: "#e0a326", icon: "▲" },
+    boss:     { name: "Bosses",      color: "#9b53d6", icon: "☠" },
+    survival: { name: "Survival",    color: "#2f9e6b", icon: "❤" },
+    mastery:  { name: "Mastery",     color: "#c9ccd6", icon: "◆" },
+  },
+
+  // goal helper: a stat-threshold achievement (the common case)
+  _s(id, cat, rarity, name, desc, stat, goal) {
+    return { id, cat, rarity, name, desc, stat, goal };
+  },
+
+  list: [],   // filled by _build() below
+  _build() {
+    const S = this._s.bind(this);
+    this.list = [
+      // ---- COMBAT: raw kills ----
+      S("first_blood", "combat", "common", "First Blood", "Defeat your first enemy.", "kills", 1),
+      S("centurion", "combat", "uncommon", "Centurion", "Defeat 100 enemies.", "kills", 100),
+      S("thousand_cuts", "combat", "rare", "Death of a Thousand Cuts", "Defeat 1,000 enemies.", "kills", 1000),
+      S("reaper", "combat", "epic", "Reaper", "Defeat 5,000 enemies.", "kills", 5000),
+      S("annihilation", "combat", "legendary", "Annihilation", "Defeat 20,000 enemies.", "kills", 20000),
+      S("cull", "combat", "uncommon", "Cull", "Defeat 20 enemies in a single wave.", "killsOneWave", 20),
+      S("massacre", "combat", "rare", "Massacre", "Defeat 40 enemies in a single wave.", "killsOneWave", 40),
+      S("bomber_baiter", "combat", "uncommon", "Controlled Demolition", "Set off 25 bombers.", "bomberKills", 25),
+
+      // ---- SKILL: the blade's craft ----
+      S("first_parry", "skill", "common", "Turnabout", "Land your first perfect parry.", "parries", 1),
+      S("deflector", "skill", "uncommon", "Deflector", "Parry or deflect 100 projectiles.", "deflects", 100),
+      S("bulletstorm", "skill", "rare", "Bulletstorm", "Parry or deflect 1,000 projectiles.", "deflects", 1000),
+      S("perfect_hand", "skill", "epic", "Perfect Hand", "Land 250 perfect parries.", "parries", 250),
+      S("juggler", "skill", "uncommon", "Juggler", "Land 50 airborne hits.", "airHits", 50),
+      S("titan_drop", "skill", "rare", "Titan Drop", "Land 25 power slams.", "superslams", 25),
+      S("updraft_artist", "skill", "uncommon", "Updraft Artist", "Land 50 updraft launches.", "updrafts", 50),
+      S("s_rank", "skill", "rare", "Immaculate", "Reach the top style rank in a run.", "topRank", 1),
+      S("velocity", "skill", "epic", "Terminal Velocity", "Land a maximum-momentum strike.", "maxMomentum", 1),
+      S("long_shot", "skill", "uncommon", "Long Shot", "Land 50 thrown-blade hits.", "throwHits", 50),
+
+      // ---- PROGRESSION: getting deeper ----
+      S("wave_10", "progress", "common", "Getting Warm", "Reach wave 10 in any mode.", "bestWave", 10),
+      S("wave_25", "progress", "uncommon", "Seasoned", "Reach wave 25 in any mode.", "bestWave", 25),
+      S("wave_50", "progress", "rare", "Unrelenting", "Reach wave 50 in any mode.", "bestWave", 50),
+      S("wave_100", "progress", "legendary", "Endless", "Reach wave 100 in any mode.", "bestWave", 100),
+      S("stage_clear", "progress", "uncommon", "Threshold", "Clear a full campaign stage.", "stageClears", 1),
+      S("campaign", "progress", "epic", "Sealed", "Complete the Adventure campaign.", "campaignClears", 1),
+      S("all_biomes", "progress", "rare", "Wayfarer", "Fight in all five biomes.", "biomesSeen", 5),
+
+      // ---- BOSSES ----
+      S("first_boss", "boss", "uncommon", "Giant Slayer", "Defeat your first boss.", "bossKills", 1),
+      S("boss_5", "boss", "rare", "Warbreaker", "Defeat 5 bosses.", "bossKills", 5),
+      S("boss_25", "boss", "epic", "Kingslayer", "Defeat 25 bosses.", "bossKills", 25),
+      S("boss_gauntlet", "boss", "legendary", "The Whole Pantheon", "Defeat every boss in one Boss Test run.", "gauntletFull", 1),
+      S("boss_nohit", "boss", "epic", "Untouchable", "Defeat a boss without taking a hit.", "bossNoHit", 1),
+
+      // ---- SURVIVAL ----
+      S("clean_wave", "survival", "common", "Spotless", "Clear a wave without taking a hit.", "noHitWaves", 1),
+      S("clean_stage", "survival", "rare", "Immortal Run", "Clear a full stage without taking a hit.", "noHitStages", 1),
+      S("marathon", "survival", "uncommon", "Marathon", "Survive 10 minutes in a single run.", "longestRun", 600),
+      S("iron", "survival", "epic", "Iron Will", "Reach wave 5 in One-Hit mode.", "oneHitWave", 5),
+      S("comeback", "survival", "uncommon", "Second Wind", "Survive a killing blow with a revive.", "revivesUsed", 1),
+
+      // ---- MASTERY: the meta ----
+      S("first_buy", "mastery", "common", "Invested", "Buy your first shop upgrade.", "shopBuys", 1),
+      S("collector", "mastery", "rare", "Collector", "Own 6 abilities in a single run.", "abilitiesInRun", 6),
+      S("rich", "mastery", "epic", "Coin Baron", "Earn 25,000 coins in total.", "coinsEarned", 25000),
+      S("veteran", "mastery", "uncommon", "Veteran", "Finish 25 runs.", "runs", 25),
+      S("well_rounded", "mastery", "rare", "Well-Rounded", "Play every game mode.", "modesPlayed", 5),
+      S("student", "mastery", "common", "Apprentice", "Complete the tutorial.", "tutorialDone", 1),
+
+      // ---- THE BOSS PANTHEON: fell each named boss ----
+      S("boss_warden", "boss", "uncommon", "Jailbreak", "Defeat The Warden.", "killWarden", 1),
+      S("boss_colossus", "boss", "rare", "Scrap Metal", "Defeat The Iron Colossus.", "killColossus", 1),
+      S("boss_aldric", "boss", "rare", "Regicide", "Defeat The Berserker King, Aldric.", "killAldric", 1),
+      S("boss_echo", "boss", "epic", "Shattered Mirror", "Defeat The Echo.", "killEcho", 1),
+      S("boss_source", "boss", "legendary", "The Wound Closes", "Defeat The Source.", "killSource", 1),
+
+      // ---- ENDLESS MILESTONES (Endless mode only) ----
+      S("endless_25", "survival", "uncommon", "Endless: Initiation", "Reach Wave 25 in Endless.", "bestWaveEndless", 25),
+      S("endless_50", "survival", "rare", "Endless: Midway", "Reach Wave 50 in Endless.", "bestWaveEndless", 50),
+      S("endless_75", "survival", "epic", "Endless: Deep Dive", "Reach Wave 75 in Endless.", "bestWaveEndless", 75),
+      S("endless_100", "survival", "legendary", "Beyond", "Reach Wave 100 in Endless.", "bestWaveEndless", 100),
+
+      // ---- DIFFICULTY MASTERY ----
+      S("adv_hard", "progress", "rare", "Hardened", "Clear Adventure on Hard difficulty.", "clearAdvHard", 1),
+      S("adv_extreme", "progress", "epic", "Masochist", "Clear Adventure on Extreme difficulty.", "clearAdvExtreme", 1),
+      S("adv_all", "progress", "legendary", "Omnipotent", "Clear Adventure on all 5 difficulties.", "clearAdvAll", 5),
+      S("endless_50_hard", "survival", "epic", "Endurance", "Reach Wave 50 in Endless on Hard.", "wave50Hard", 1),
+      S("endless_100_extreme", "survival", "legendary", "Beyond Human", "Reach Wave 100 in Endless on Extreme.", "wave100Extreme", 1),
+      S("adv_flawless", "survival", "legendary", "Flawless Victory", "Clear the whole Adventure campaign without taking a single hit.", "clearAdvNoHit", 1),
+
+      // ---- COMBAT POLISH ----
+      S("overkill", "combat", "uncommon", "Overkill", "Deal over 3,000 damage in a single strike.", "maxDamageHit", 3000),
+      S("collateral", "skill", "uncommon", "Collateral Damage", "Defeat an enemy by throwing the blade through another enemy.", "throwPierceKills", 1),
+      S("surgeon", "combat", "rare", "Surgeon", "Stack 20 Bleed on a single enemy.", "maxBleedStacks", 20),
+      S("inferno", "combat", "rare", "Inferno", "Have 10 enemies burning at once.", "maxConcurrentBurn", 10),
+      S("floor_is_lava", "skill", "epic", "Air Superiority", "Stay airborne for 15 straight seconds.", "maxAirTime", 15),
+      S("gravity_defied", "skill", "rare", "Gravity Defied", "Chain 3 Updraft launches without landing.", "consecutiveUpdrafts", 3),
+      S("friendly_fire", "combat", "rare", "Friendly Fire", "Have a Bomber blast kill 3 other enemies.", "bomberBetrayal", 3),
+
+      // ---- MASTERY & META ----
+      S("weapon_master", "mastery", "rare", "Armory", "Win a run with each weapon.", "distinctWeaponsWon", 2),
+      S("arsenal", "mastery", "legendary", "Arsenal", "Max out every item in the meta shop.", "shopMaxed", 13),
+      S("speedrunner", "mastery", "epic", "Speedrunner", "Clear the Adventure campaign in under 15 minutes.", "speedrunUnder15", 1),
+      S("close_call", "survival", "rare", "By a Thread", "Defeat a boss while at 10% HP or lower.", "bossKillsLowHP", 1),
+
+      // ---- BOSS DISRESPECT: humiliation tactics ----
+      S("warden_deflect", "boss", "epic", "Stop Hitting Yourself", "Defeat The Warden using ONLY their deflected projectiles.", "wardenDeflectOnly", 1),
+      S("colossus_throw", "boss", "rare", "David and Goliath", "Defeat The Iron Colossus without a single melee swing (throws only).", "colossusThrowOnly", 1),
+      S("aldric_interrupt", "boss", "epic", "Silence, King", "Interrupt Aldric with a Power Slam 3 times in one fight.", "aldricSlams", 3),
+      S("echo_parry", "boss", "legendary", "I Am Rubber", "Land the killing blow on The Echo with a deflected projectile.", "echoReflectKill", 1),
+      S("source_speed", "boss", "epic", "Pulling the Plug", "Defeat The Source in under 60 seconds.", "sourceSpeedrun", 1),
+
+      // ---- THE SADIST: physics & sandbox shenanigans ----
+      S("space_program", "skill", "rare", "Space Program", "Launch an enemy clean off the top of the screen.", "launchOffScreen", 1),
+      S("pinball", "skill", "epic", "Pinball Wizard", "Hit 4 different enemies with a single thrown blade.", "bladeBounces", 4),
+      S("rainbow_pain", "combat", "epic", "Taste the Rainbow", "Have Bleed, Burn and Mark on one enemy at once.", "tripleStatus", 1),
+      S("surgical", "combat", "rare", "Surgical Extraction", "Kill an Armored enemy with status effects — armor never broken.", "armorBypassKills", 1),
+      S("air_assassination", "skill", "epic", "Death from Above", "Kill 3 enemies in one airborne combo without landing.", "airComboKills", 3),
+
+      // ---- THE MASOCHIST: self-imposed restrictions ----
+      S("no_takebacks", "mastery", "epic", "No Takebacks", "Clear an Adventure stage without ever throwing your blade.", "stageNoThrow", 1),
+      S("butterfingers", "mastery", "epic", "Butterfingers", "Clear an Adventure stage without a single melee swing.", "stageThrowOnly", 1),
+      S("glass_cannon", "mastery", "rare", "Glass Cannon", "Clear a stage with damage upgrades but no Thick Skin or Warding.", "stageGlassCannon", 1),
+      S("deflector_shield", "skill", "epic", "Immovable Object", "Perfect-parry 10 in a row without moving, dashing or being hit.", "staticParryStreak", 10),
+      S("heavy_boots", "mastery", "epic", "Heavy Boots", "Clear a 10-wave stage without jumping once.", "stageNoJump", 1),
+
+      // ---- ANOMALIES & ECONOMY ----
+      S("the_setup", "skill", "rare", "The Setup", "Updraft an Armored enemy, then spike it into the ground.", "spikeArmored", 1),
+      S("return_to_sender", "combat", "uncommon", "Return to Sender", "Kill a Bomber with its own deflected bomb.", "bombDeflectKills", 1),
+      S("chain_reaction", "combat", "rare", "Chain Reaction", "Kill 5 enemies with a single deflected bomb.", "bombMultikill", 5),
+      S("matador", "skill", "rare", "Matador", "I-frame dash through 15 projectiles in one run.", "projectileDashes", 15),
+      S("cinematic_kill", "combat", "uncommon", "Stylishly Late", "Land a kill during the stage-clear transition.", "transitionKills", 1),
+      S("phoenix_full", "survival", "epic", "From the Ashes", "Revive from a killing blow, then heal back to full HP.", "reviveToFull", 1),
+      S("horde_breaker", "combat", "rare", "Horde Breaker", "Clear an Endless horde wave in under 15 seconds.", "fastHordeClear", 1),
+      S("exodia", "mastery", "legendary", "The Forbidden Technique", "Own Long Arm, Throwing Arm, Aether Step and Lifeline at once.", "exodiaBuild", 1),
+    ];
+
+    // ---- CATEGORY MASTERY: unlock every OTHER achievement in a category ----
+    const CAT_MASTERY = [
+      { id: "master_combat", cat: "combat", name: "Warmaster", desc: "Complete all other Combat achievements." },
+      { id: "master_skill", cat: "skill", name: "Virtuoso", desc: "Complete all other Skill achievements." },
+      { id: "master_progress", cat: "progress", name: "The Journey", desc: "Complete all other Progression achievements." },
+      { id: "master_boss", cat: "boss", name: "Godslayer", desc: "Complete all other Boss achievements." },
+      { id: "master_survival", cat: "survival", name: "Indomitable", desc: "Complete all other Survival achievements." },
+      { id: "master_mastery", cat: "mastery", name: "The Apex", desc: "Complete all other Mastery achievements." },
+    ];
+    for (const m of CAT_MASTERY) {
+      const ach = S(m.id, m.cat, "epic", m.name, m.desc);
+      ach.check = () => this.list.filter((a) => a.cat === m.cat && a.id !== m.id && !a.master).every((a) => PROFILE.unlocked(a.id));
+      ach.master = true;   // excluded from other masters' checks so they don't wait on each other
+      this.list.push(ach);
+    }
+    // ---- THE PLATINUM: unlock literally everything else ----
+    const platinum = S("completionist", "mastery", "legendary", "The Momentum Blade", "Unlock every other achievement in Tear.");
+    platinum.check = () => this.list.filter((a) => a.id !== "completionist").every((a) => PROFILE.unlocked(a.id));
+    platinum.master = true;
+    this.list.push(platinum);
+  },
+
+  byId(id) { return this.list.find((a) => a.id === id); },
+  shardsFor(a) { return a.shards != null ? a.shards : (this.RARITY[a.rarity] || {}).shards || 5; },
+  coinsFor(a) { return a.coins != null ? a.coins : (this.RARITY[a.rarity] || {}).coins || 0; },
+  totalShards() { let s = 0; for (const a of this.list) s += this.shardsFor(a); return s; },
+
+  // 0..1 progress toward an achievement (for the menu's bars)
+  progress(a) {
+    if (PROFILE.unlocked(a.id)) return 1;
+    if (a.check) return a.check(PROFILE) ? 1 : 0;
+    const cur = PROFILE.stat(a.stat), goal = a.goal || 1;
+    return clamp(cur / goal, 0, 1);
+  },
+  progressText(a) {
+    if (a.check || !a.goal) return PROFILE.unlocked(a.id) ? "Complete" : "Locked";
+    const cur = Math.min(PROFILE.stat(a.stat), a.goal);
+    return cur + " / " + a.goal;
+  },
+
+  pending: [],   // freshly unlocked -> the HUD/menu toast queue
+
+  // evaluate every locked achievement; unlock + reward + queue toasts for newly-met ones
+  check() {
+    for (const a of this.list) {
+      if (PROFILE.unlocked(a.id)) continue;
+      const met = a.check ? a.check(PROFILE) : PROFILE.stat(a.stat) >= (a.goal || 1);
+      if (met) {
+        a.shards = this.shardsFor(a);
+        a.coins = this.coinsFor(a);
+        if (PROFILE.unlock(a)) { this.pending.push(a); try { SFX.rankup(); } catch (e) {} }
+      }
+    }
+  },
+};
+ACH._build();
+
+
 export {
   clamp, lerp, len, lerpAngle, segPointDist, chargeTelegraph,
   CONFIG,
   FX, Projectile,
   VARIANTS, applyVariant,
   Enemy, Charger, Ranged, Flyer, Bomber, Armored, Boss, Support, Wraith, Chimera, Warden, Colossus, Aldric, Echo, Source,
-  SHOP
+  SHOP,
+  UPGRADES, applyUpgrade,
+  STAGES,
+  ACH
 };

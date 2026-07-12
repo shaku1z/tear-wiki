@@ -4,7 +4,7 @@ description: "Defeat The Warden, the Stage 1 Boss of Tear. Learn his mortar patt
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import BossProfile from '../../../components/BossProfile.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
@@ -19,18 +19,7 @@ import ModelViewer from '../../../components/ModelViewer.astro';
 
 <ModelViewer model="warden" />
 
-<StatBlock
-  name="The Warden"
-  color="#b01030"
-  stats={{
-    'HP': 1900,
-    'Speed': '70 px/s',
-    'Contact Damage': 20,
-    'Knockback Taken': 0.6,
-    'Weight': 6,
-    'Dimensions': '118x118 px'
-  }}
-/>
+<BossProfile name="warden" />
 
 ### Phase 1: The Enforcer
 The Warden relies on heavy melee strikes and artillery to keep you at bay.

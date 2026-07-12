@@ -1,0 +1,162 @@
+---
+import { CONFIG, VARIANTS } from '../scripts/game-engine.js';
+
+const { variant } = Astro.props; // e.g. "charger", "brawler"
+
+let foundVariant = null;
+let baseEnemyType = null;
+for (const [type, list] of Object.entries(VARIANTS)) {
+  const v = list.find(x => x.id === variant);
+  if (v) {
+    foundVariant = v;
+    baseEnemyType = type;
+    break;
+  }
+}
+
+// Fallback to basic type if no variant is found
+if (!foundVariant && CONFIG[variant]) {
+  baseEnemyType = variant;
+}
+
+const baseConfig = CONFIG[baseEnemyType] || {};
+
+let stats = { 
+  hp: baseConfig.hp || 0, 
+  maxHp: baseConfig.hp || 0,
+  speedMult: 1, 
+  speed: baseConfig.speed || 0,
+  contactDmg: baseConfig.contactDmg || 0
+};
+
+if (foundVariant && foundVariant.apply) {
+  foundVariant.apply(stats);
+}
+
+const finalSpeed = stats.speed * stats.speedMult;
+const finalHp = stats.maxHp;
+const finalDmg = stats.contactDmg;
+
+const enemyColor = CONFIG.colors[baseEnemyType] || "#ff4444";
+---
+
+<div class="enemy-card">
+  <div class="card-header" style={`border-bottom-color: ${enemyColor}`}>
+    <div class="avatar-placeholder" style={`background-color: ${enemyColor}`}></div>
+    <h3>{foundVariant ? foundVariant.name : (variant.charAt(0).toUpperCase() + variant.slice(1))}</h3>
+  </div>
+  
+  <div class="stats-container">
+    <div class="stat-row">
+      <div class="stat-labels">
+        <span>HP</span>
+        <span class="stat-value">{Math.round(finalHp)}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill hp-fill" style={`width: ${Math.min(100, finalHp / 2)}%`}></div>
+      </div>
+    </div>
+    
+    <div class="stat-row">
+      <div class="stat-labels">
+        <span>Speed</span>
+        <span class="stat-value">{Math.round(finalSpeed)}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill speed-fill" style={`width: ${Math.min(100, finalSpeed / 4)}%`}></div>
+      </div>
+    </div>
+    
+    <div class="stat-row">
+      <div class="stat-labels">
+        <span>Base Damage</span>
+        <span class="stat-value">{Math.round(finalDmg)}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill dmg-fill" style={`width: ${Math.min(100, finalDmg * 3)}%`}></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .enemy-card {
+    background: linear-gradient(145deg, #1e222a, #16191f);
+    border: 1px solid #2d333b;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    color: #e5e7eb;
+    font-family: system-ui, -apple-system, sans-serif;
+    max-width: 400px;
+    margin: 20px 0;
+    transition: transform 0.2s ease;
+  }
+  
+  .enemy-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #444;
+  }
+
+  .avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px currentColor;
+    opacity: 0.8;
+  }
+
+  .card-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .stat-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #9ca3af;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .stat-value {
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-track {
+    width: 100%;
+    background-color: #2d333b;
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hp-fill { background: linear-gradient(90deg, #b01030, #e23b3b); }
+  .speed-fill { background: linear-gradient(90deg, #1597c2, #13c4d6); }
+  .dmg-fill { background: linear-gradient(90deg, #d35400, #f39c12); }
+</style>

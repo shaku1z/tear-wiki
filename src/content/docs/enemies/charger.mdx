@@ -4,7 +4,7 @@ description: "Defeat the Charger in Tear. View raw stats, attack patterns, varia
 gameVersion: v0.1
 ---
 
-import StatBlock from '../../../components/StatBlock.astro';
+import EnemyStats from '../../../components/EnemyStats.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -18,18 +18,7 @@ The **Charger** is the foundational melee unit of the Tear engine. It relentless
 
 ## Base Attributes
 
-<StatBlock
-  name="Charger"
-  color="#e23b3b"
-  stats={{
-    'HP': 86,
-    'Speed': '150 px/s',
-    'Contact Damage': 12,
-    'Knockback Taken': 9,
-    'Weight': 1,
-    'Dimensions': '40x40 px'
-  }}
-/>
+<EnemyStats variant="charger" />
 
 ### Mechanics
 
@@ -51,67 +40,31 @@ As you dive deeper into the waves, the Charger evolves to counter different play
   
   <TabItem label="Brawler (Wave 2+)">
     <ModelViewer model="charger" variant="brawler" />
-    <StatBlock
-      name="Brawler"
-      color="#e23b3b"
-      stats={{ 'Contact Reach': '+10 px' }}
-    />
+    <EnemyStats variant="brawler" />
     Abandons the telegraphed charge in favor of relentless, close-range punches. The extended contact reach makes it dangerous to approach horizontally without a committed swing.
   </TabItem>
 
   <TabItem label="Stalker (Wave 4+)">
     <ModelViewer model="charger" variant="stalker" />
-    <StatBlock
-      name="Stalker"
-      color="#e23b3b"
-      stats={{
-        'HP': '67 (-22%)',
-        'Speed': '195 px/s (+30%)'
-      }}
-    />
+    <EnemyStats variant="stalker" />
     A fragile but highly elusive variant. It uses its boosted speed to constantly kite and dash away from your approach, flanking you while you focus on heavier targets.
   </TabItem>
 
   <TabItem label="Executioner (Wave 6+)">
     <ModelViewer model="charger" variant="executioner" />
-    <StatBlock
-      name="Executioner"
-      color="#e23b3b"
-      stats={{
-        'HP': '111 (+30%)',
-        'Speed': '105 px/s (-30%)',
-        'Shock Damage': 24,
-        'Shock Speed': '640 px/s'
-      }}
-    />
+    <EnemyStats variant="executioner" />
     A lumbering juggernaut. It winds up for a massive **1.3s** before delivering an overhead smash that sends out **19px radius** shockwaves in both directions. Jump over the shocks and counterattack while it recovers.
   </TabItem>
 
   <TabItem label="Gravedigger (Wave 5+)">
     <ModelViewer model="charger" variant="gravedigger" />
-    <StatBlock
-      name="Gravedigger"
-      color="#e23b3b"
-      stats={{
-        'HP': '120 (+40%)',
-        'Speed': '90 px/s (-40%)',
-        'Sweep Damage': 22,
-        'Shock Speed': '420 px/s'
-      }}
-    />
+    <EnemyStats variant="gravedigger" />
     Winds up for **0.9s** to deliver a massive wide arc swing with a **120 px reach**. Curiously, it is perfectly safe at point-blank range, as the shovel hits only at mid-range. Cling to it and attack aggressively.
   </TabItem>
 
   <TabItem label="Duelist (Wave 6+)">
     <ModelViewer model="charger" variant="duelist" />
-    <StatBlock
-      name="Duelist"
-      color="#e23b3b"
-      stats={{
-        'Contact Reach': '+12 px',
-        'Parry Cooldown': '2.4s'
-      }}
-    />
+    <EnemyStats variant="duelist" />
     A true swordsman. If you attempt to throw your blade at the Duelist, it will parry it flawlessly. You must either bait its parry (putting it on a **2.4s** cooldown) or engage it entirely in melee.
   </TabItem>
 </Tabs>
