@@ -18,6 +18,15 @@ window.projectiles = [];
 // FX is handled by FX.list inside the game engine
 
 export function initModelViewer(canvas, modelName, variant, state = { timeScale: 1, phase: 'auto', debug: false }) {
+  // Expand universe to prevent projectile culling/bouncing in the cinematic viewer
+  if (window.CONFIG) {
+    window.CONFIG.view.w = 10000;
+    window.CONFIG.view.h = 10000;
+    window.CONFIG.world.groundY = 10000;
+  }
+  const simX = 5000;
+  const simY = 5000;
+
   const ctx = canvas.getContext('2d');
   let rafId;
   let lastTime = performance.now();
@@ -28,8 +37,8 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
   
   // Camera State
   let camScale = 1.0;
-  let realCamX = CONFIG.view.w / 2;
-  let realCamY = CONFIG.view.h / 2;
+  let realCamX = simX;
+  let realCamY = simY;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -83,9 +92,9 @@ export function initModelViewer(canvas, modelName, variant, state = { timeScale:
   const isBoss = (modelName === "the-source" || modelName === "iron-colossus" || modelName === "aldric" || modelName === "the-echo" || modelName === "warden");
   
   if (isBoss) {
-    enemyInstance = new Cls(0, 0, CONFIG[modelName.replace("iron-","").replace("the-","")] || CONFIG.boss);
+    enemyInstance = new Cls(simX, simY, CONFIG[modelName.replace("iron-","").replace("the-","")] || CONFIG.boss);
   } else {
-    enemyInstance = new Cls(0, 0, CONFIG[modelName] || CONFIG.charger);
+    enemyInstance = new Cls(simX, simY, CONFIG[modelName] || CONFIG.charger);
   }
   
   if (variant) {

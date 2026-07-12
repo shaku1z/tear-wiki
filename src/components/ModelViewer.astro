@@ -188,25 +188,28 @@ const { model, variant } = Astro.props;
   }
   .model-controls {
     display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center; /* Center the command bar */
     pointer-events: auto; /* Allow clicking buttons */
+    margin-bottom: 0.5rem; /* Lift slightly off the bottom */
   }
   .control-group {
     display: flex;
     align-items: center;
-    background: rgba(20, 20, 28, 0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 6px;
-    padding: 0.25rem;
+    background: rgba(15, 15, 20, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 0.35rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .control-label {
     font-family: var(--sl-font-mono);
     font-size: 0.65rem;
     color: var(--sl-color-gray-3);
-    padding: 0 0.5rem;
-    letter-spacing: 0.1em;
+    padding: 0 0.75rem;
+    letter-spacing: 0.15em;
+    font-weight: bold;
   }
   .ctrl-btn {
     background: transparent;
@@ -214,14 +217,14 @@ const { model, variant } = Astro.props;
     color: var(--sl-color-gray-3);
     font-family: var(--sl-font-mono);
     font-size: 0.75rem;
-    padding: 0.25rem 0.75rem;
+    padding: 0.35rem 0.85rem;
     cursor: pointer;
     border-radius: 4px;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   .ctrl-btn:hover {
     color: var(--sl-color-white);
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.08);
   }
   .ctrl-btn.active {
     color: #15c2c2;
