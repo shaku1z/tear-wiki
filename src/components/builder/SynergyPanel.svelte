@@ -119,24 +119,27 @@
   h4 {
     margin-bottom: 12px;
     font-size: 1rem;
-    color: var(--sl-color-white);
+    color: var(--sl-color-gray-3);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
   }
 
   .muted { color: var(--sl-color-gray-3); font-size: 0.9rem; }
 
   .syn-card {
     padding: 12px;
-    border-radius: 6px;
+    border-radius: 0;
     margin-bottom: 12px;
     background: var(--sl-color-black);
     border-left: 4px solid transparent;
+    border: 1px solid var(--sl-color-hairline);
   }
   .syn-card strong {
     display: block;
     margin-bottom: 4px;
     font-size: 0.95rem;
+    font-family: monospace;
+    text-transform: uppercase;
   }
   .syn-card p {
     margin: 0;
@@ -145,25 +148,28 @@
   }
 
   .type-positive {
-    background: rgba(19, 196, 214, 0.1);
-    border-left-color: #13c4d6;
+    background: rgba(19, 196, 214, 0.05);
+    border-left: 4px solid #13c4d6;
   }
   .type-positive strong { color: #13c4d6; }
 
   .type-conflict {
-    background: rgba(245, 158, 11, 0.1);
-    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
+    border-left: 4px solid #f59e0b;
   }
   .type-conflict strong { color: #f59e0b; }
 
   .suggestions {
     margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--sl-color-hairline);
   }
   .suggestions h5 {
     color: var(--sl-color-gray-3);
     margin-bottom: 8px;
     font-size: 0.85rem;
     text-transform: uppercase;
+    font-family: monospace;
   }
   .suggestions ul {
     list-style: none;
