@@ -5,7 +5,7 @@ import { execFileSync } from 'child_process';
 
 const GAME_REPOSITORY = process.env.GAME_REPOSITORY || 'shaku1z/tear';
 const DEFAULT_BRANCH = process.env.GAME_BRANCH || 'main';
-const FILES = ['utils.js', 'config.js', 'particles.js', 'projectile.js', 'variants.js', 'affixes.js', 'enemy.js', 'meta.js', 'upgrades.js', 'stages.js', 'achievements.js'];
+const FILES = ['utils.js', 'config.js', 'particles.js', 'projectile.js', 'variants.js', 'affixes.js', 'enemy.js', 'meta.js', 'upgrades.js', 'stages.js', 'achievements.js', 'challenges.js'];
 const DEST_PATH = path.join(process.cwd(), 'src', 'scripts', 'game-engine.js');
 const LOCAL_GAME_DIR = path.resolve(process.cwd(), '..', 'Tear');
 
@@ -77,7 +77,7 @@ export {
   SHOP,
   UPGRADES, applyUpgrade,
   STAGES,
-  ACH
+  ACH, DAILY
 };
 `;
     combined += exports;

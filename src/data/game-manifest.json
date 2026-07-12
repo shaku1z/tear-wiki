@@ -2859,5 +2859,77 @@
       "baseCost": 850,
       "maxLevel": 1
     }
+  ],
+  "dailyChallenges": [
+    {
+      "id": "d_kills",
+      "key": "kills",
+      "mode": "add",
+      "goal": 150,
+      "shards": 15
+    },
+    {
+      "id": "d_parry",
+      "key": "parries",
+      "mode": "add",
+      "goal": 15,
+      "shards": 15
+    },
+    {
+      "id": "d_boss",
+      "key": "boss",
+      "mode": "add",
+      "goal": 2,
+      "shards": 20
+    },
+    {
+      "id": "d_nohit",
+      "key": "nohit",
+      "mode": "add",
+      "goal": 5,
+      "shards": 15
+    },
+    {
+      "id": "d_wave",
+      "key": "wave",
+      "mode": "max",
+      "goal": 15,
+      "shards": 20
+    },
+    {
+      "id": "d_superslam",
+      "key": "superslam",
+      "mode": "add",
+      "goal": 8,
+      "shards": 15
+    },
+    {
+      "id": "d_updraft",
+      "key": "updraft",
+      "mode": "add",
+      "goal": 10,
+      "shards": 15
+    },
+    {
+      "id": "d_runs",
+      "key": "runs",
+      "mode": "add",
+      "goal": 3,
+      "shards": 10
+    },
+    {
+      "id": "d_deflect",
+      "key": "deflect",
+      "mode": "add",
+      "goal": 40,
+      "shards": 12
+    },
+    {
+      "id": "d_air",
+      "key": "air",
+      "mode": "add",
+      "goal": 25,
+      "shards": 12
+    }
   ]
 }
