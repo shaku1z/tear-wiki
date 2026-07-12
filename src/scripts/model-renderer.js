@@ -15,8 +15,8 @@ export function initModelViewer(canvas, modelName, variant) {
     ctx.scale(dpr, dpr);
   }
   
-  window.addEventListener('resize', resize);
-  resize();
+  const ro = new ResizeObserver(() => resize());
+  ro.observe(canvas.parentElement);
 
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -422,9 +422,8 @@ export function initModelViewer(canvas, modelName, variant) {
       }
       
       ctx.fillStyle = COLORS.armored;
-      ctx.beginPath(); ctx.moveTo(-hw*0.4, -hh); ctx.lineTo(hw*0.4, -hh); ctx.lineTo(hw*0.8, -hh*0.2); 
-      ctx.lineTo(0, hh); ctx.lineTo(-hw*0.8, -hh*0.2); ctx.closePath();
-      ctx.fill(); ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.stroke();
+      ctx.fillRect(-hw, -hh, hw * 2, hh * 2);
+      ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(-hw, -hh, hw * 2, hh * 2);
       
       const bx = faceDir * 20;
       ctx.strokeStyle = ink; ctx.lineWidth = 9; ctx.lineCap = "round";
@@ -494,7 +493,7 @@ export function initModelViewer(canvas, modelName, variant) {
       ctx.beginPath(); ctx.ellipse(0, 0, w * 1.45, h * 1.45, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       
-      const spin = time * 2 * (1 + hoverK * 3);
+      const spin = time * 0.5 * (1 + hoverK * 3);
       ctx.rotate(spin);
       ctx.fillStyle = "#191328";
       ctx.beginPath();
@@ -541,6 +540,6 @@ export function initModelViewer(canvas, modelName, variant) {
   
   return () => {
     cancelAnimationFrame(rafId);
-    window.removeEventListener('resize', resize);
+    ro.disconnect();
   };
 }
