@@ -4,6 +4,9 @@ export interface Props {
   variant?: string;
 }
 const { model, variant } = Astro.props;
+
+const isBoss = (model === "warden" || model === "aldric" || model === "iron-colossus" || model === "the-echo" || model === "the-source");
+const defaultZoom = isBoss ? 0.4 : 1.0;
 ---
 
 <tear-model-viewer data-model={model} data-variant={variant || ''} class="tear-model-viewer">
@@ -18,7 +21,7 @@ const { model, variant } = Astro.props;
         </div>
         
         <div class="model-zoom-container">
-          <input type="range" class="zoom-slider" min="0.4" max="2.5" step="0.1" value="0.4">
+          <input type="range" class="zoom-slider" min="0.4" max="2.5" step="0.1" value={defaultZoom}>
         </div>
         
         <div class="model-controls">
@@ -64,8 +67,11 @@ const { model, variant } = Astro.props;
       const modelName = this.dataset.model;
       const variant = this.dataset.variant;
       
+      const isBossModel = (modelName === "the-source" || modelName === "iron-colossus" || modelName === "aldric" || modelName === "the-echo" || modelName === "warden");
+      const defaultZoom = isBossModel ? 0.4 : 1.0;
+
       // Setup state
-      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 0.4 };
+      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: defaultZoom };
 
       if (canvas && modelName) {
         this.cleanup = initModelViewer(canvas, modelName, variant, state);
