@@ -53,7 +53,7 @@ const stage = typeof id === 'number' ? STAGES[id] : STAGES.find(s => s.name.toLo
 
 <style>
   .stage-env {
-    background-color: var(--sl-color-bg-nav);
+    background-color: var(--sl-color-gray-6);
     border: 1px solid var(--sl-color-hairline);
     border-radius: 16px;
     overflow: hidden;
@@ -61,7 +61,6 @@ const stage = typeof id === 'number' ? STAGES[id] : STAGES.find(s => s.name.toLo
     font-family: system-ui, -apple-system, sans-serif;
     color: var(--sl-color-text);
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    backdrop-filter: blur(10px);
   }
 
   .stage-banner {

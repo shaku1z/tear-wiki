@@ -39,7 +39,7 @@ const filtered = category
   }
 
   .upgrade-card {
-    background-color: var(--sl-color-bg-nav);
+    background-color: var(--sl-color-gray-6);
     border: 1px solid var(--sl-color-hairline);
     border-radius: 12px;
     padding: 20px;
@@ -48,16 +48,6 @@ const filtered = category
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
-  }
-  
-  .upgrade-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    opacity: 0.05;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
   }
 
   .upgrade-card:hover {
@@ -66,15 +56,11 @@ const filtered = category
     border-color: var(--sl-color-accent);
   }
 
-  .upgrade-card:hover::before {
-    opacity: 0.15;
-  }
-
-  .cat-offense::before { background: linear-gradient(135deg, #ef4444, transparent); }
-  .cat-resilience::before { background: linear-gradient(135deg, #10b981, transparent); }
-  .cat-mobility::before { background: linear-gradient(135deg, #3b82f6, transparent); }
-  .cat-utility::before { background: linear-gradient(135deg, #a855f7, transparent); }
-  .cat-throw::before { background: linear-gradient(135deg, #f59e0b, transparent); }
+  .cat-offense { border-top: 3px solid #ef4444; }
+  .cat-resilience { border-top: 3px solid #10b981; }
+  .cat-mobility { border-top: 3px solid #3b82f6; }
+  .cat-utility { border-top: 3px solid #a855f7; }
+  .cat-throw { border-top: 3px solid #f59e0b; }
 
   .card-header {
     display: flex;
