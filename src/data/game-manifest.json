@@ -2,9 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "repository": "shaku1z/tear",
-    "commit": "9e0d1f15c4b35b716219168e3cda37074b615fa5",
-    "mode": "remote",
-    "syncedAt": "2026-07-12T22:48:25.947Z"
+    "commit": "9e0d1f15c4b35b716219168e3cda37074b615fa5"
   },
   "config": {
     "view": {

@@ -1,10 +1,9 @@
 ---
 import gameManifest from '../data/game-manifest.json';
-const date = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(gameManifest.source.syncedAt));
 ---
 
 <aside class="game-source-status" aria-label="Game data source">
-  <span class="status-mark"></span><span>GAME DATA SYNCED</span><code>{gameManifest.source.commit.slice(0, 7)}</code><span class="status-date">{date}</span>
+  <span class="status-mark"></span><span>GAME DATA SYNCED</span><code>{gameManifest.source.commit.slice(0, 7)}</code><span class="status-date">COMMITTED SOURCE</span>
 </aside>
 
 <style>

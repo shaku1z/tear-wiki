@@ -1,170 +1,54 @@
 ---
 import { CONFIG, VARIANTS } from '../scripts/game-engine.js';
+import gameManifest from '../data/game-manifest.json';
 
-const { variant } = Astro.props; // e.g. "charger", "brawler"
-
+const { variant } = Astro.props;
 let foundVariant = null;
 let baseEnemyType = null;
+
 for (const [type, list] of Object.entries(VARIANTS)) {
-  const v = list.find(x => x.id === variant);
-  if (v) {
-    foundVariant = v;
+  const match = list.find((entry) => entry.id === variant);
+  if (match) {
+    foundVariant = match;
     baseEnemyType = type;
     break;
   }
 }
 
-// Fallback to basic type if no variant is found
-if (!foundVariant && CONFIG[variant]) {
-  baseEnemyType = variant;
-}
-
+if (!foundVariant && CONFIG[variant]) baseEnemyType = variant;
 const baseConfig = CONFIG[baseEnemyType] || {};
+const stats = { hp: baseConfig.hp || 0, maxHp: baseConfig.hp || 0, speedMult: 1, speed: baseConfig.speed || 0, contactDmg: baseConfig.contactDmg || 0 };
+if (foundVariant?.apply) foundVariant.apply(stats);
 
-let stats = { 
-  hp: baseConfig.hp || 0, 
-  maxHp: baseConfig.hp || 0,
-  speedMult: 1, 
-  speed: baseConfig.speed || 0,
-  contactDmg: baseConfig.contactDmg || 0
-};
-
-if (foundVariant && foundVariant.apply) {
-  foundVariant.apply(stats);
-}
-
-const finalSpeed = stats.speed * stats.speedMult;
-const finalHp = stats.maxHp;
-const finalDmg = stats.contactDmg;
-
-const enemyColor = CONFIG.colors[baseEnemyType] || "#ff4444";
+const label = foundVariant?.name || (variant.charAt(0).toUpperCase() + variant.slice(1));
+const accent = CONFIG.colors[baseEnemyType] || CONFIG.colors.enemyShot;
+const metrics = [
+  ['BASE HP', Math.round(stats.maxHp)],
+  ['MOVE SPEED', Math.round(stats.speed * stats.speedMult)],
+  ['CONTACT DMG', Math.round(stats.contactDmg)],
+  ['WEIGHT', baseConfig.weight ?? '—'],
+];
 ---
 
-<div class="enemy-card">
-  <div class="card-header" style={`border-bottom-color: ${enemyColor}`}>
-    <div class="avatar-placeholder" style={`background-color: ${enemyColor}`}></div>
-    <h3>{foundVariant ? foundVariant.name : (variant.charAt(0).toUpperCase() + variant.slice(1))}</h3>
+<section class="enemy-terminal" style={`--entity-accent: ${accent}`} aria-label={`${label} statistics`}>
+  <header>
+    <div><span>ENTITY READOUT / {baseEnemyType || 'UNKNOWN'}</span><h3>{label}</h3></div>
+    <code>{gameManifest.source.commit.slice(0, 7)}</code>
+  </header>
+  <div class="metric-grid">
+    {metrics.map(([name, value]) => <div class="metric"><span>{name}</span><strong>{value}</strong></div>)}
   </div>
-  
-  <div class="stats-container">
-    <div class="stat-row">
-      <div class="stat-labels">
-        <span>HP</span>
-        <span class="stat-value">{Math.round(finalHp)}</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill hp-fill" style={`width: ${Math.min(100, finalHp / 2)}%`}></div>
-      </div>
-    </div>
-    
-    <div class="stat-row">
-      <div class="stat-labels">
-        <span>Speed</span>
-        <span class="stat-value">{Math.round(finalSpeed)}</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill speed-fill" style={`width: ${Math.min(100, finalSpeed / 4)}%`}></div>
-      </div>
-    </div>
-    
-    <div class="stat-row">
-      <div class="stat-labels">
-        <span>Base Damage</span>
-        <span class="stat-value">{Math.round(finalDmg)}</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill dmg-fill" style={`width: ${Math.min(100, finalDmg * 3)}%`}></div>
-      </div>
-    </div>
-  </div>
-</div>
+  {foundVariant && <p class="variant-note">VARIANT MODULE ACTIVE — source modifiers are applied to the base entity before display.</p>}
+</section>
 
 <style>
-  .enemy-card {
-    background-color: var(--sl-color-gray-6);
-    border: 1px solid var(--sl-color-hairline);
-    border-radius: 12px;
-    padding: clamp(16px, 4vw, 24px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    color: var(--sl-color-text);
-    font-family: system-ui, -apple-system, sans-serif;
-    width: 100%;
-    max-width: 450px;
-    margin: 20px 0;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-  
-  .enemy-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    border-color: var(--sl-color-accent);
-  }
-
-  .enemy-card:active {
-    transform: scale(0.98);
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--sl-color-hairline);
-  }
-
-  .avatar-placeholder {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px currentColor;
-    opacity: 0.8;
-  }
-
-  .card-header h3 {
-    margin: 0;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: var(--sl-color-white);
-  }
-
-  .stats-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .stat-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    color: var(--sl-color-gray-3);
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-
-  .stat-value {
-    color: var(--sl-color-white);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .progress-track {
-    width: 100%;
-    background-color: var(--sl-color-gray-6);
-    border-radius: 6px;
-    height: 8px;
-    overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 6px;
-    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .hp-fill { background: linear-gradient(90deg, #b01030, #e23b3b); }
-  .speed-fill { background: linear-gradient(90deg, #1597c2, #13c4d6); }
-  .dmg-fill { background: linear-gradient(90deg, #d35400, #f39c12); }
+  .enemy-terminal { border: 1px solid var(--sl-color-hairline); border-left: 4px solid var(--entity-accent); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
+  header { align-items: start; background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); display: flex; justify-content: space-between; padding: .8rem .9rem; }
+  header span { color: var(--sl-color-gray-3); display: block; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  h3 { border: 0; font-size: 1.15rem; letter-spacing: .08em; margin: .4rem 0 0; padding: 0; } code { color: var(--entity-accent); font: inherit; font-size: .65rem; }
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .metric { border-right: 1px solid var(--sl-color-hairline); padding: .75rem .85rem; } .metric:last-child { border-right: 0; }
+  .metric span { color: var(--sl-color-gray-3); display: block; font-size: .6rem; font-weight: 800; letter-spacing: .08em; } .metric strong { color: var(--sl-color-white); display: block; font-size: 1.15rem; margin-top: .35rem; }
+  .variant-note { border-top: 1px dashed var(--sl-color-hairline); color: var(--sl-color-gray-3); font-family: var(--sl-font); font-size: .75rem; margin: 0; padding: .65rem .85rem; }
+  @media (max-width: 560px) { .metric-grid { grid-template-columns: 1fr 1fr; } .metric:nth-child(2) { border-right: 0; } .metric:nth-child(-n+2) { border-bottom: 1px solid var(--sl-color-hairline); } }
 </style>

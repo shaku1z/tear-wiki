@@ -87,8 +87,6 @@ export {
     fs.writeFileSync(path.join(path.dirname(DEST_PATH), 'game-source.json'), JSON.stringify({
       repository: GAME_REPOSITORY,
       commit: source.commit,
-      mode: source.mode,
-      syncedAt: new Date().toISOString(),
     }, null, 2) + '\n');
     console.log(`Successfully synced game engine to ${DEST_PATH}`);
   } catch(e) {

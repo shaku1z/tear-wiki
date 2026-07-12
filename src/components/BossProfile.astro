@@ -1,148 +1,38 @@
 ---
 import { CONFIG } from '../scripts/game-engine.js';
+import gameManifest from '../data/game-manifest.json';
 
 const { name } = Astro.props;
 const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
+const hiddenKeys = new Set(['w', 'h', 'hp', 'speed', 'contactDmg', 'weight', 'knockbackTaken']);
+const mechanics = Object.entries(bossConfig).filter(([key, value]) => !hiddenKeys.has(key) && typeof value !== 'object');
+const metrics = [['BASE HP', bossConfig.hp], ['MOVE SPEED', bossConfig.speed], ['CONTACT DMG', bossConfig.contactDmg], ['WEIGHT', bossConfig.weight]];
 ---
 
-<div class="boss-profile">
-  <div class="boss-header">
-    <h2>{name}</h2>
+<section class="boss-terminal" aria-label={`${name} boss data`}>
+  <header>
+    <div><span>BOSS DOSSIER / LIVE CONFIGURATION</span><h2>{name}</h2></div>
+    <code>{gameManifest.source.commit.slice(0, 7)}</code>
+  </header>
+  <div class="boss-metrics">
+    {metrics.map(([label, value]) => <div><span>{label}</span><strong>{value}</strong></div>)}
   </div>
-  
-  <div class="boss-content">
-    <div class="boss-main-stats">
-      <div class="stat-block">
-        <h4>Base Health</h4>
-        <div class="stat-value hp-color">{bossConfig.hp}</div>
-      </div>
-      <div class="stat-block">
-        <h4>Speed</h4>
-        <div class="stat-value speed-color">{bossConfig.speed} px/s</div>
-      </div>
-      <div class="stat-block">
-        <h4>Contact Damage</h4>
-        <div class="stat-value dmg-color">{bossConfig.contactDmg}</div>
-      </div>
-    </div>
-    
-    <div class="boss-mechanics">
-      <h4>Mechanics & Stats</h4>
-      <ul>
-        {Object.entries(bossConfig).map(([k, v]) => {
-          if(['w', 'h', 'hp', 'speed', 'contactDmg', 'weight', 'knockbackTaken'].includes(k)) return null;
-          return (
-            <li>
-              <span class="mech-key">{k}</span>
-              <span class="mech-val">{typeof v === 'number' ? Math.round(v * 100) / 100 : v.toString()}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+  <div class="mechanics">
+    <h3>MECHANICAL PARAMETERS</h3>
+    <dl>
+      {mechanics.map(([key, value]) => <div><dt>{key.replace(/([A-Z])/g, ' $1')}</dt><dd>{typeof value === 'number' ? Math.round(value * 100) / 100 : String(value)}</dd></div>)}
+    </dl>
   </div>
-</div>
+</section>
 
 <style>
-  .boss-profile {
-    background-color: var(--sl-color-gray-6);
-    border: 1px solid var(--sl-color-hairline);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    margin: 30px 0;
-    color: var(--sl-color-text);
-    font-family: system-ui, -apple-system, sans-serif;
-  }
-
-  .boss-header {
-    background-color: var(--sl-color-gray-6);
-    padding: clamp(16px, 4vw, 24px);
-    border-bottom: 1px solid var(--sl-color-hairline);
-  }
-
-  .boss-header h2 {
-    margin: 0;
-    font-size: clamp(1.5rem, 4vw + 1rem, 2rem);
-    font-weight: 900;
-    text-transform: capitalize;
-    letter-spacing: 2px;
-    color: var(--sl-color-white);
-  }
-
-  .boss-content {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: clamp(16px, 4vw, 24px);
-    padding: clamp(16px, 4vw, 24px);
-  }
-  
-  @media (min-width: 768px) {
-    .boss-content {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .boss-main-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .stat-block h4 {
-    margin: 0 0 4px 0;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--sl-color-gray-3);
-  }
-
-  .stat-value {
-    font-size: clamp(1.5rem, 5vw, 2rem);
-    font-weight: 800;
-  }
-
-  .hp-color { color: #f87171; }
-  .speed-color { color: var(--sl-color-text-accent); }
-  .dmg-color { color: #fb923c; }
-
-  .boss-mechanics {
-    background-color: var(--sl-color-gray-6);
-    border-radius: 8px;
-    padding: clamp(16px, 4vw, 20px);
-    border: 1px solid var(--sl-color-hairline);
-  }
-
-  .boss-mechanics h4 {
-    margin: 0 0 16px 0;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--sl-color-hairline);
-    font-size: 1.1rem;
-    color: var(--sl-color-white);
-  }
-
-  .boss-mechanics ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .boss-mechanics li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px dashed var(--sl-color-hairline);
-    font-size: 0.95rem;
-    min-height: 44px; /* Touch target minimum */
-  }
-
-  .mech-key { color: var(--sl-color-gray-2); }
-  .mech-val { 
-    color: var(--sl-color-accent-high); 
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
-  }
+  .boss-terminal { --boss: var(--tear-red); border: 2px solid var(--sl-color-white); border-top: 4px solid var(--boss); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
+  header { align-items: start; background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); display: flex; justify-content: space-between; padding: 1rem; }
+  header span, h3 { color: var(--sl-color-gray-3); display: block; font-size: .63rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+  h2 { border: 0; font-size: clamp(1.35rem, 4vw, 2rem); letter-spacing: .1em; margin: .4rem 0 0; padding: 0; } code { color: var(--boss); font: inherit; font-size: .65rem; }
+  .boss-metrics { display: grid; grid-template-columns: repeat(4, 1fr); } .boss-metrics > div { border-right: 1px solid var(--sl-color-hairline); padding: .9rem; } .boss-metrics > div:last-child { border-right: 0; }
+  .boss-metrics span { color: var(--sl-color-gray-3); display: block; font-size: .6rem; font-weight: 800; letter-spacing: .08em; } .boss-metrics strong { color: var(--sl-color-white); display: block; font-size: 1.35rem; margin-top: .35rem; }
+  .mechanics { border-top: 1px solid var(--sl-color-hairline); padding: 1rem; } .mechanics h3 { border: 0; margin: 0 0 .7rem; padding: 0; }
+  dl { border: 1px solid var(--sl-color-hairline); margin: 0; } dl div { border-bottom: 1px solid var(--sl-color-hairline); display: grid; grid-template-columns: 1fr auto; gap: 1rem; padding: .55rem .65rem; } dl div:last-child { border-bottom: 0; } dt { color: var(--sl-color-gray-2); font-size: .72rem; text-transform: uppercase; } dd { color: var(--boss); font-size: .78rem; font-weight: 800; margin: 0; }
+  @media (max-width: 560px) { .boss-metrics { grid-template-columns: 1fr 1fr; } .boss-metrics > div:nth-child(2) { border-right: 0; } .boss-metrics > div:nth-child(-n+2) { border-bottom: 1px solid var(--sl-color-hairline); } }
 </style>

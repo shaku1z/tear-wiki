@@ -103,7 +103,7 @@
   <div class="signal-strip" aria-label="Current build status">
     <span><b>{selectedCount}</b> PICKS</span>
     <span><b>{activeCount}</b> ABILITIES</span>
-    <span>SOURCE: {gameManifest.source.mode.toUpperCase()}</span>
+    <span>SOURCE: COMMITTED REVISION</span>
     <span class="strip-last">SIMULATION: EXACT APPLY PIPELINE</span>
   </div>
 
