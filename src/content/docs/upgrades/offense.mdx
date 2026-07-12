@@ -1,33 +1,9 @@
 ---
-title: "Offense Abilities"
-description: "All unique offense abilities in Tear, with tier progressions."
-gameVersion: v0.1
+title: Offense Abilities
+description: Live offense upgrades for damage, launch control, and status pressure.
 ---
-
 import InRunUpgrades from '../../../components/InRunUpgrades.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
-import BuilderDeepLink from '../../../components/BuilderDeepLink.astro';
-
-Offense abilities dramatically shift how you deal damage, capitalizing on the physics engine's `tipSpeed` and introducing powerful area-of-effect tools.
-
-> [!NOTE]
-> All percentage damage bonuses (e.g. +25%) stack multiplicatively with the base damage limit of **58** (`blade.maxDamage`), the style meter multiplier (`trick.tiers`), and the commit multiplier.
-
----
-
-## The Upgrades
-
+Offense upgrades reward committed blade work, aerial routes, status setups, and decisive finishes. Their current descriptions and tiers are generated below.
 <InRunUpgrades category="offense" />
----
-
 <ModelViewer model="armored" variant="default" />
-*The **Sunder** upgrade is incredibly potent against Armored enemies. Instantly shattering their guard bypasses their 50% damage reduction on the ground.*
-
-<BuilderDeepLink 
-  loadout={{
-    uniques: ['sunder'],
-    specials: { glass_cannon: 3 },
-    stackables: { keen_edge: 2 }
-  }}
-  label="Prototype the Sunder / Glass Cannon Build →"
-/>

@@ -1,43 +1,8 @@
 ---
-title: "The Voidspire"
-description: "Where the rules thin out. — Stage 4 of the Tear campaign."
-gameVersion: v0.1
+title: The Voidspire
+description: Live stage dossier for The Voidspire.
 ---
-
 import StageEnvironment from '../../../components/StageEnvironment.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Voidspire"]} />
-
-> *Where the rules thin out.*
-
-**Stage 4 of 5.** 9 waves, then [**The Echo**](/bosses/echo).
-
+import BossProfile from '../../../components/BossProfile.astro';
 <StageEnvironment id="The Voidspire" />
-
-> [!IMPORTANT]
-> Wraiths are **immune to direct blade hits**. Only your thrown blade or a deflected projectile will kill them!
-
-<ModelViewer model="wraith" />
-
-## Boss: The Echo
-
-When the 9th wave is cleared, [**The Echo**](/bosses/echo) enters the arena.
-
-<ModelViewer model="the-echo" />
-
-### Mechanics
-
-The Echo is a dark reflection of your own silhouette:
-- **Base Stats**: 3000 HP, high speed (280 px/s).
-- **Mirroring**: Mirrors your tricks and attacks (0.55s copy delay).
-- **Invisibility**: Cycles into invisibility for 3.5 seconds every 10 seconds.
-- **Lunge**: A swift 1500 px/s lunge attack.
-
-> [!TIP]
-> The Echo mimics your aggressive style. Watch out for its sudden invisibility cycle and rely on audio/visual tells to counter its rapid lunges.
-
-## Lore
-
-> The Voidspire is quiet for the first time. On the wall behind where The Echo stood, scratched deep over what must have been years: your name. Over and over — hundreds of times. Below them all, fresher, still sharp: "I remember what it was like to be going somewhere." And at the very bottom: "Go finish it. One of us should."
+<BossProfile name="echo" />

@@ -1,42 +1,8 @@
 ---
-title: "The Crimson Fields"
-description: "Red and gold, and old rage. — Stage 3 of the Tear campaign."
-gameVersion: v0.1
+title: The Crimson Fields
+description: Live stage dossier for The Crimson Fields.
 ---
-
 import StageEnvironment from '../../../components/StageEnvironment.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Crimson Fields"]} />
-
-> *Red and gold, and old rage.*
-
-**Stage 3 of 5.** 9 waves, then [**Aldric (Berserker King)**](/bosses/aldric).
-
+import BossProfile from '../../../components/BossProfile.astro';
 <StageEnvironment id="The Crimson Fields" />
-
-> [!NOTE] Support Targeting
-> **Heralds** buff enemy speed by 1.45x and attack rate by 1.5x. Take them out first!
-
-<ModelViewer model="chimera" />
-
-## Boss: Aldric (Berserker King)
-
-When the 9th wave is cleared, [**Aldric**](/bosses/aldric) enters the arena. 
-
-<ModelViewer model="aldric" />
-
-### Mechanics
-
-Aldric offers a fierce duel that evolves into a deadly desperation phase:
-- **Base Stats**: 3400 HP, 130 px/s speed.
-- **Throne of Fire**: Creates a checkerboard of fire that pulses every 3 seconds.
-- **Fake Death & Frenzy**: Aldric will feign death and rapidly regenerate up to 50% HP (at 5% per second). During his Frenzy, he charges at 1550 px/s but takes 35% extra damage!
-
-> [!WARNING]
-> Do not let your guard down when Aldric falls. When he enters frenzy, prepare to dodge or execute perfect parries to counter his massive 1550 px/s charges!
-
-## Lore
-
-> Among Aldric's belongings, tucked inside the wrapping of his broken cleaver's handle: a small painted portrait, almost worn through. Two children, laughing. On the back, in handwriting read so many times the ink is barely there: "Elan and Mira — before the first Tear opened." And, in another hand: "Aldric. Come home." He never did.
+<BossProfile name="aldric" />

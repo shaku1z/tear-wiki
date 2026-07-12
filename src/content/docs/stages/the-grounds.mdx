@@ -1,42 +1,8 @@
 ---
-title: "The Grounds"
-description: "Where order is kept. — Stage 1 of the Tear campaign."
-gameVersion: v0.1
+title: The Grounds
+description: Live stage dossier for The Grounds.
 ---
-
 import StageEnvironment from '../../../components/StageEnvironment.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Grounds"]} />
-
-> *Where order is kept.*
-
-**Stage 1 of 5.** 9 waves, then [**The Warden**](/bosses/warden).
-
+import BossProfile from '../../../components/BossProfile.astro';
 <StageEnvironment id="The Grounds" />
-
-> [!NOTE] Wave Scaling
-> Within this stage, Enemy HP increases by **+6%** and damage by **+2%** each wave.
-
-<ModelViewer model="charger" />
-
-## Boss: The Warden
-
-When the 9th wave is cleared, [**The Warden**](/bosses/warden) enters the arena. Defeating it unlocks an **Ability Tier-Up** — evolve one of your owned tiered abilities to its next level.
-
-<ModelViewer model="warden" />
-
-### Mechanics
-
-The Warden is a methodical guard who weaponizes the arena across 3 phases:
-- **Phase 1**: Fires mortars (3 shots, 760 px/s speed) and bashes if you get too close.
-- **Phase 2 (Zones)**: Creates prohibited zones (3 zones, shifting) that deal damage if you enter them.
-- **Phase 3 (Ceiling Lock)**: Drops from the ceiling with a devastating lunge (1500 px/s speed).
-
-> [!TIP]
-> Use upward swings ("updrafts") to knock the Warden off-balance or parry its mortars back for massive damage.
-
-## Lore
-
-> The Warden's badge lies in pieces. Etched inside, worn almost smooth: "Appointed by the Council of First Light. Directive: none shall reach the Undercroft." Below it, scratched by hand: "I never asked what was down there."
+<BossProfile name="warden" />

@@ -1,43 +1,8 @@
 ---
-title: "The Undercroft"
-description: "Gray industry, deep below. — Stage 2 of the Tear campaign."
-gameVersion: v0.1
+title: The Undercroft
+description: Live stage dossier for The Undercroft.
 ---
-
 import StageEnvironment from '../../../components/StageEnvironment.astro';
-import BiomeBadge from '../../../components/BiomeBadge.astro';
-import ModelViewer from '../../../components/ModelViewer.astro';
-
-<BiomeBadge stages={["The Undercroft"]} />
-
-> *Gray industry, deep below.*
-
-**Stage 2 of 5.** 9 waves, then [**The Iron Colossus**](/bosses/colossus).
-
+import BossProfile from '../../../components/BossProfile.astro';
 <StageEnvironment id="The Undercroft" />
-
-> [!NOTE] Wave Scaling
-> Within this stage, Enemy HP increases by **+6%** and damage by **+2%** each wave. Additionally, stage 2 brings an inherent **+34% Enemy HP** bump from stage 1.
-
-<ModelViewer model="armored" />
-
-## Boss: The Iron Colossus
-
-When the 9th wave is cleared, [**The Iron Colossus**](/bosses/colossus) enters the arena.
-
-<ModelViewer model="iron-colossus" />
-
-### Mechanics
-
-The Iron Colossus is a tank with a front shield that forces you to maneuver. 
-- **Base Stats**: 2900 HP, massive weight (9) preventing knockback.
-- **Sweeping Arm**: Throws a sweeping arm across the arena (540 px/s).
-- **Core Expose**: Temporarily exposes its core after heavy attacks.
-- **Cross Panels**: Actively uses 4 panels for defensive shocks.
-
-> [!TIP]
-> The Colossus cannot be knocked back (0 knockback taken). Rely on mobility and dashing to get behind its front shield to deal full damage!
-
-## Lore
-
-> In the deepest wall of the Undercroft, beneath the mechanism that is now still, words are carved into the original stone — older than the machine: "Built to contain the Tide of Crimson. Should the Colossus fall, know this — we tried to stop it before it reached the Fields. We failed then too."
+<BossProfile name="colossus" />
