@@ -161,11 +161,12 @@ Bosses also scale with the game mode and difficulty multipliers. In **Gauntlet**
 Tip: **Tiered abilities** (Bloodrite, Storm Recall, Backlash, etc.) gain their most powerful upgrades from boss kills — these are the abilities to invest in during a full campaign run.
 `;
 
-fs.writeFileSync(path.join(OUT_DIR, 'index.mdx'), indexContent);
-console.log('✔ bosses/index.mdx');
+try {
+  fs.writeFileSync(path.join(OUT_DIR, 'index.mdx'), indexContent);
+  console.log('✔ bosses/index.mdx');
 
-for (const b of BOSSES) {
-  const phaseBlocks = b.phases.map((p, i) => `### ${p.name}
+  for (const b of BOSSES) {
+    const phaseBlocks = b.phases.map((p, i) => `### ${p.name}
 
 ${p.desc}
 
@@ -173,9 +174,12 @@ ${p.desc}
 ${p.tip}
 :::`).join('\n\n');
 
-  const content = `---
+    // Clean up the stage slug logic for internal linking
+    const stageSlug = b.stageName.toLowerCase().replace(/ /g, '-');
+
+    const content = `---
 title: "${b.name}"
-description: "${b.blurb} — Stage ${b.stage} boss."
+description: "How to defeat ${b.name}, the Stage ${b.stage} boss in Tear. Phase breakdowns, attack patterns, and lore."
 gameVersion: v0.1
 ---
 
@@ -186,7 +190,7 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 
 > *${b.blurb}*
 
-**Stage ${b.stage} Boss.** Found at the end of [${b.stageName}](/stages/${b.slug.replace('the-', 'the-').replace('iron-colossus','the-undercroft').replace('aldric','the-crimson-fields').replace('warden','the-grounds')}).
+**Stage ${b.stage} Boss.** Found at the end of [${b.stageName}](/stages/${stageSlug}).
 Defeating ${b.name} grants an **Ability Tier-Up**.
 
 <StatBlock
@@ -206,10 +210,18 @@ ${phaseBlocks}
 ## Lore
 
 > ${b.lore}
+
+## Related Links
+- Explore the [${b.stageName}](/stages/${stageSlug}) biome.
+- Learn about [Ability Tier-Ups](/mechanics/combat).
 `;
 
-  fs.writeFileSync(path.join(OUT_DIR, `${b.slug}.mdx`), content);
-  console.log(`✔ bosses/${b.slug}.mdx`);
-}
+    fs.writeFileSync(path.join(OUT_DIR, `${b.slug}.mdx`), content);
+    console.log(`✔ bosses/${b.slug}.mdx`);
+  }
 
-console.log('\n✅ Boss stubs generated successfully.');
+  console.log('\n✅ Boss stubs generated successfully.');
+} catch (error) {
+  console.error('❌ Failed to generate boss pages. Error:', error.message);
+  process.exit(1);
+}

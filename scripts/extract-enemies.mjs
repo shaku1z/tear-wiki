@@ -13,7 +13,7 @@ const OUT_DIR = path.resolve(__dirname, '../src/content/docs/enemies');
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
 // --- Dynamically load live game scripts ---
-const gameJsDir = path.resolve(__dirname, '../../js');
+const gameJsDir = path.resolve(__dirname, '../../Tear/js');
 const variantsSrc = fs.readFileSync(path.join(gameJsDir, 'variants.js'), 'utf-8');
 const configSrc = fs.readFileSync(path.join(gameJsDir, 'config.js'), 'utf-8');
 
@@ -180,21 +180,25 @@ In **Adventure**: +6% per wave within a stage, +34% between stages.
 All values are also modified by the selected [difficulty](/modes/index).
 `;
 
-fs.writeFileSync(path.join(OUT_DIR, 'index.mdx'), indexContent);
-console.log('✔ enemies/index.mdx');
+try {
+  fs.writeFileSync(path.join(OUT_DIR, 'index.mdx'), indexContent);
+  console.log('✔ enemies/index.mdx');
 
-for (const f of FAMILIES) {
-  const variantTable = f.variants.length
-    ? `## Variants\n\n| Name | Available | Description |\n|---|---|---|\n${f.variants.map(v => `| **${v.name}** | Wave ${v.minWave}+ | ${v.desc} |`).join('\n')}`
-    : '*(No named variants — uses the base family only.)*';
+  for (const f of FAMILIES) {
+    const variantTable = f.variants.length
+      ? `## Variants\n\n| Name | Available | Description |\n|---|---|---|\n${f.variants.map(v => `| **${v.name}** | Wave ${v.minWave}+ | ${v.desc} |`).join('\n')}`
+      : '*(No named variants — uses the base family only.)*';
 
-  const tipsBlock = f.tips.length
-    ? `## Tips\n\n${f.tips.map(t => `- ${t}`).join('\n')}`
-    : '';
+    const tipsBlock = f.tips.length
+      ? `## Strategies & Tips\n\n${f.tips.map(t => `- ${t}`).join('\n')}`
+      : '';
 
-  const content = `---
+    // Automated internal linking based on keywords
+    const autoLinkRole = f.role.replace(/Armored/g, '[Armored](/enemies/affixes)');
+
+    const content = `---
 title: "${f.name}"
-description: "${f.role}"
+description: "Defeat the ${f.name} in Tear. View raw stats, attack patterns, variants, and optimal combat strategies."
 gameVersion: v0.1
 ---
 
@@ -203,7 +207,7 @@ import BiomeBadge from '../../../components/BiomeBadge.astro';
 
 <BiomeBadge stages={[${f.stages.map(s=>`"${s}"`).join(', ')}]} />
 
-> ${f.role}
+> ${autoLinkRole}
 
 <StatBlock
   name="${f.name}"
@@ -222,10 +226,19 @@ ${Object.entries(f.keyStats).map(([k, v]) => `    '${k}': '${v}',`).join('\n')}
 ${variantTable}
 
 ${tipsBlock}
+
+## Related Data
+- See how Elite mutations affect this enemy on the [Affixes & Elites](/enemies/affixes) page.
+- View the full [Stat Glossary](/reference/stat-glossary) for formula details.
 `;
 
-  fs.writeFileSync(path.join(OUT_DIR, `${f.slug}.mdx`), content);
-  console.log(`✔ enemies/${f.slug}.mdx`);
+    fs.writeFileSync(path.join(OUT_DIR, `${f.slug}.mdx`), content);
+    console.log(`✔ enemies/${f.slug}.mdx`);
+  }
+
+  console.log('\n✅ Enemy stubs generated successfully.');
+} catch (error) {
+  console.error('❌ Failed to generate enemy pages. Error:', error.message);
+  process.exit(1);
 }
 
-console.log('\n✅ Enemy stubs generated successfully.');
