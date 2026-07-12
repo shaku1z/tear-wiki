@@ -7,11 +7,39 @@ const { model, variant } = Astro.props;
 ---
 
 <tear-model-viewer data-model={model} data-variant={variant || ''} class="tear-model-viewer">
-  <div class="model-canvas-wrapper">
-    <canvas></canvas>
-    <div class="model-ui-overlay">
-      <span class="model-label">[{model.toUpperCase()}{variant ? `::${variant.toUpperCase()}` : ''}]</span>
-      <span class="model-status">IDLE // HOVER TO ENGAGE</span>
+  <div class="model-perspective-container">
+    <div class="model-canvas-wrapper">
+      <div class="model-grid-bg"></div>
+      <canvas></canvas>
+      <div class="model-ui-overlay">
+        <div class="model-header">
+          <span class="model-label">[{model.toUpperCase()}{variant ? `::${variant.toUpperCase()}` : ''}]</span>
+          <span class="model-status">IDLE // HOVER TO ENGAGE</span>
+        </div>
+        
+        <div class="model-controls">
+          <div class="control-group time-controls">
+            <span class="control-label">TIME</span>
+            <button class="ctrl-btn" data-time="0.25">0.25x</button>
+            <button class="ctrl-btn" data-time="0.5">0.5x</button>
+            <button class="ctrl-btn active" data-time="1">1.0x</button>
+          </div>
+          
+          {(model === "warden" || model === "aldric" || model === "iron-colossus" || model === "the-echo" || model === "the-source") && (
+            <div class="control-group phase-controls">
+              <span class="control-label">PHASE</span>
+              <button class="ctrl-btn active" data-phase="auto">AUTO</button>
+              <button class="ctrl-btn" data-phase="1">I</button>
+              <button class="ctrl-btn" data-phase="2">II</button>
+              <button class="ctrl-btn" data-phase="3">III</button>
+            </div>
+          )}
+          
+          <div class="control-group debug-controls">
+            <button class="ctrl-btn debug-toggle">DEBUG: OFF</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </tear-model-viewer>
@@ -26,11 +54,59 @@ const { model, variant } = Astro.props;
     }
 
     connectedCallback() {
+      const container = this.querySelector('.model-perspective-container');
+      const wrapper = this.querySelector('.model-canvas-wrapper');
       const canvas = this.querySelector('canvas');
       const modelName = this.dataset.model;
       const variant = this.dataset.variant;
+      
+      // Setup state
+      const state = { timeScale: 1, phase: 'auto', debug: false };
+
       if (canvas && modelName) {
-        this.cleanup = initModelViewer(canvas, modelName, variant);
+        this.cleanup = initModelViewer(canvas, modelName, variant, state);
+      }
+
+      // Parallax effect
+      wrapper.addEventListener('mousemove', (e) => {
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const rotateX = ((y - cy) / cy) * -4; // subtle tilt
+        const rotateY = ((x - cx) / cx) * 4;
+        wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+      
+      wrapper.addEventListener('mouseleave', () => {
+        wrapper.style.transform = `rotateX(0deg) rotateY(0deg)`;
+      });
+
+      // UI Controls bindings
+      this.querySelectorAll('.time-controls .ctrl-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this.querySelectorAll('.time-controls .ctrl-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.timeScale = parseFloat(btn.dataset.time);
+        });
+      });
+
+      this.querySelectorAll('.phase-controls .ctrl-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this.querySelectorAll('.phase-controls .ctrl-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.phase = btn.dataset.phase;
+        });
+      });
+
+      const debugBtn = this.querySelector('.debug-toggle');
+      if (debugBtn) {
+        debugBtn.addEventListener('click', () => {
+          state.debug = !state.debug;
+          debugBtn.textContent = `DEBUG: ${state.debug ? 'ON' : 'OFF'}`;
+          debugBtn.classList.toggle('active', state.debug);
+        });
       }
     }
 
@@ -48,42 +124,111 @@ const { model, variant } = Astro.props;
 <style>
   .tear-model-viewer {
     display: block;
-    margin: 2rem 0;
-    border: 1px solid var(--sl-color-hairline);
-    background: #0a0a0d;
+    margin: 2.5rem 0;
+  }
+  .model-perspective-container {
+    perspective: 1000px;
   }
   .model-canvas-wrapper {
     position: relative;
     width: 100%;
-    height: 350px;
+    height: 450px; /* Taller for cinematic feel */
+    border: 1px solid var(--sl-color-hairline);
+    background: #0a0a0d;
     overflow: hidden;
     cursor: crosshair;
+    transition: transform 0.1s ease-out;
+    transform-style: preserve-3d;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .model-grid-bg {
+    position: absolute;
+    top: -50%; left: -50%; right: -50%; bottom: -50%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    transform: translateZ(-50px);
+    pointer-events: none;
   }
   canvas {
     display: block;
     width: 100%;
     height: 100%;
+    position: relative;
+    z-index: 10;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
   }
   .model-ui-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none;
-    padding: 1rem;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    z-index: 20;
+    transform: translateZ(20px); /* UI floats above canvas */
   }
-  .model-label {
+  .model-header {
+    display: flex;
+    justify-content: space-between;
+  }
+  .model-label, .model-status {
     font-family: var(--sl-font-mono);
     font-size: 0.75rem;
     color: var(--sl-color-white);
     letter-spacing: 0.2em;
+    background: rgba(10, 10, 13, 0.7);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
   }
-  .model-status {
+  .model-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    pointer-events: auto; /* Allow clicking buttons */
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    background: rgba(20, 20, 28, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 0.25rem;
+  }
+  .control-label {
     font-family: var(--sl-font-mono);
     font-size: 0.65rem;
     color: var(--sl-color-gray-3);
+    padding: 0 0.5rem;
     letter-spacing: 0.1em;
-    text-align: right;
+  }
+  .ctrl-btn {
+    background: transparent;
+    border: none;
+    color: var(--sl-color-gray-3);
+    font-family: var(--sl-font-mono);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .ctrl-btn:hover {
+    color: var(--sl-color-white);
+    background: rgba(255,255,255,0.1);
+  }
+  .ctrl-btn.active {
+    color: #15c2c2;
+    background: rgba(21, 194, 194, 0.15);
+  }
+  .debug-toggle.active {
+    color: #ff00ff;
+    background: rgba(255, 0, 255, 0.15);
   }
 </style>
