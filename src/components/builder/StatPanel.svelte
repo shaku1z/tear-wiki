@@ -27,6 +27,25 @@
   $: throwReleaseMax = c.blade.throw.speed + (c.blade.throw.speedFromSwing * c.blade.maxSpeed);
   $: cappedThrowSpeed = Math.min(throwReleaseMax, c.blade.throw.maxSpeed);
   $: throwDmg = c.blade.throw.damage + (cappedThrowSpeed * c.blade.throw.damageFromSpeed);
+  $: baseline = simulate([]);
+  $: baselineSwing = Math.min(baseline.config.blade.maxSpeed * baseline.config.blade.damageScale, baseline.config.blade.maxDamage);
+  $: baselineSlam = baselineSwing * baseline.config.blade.slamMultiplier * (1 + baseline.config.blade.slamPowerBonus);
+  $: baselineThrowSpeed = Math.min(baseline.config.blade.throw.speed + (baseline.config.blade.throw.speedFromSwing * baseline.config.blade.maxSpeed), baseline.config.blade.throw.maxSpeed);
+  $: baselineThrow = baseline.config.blade.throw.damage + (baselineThrowSpeed * baseline.config.blade.throw.damageFromSpeed);
+  $: buildIdentity = [
+    (m.airBonus || m.aerialRave) && 'AERIAL PRESSURE',
+    (m.parryGuard || m.parryStun || m.deflectPierce || m.deflectSplit) && 'PARRY CONTROL',
+    (m.ricochet || m.vortexRecall || m.throwRamp || m.impale) && 'THROW LOOP',
+    (m.lifesteal || m.bloodrite || p.maxShield || p.maxHp > 100) && 'SUSTAIN',
+    c.player.dmgTakenMult > 1 && 'HIGH RISK',
+    (m.cinder || m.bleedHit || m.sunderHit) && 'STATUS ENGINE',
+  ].filter(Boolean).slice(0, 3);
+
+  function delta(value, base, suffix = '') {
+    const difference = value - base;
+    if (Math.abs(difference) < 0.005) return 'BASELINE';
+    return `${difference > 0 ? '+' : ''}${Number.isInteger(difference) ? difference : difference.toFixed(2)}${suffix}`;
+  }
 
   // -- SCORING --
   function calcScore(current, base, maxFactor = 2) {
@@ -48,6 +67,17 @@
 </script>
 
 <div class="telemetry">
+  <div class="build-identity">
+    <span class="identity-label">BUILD DNA</span>
+    <div class="identity-tags">
+      {#if buildIdentity.length}
+        {#each buildIdentity as identity}<span>{identity}</span>{/each}
+      {:else}
+        <span>BASELINE FRAME</span>
+      {/if}
+    </div>
+    <p>Every readout is compared against an unmodified engine simulation.</p>
+  </div>
   <div class="radar-header">
     <div class="radar-row">
       <span class="label">AGL</span>
@@ -89,26 +119,32 @@
       <div class="t-box">
         <span class="t-val">{Math.round(minSwingBase)} - {Math.round(cappedSwingBase)}</span>
         <span class="t-sub">SWING DMG</span>
+        <span class="delta" class:up={cappedSwingBase > baselineSwing} class:down={cappedSwingBase < baselineSwing}>{delta(cappedSwingBase, baselineSwing)}</span>
       </div>
       <div class="t-box">
         <span class="t-val">{Math.round(maxPowerSlam)}</span>
         <span class="t-sub">POWER SLAM</span>
+        <span class="delta" class:up={maxPowerSlam > baselineSlam}>{delta(maxPowerSlam, baselineSlam)}</span>
       </div>
       <div class="t-box">
         <span class="t-val">{Math.round(maxLaunchSpeed)}</span>
         <span class="t-sub">UPDRAFT SPD</span>
+        <span class="delta" class:up={maxLaunchSpeed > baseline.config.blade.launchPower}>{delta(maxLaunchSpeed, baseline.config.blade.launchPower)}</span>
       </div>
       <div class="t-box">
         <span class="t-val">{c.blade.deflectDmgMult.toFixed(2)}X</span>
         <span class="t-sub">DEFLECT MULT</span>
+        <span class="delta" class:up={c.blade.deflectDmgMult > baseline.config.blade.deflectDmgMult}>{delta(c.blade.deflectDmgMult, baseline.config.blade.deflectDmgMult, '×')}</span>
       </div>
       <div class="t-box">
         <span class="t-val">{Math.round(throwDmg)}</span>
         <span class="t-sub">THROW DMG</span>
+        <span class="delta" class:up={throwDmg > baselineThrow}>{delta(throwDmg, baselineThrow)}</span>
       </div>
       <div class="t-box">
         <span class="t-val">{c.trick.decay.toFixed(2)} /s</span>
         <span class="t-sub">STYLE DECAY</span>
+        <span class="delta" class:down={c.trick.decay < baseline.config.trick.decay}>{delta(c.trick.decay, baseline.config.trick.decay, '/s')}</span>
       </div>
     </div>
   </div>
@@ -169,6 +205,11 @@
     color: var(--sl-color-white);
     text-transform: uppercase;
   }
+  .build-identity { border: 1px solid var(--sl-color-hairline); border-left: 4px solid #13c4d6; margin-bottom: 16px; padding: 12px; }
+  .identity-label { color: var(--sl-color-gray-3); display: block; font-size: .65rem; font-weight: 800; letter-spacing: .12em; }
+  .identity-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .identity-tags span { border: 1px solid #13c4d6; color: #13c4d6; font-size: .62rem; font-weight: 800; letter-spacing: .06em; padding: 3px 5px; }
+  .build-identity p { color: var(--sl-color-gray-3); font-size: .68rem; line-height: 1.4; margin: 9px 0 0; text-transform: none; }
 
   .radar-header {
     background: var(--sl-color-gray-6);
@@ -236,6 +277,7 @@
   }
   .t-val { font-size: 1rem; font-weight: bold; color: var(--sl-color-white); text-align: center; }
   .t-sub { font-size: 0.65rem; color: var(--sl-color-gray-3); text-align: center; }
+  .delta { color: var(--sl-color-gray-3); font-size: .6rem; font-weight: 800; letter-spacing: .05em; margin-top: 2px; } .delta.up { color: #1faf5a; } .delta.down { color: #13c4d6; }
 
   .t-table {
     width: 100%;
