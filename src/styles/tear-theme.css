@@ -259,7 +259,7 @@ site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-c
   display: block;
   overflow: hidden;
   text-decoration: none;
-  height: 160px;
+  height: 180px;
   background: var(--panel-bg, #f5f4f0);
 }
 .biome-panel-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -270,9 +270,9 @@ site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-c
   flex-direction: column;
   justify-content: flex-end;
   height: 100%;
-  padding: 0.8rem;
+  padding: 1rem 1rem 1.5rem 1rem;
   box-sizing: border-box !important;
-  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%);
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 75%);
 }
 .biome-panel-name {
   font-family: var(--sl-font-mono);
@@ -281,14 +281,16 @@ site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-c
   letter-spacing: 0.10em;
   text-transform: uppercase;
   color: #fff;
-  line-height: 1.2;
+  line-height: 1.3;
+  margin-bottom: 0.2rem;
 }
 .biome-panel-blurb {
   font-family: var(--sl-font-mono);
   font-size: 0.60rem;
   color: rgba(255,255,255,0.55);
-  margin-top: 0.2rem;
-  line-height: 1.3;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 1.4;
 }
 .biome-panel::after {
   content: '';
