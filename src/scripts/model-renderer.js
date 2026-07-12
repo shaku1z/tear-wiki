@@ -1,4 +1,4 @@
-export function initModelViewer(canvas, modelName) {
+export function initModelViewer(canvas, modelName, variant) {
   const ctx = canvas.getContext('2d');
   let rafId;
   let t = 0;
@@ -34,6 +34,8 @@ export function initModelViewer(canvas, modelName) {
     armored: "#3a4654",
     armoredShield: "#15c2c2",
     aldric: "#b01030",
+    slam: "#ef8a17",
+    sludge: "#6f7a35",
     ink: "#0a0a0d", // Dark background matches wiki bg
     grid: "rgba(255,255,255,0.04)",
     dim: "rgba(255,255,255,0.25)"
@@ -121,16 +123,41 @@ export function initModelViewer(canvas, modelName) {
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.strokeRect(-hw, -hh, hw*2, hh*2);
       
-      // Weapon (axe or sword)
+      // Variants
+      if (variant === "bull") {
+        ctx.fillStyle = ink;
+        ctx.fillRect(-hw + 2, -hh - 6, 5, 6); ctx.fillRect(hw - 7, -hh - 6, 5, 6);
+      } else if (variant === "stalker") {
+        ctx.fillStyle = ink;
+        ctx.beginPath(); ctx.moveTo(-hw, -hh); ctx.lineTo(-hw - 6, -hh + 6); ctx.lineTo(-hw, -hh + 10); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(hw, -hh); ctx.lineTo(hw + 6, -hh + 6); ctx.lineTo(hw, -hh + 10); ctx.fill();
+      }
+
+      // Weapon (axe, sword, fists)
       ctx.save();
-      const wAngle = -0.5 + hoverK * 1.2; // raise weapon on hover
-      ctx.translate(faceDir * (hw+4), 0);
-      ctx.rotate(faceDir * wAngle);
-      ctx.fillStyle = ink;
-      ctx.fillRect(-2, -18, 4, 24);
-      ctx.fillStyle = COLORS.charger;
-      ctx.fillRect(-4, -20, 8, 12); // axe head
+      if (variant === "brawler") {
+        ctx.fillStyle = ink;
+        const ext = hoverK * 12; // extend fists on hover
+        ctx.fillRect(faceDir * (hw + ext) - 4, - 3, 8, 9);
+      } else {
+        const wAngle = -0.5 + hoverK * 1.2; // raise weapon on hover
+        ctx.translate(faceDir * (hw+4), 0);
+        ctx.rotate(faceDir * wAngle);
+        ctx.fillStyle = ink;
+        ctx.fillRect(-2, -18, 4, 24);
+        if (variant !== "duelist") {
+          ctx.fillStyle = COLORS.charger;
+          ctx.fillRect(-4, -20, 8, 12); // axe head
+        }
+      }
       ctx.restore();
+      
+      // Bull charge telegraph projection
+      if (variant === "bull" && hoverK > 0) {
+        ctx.strokeStyle = COLORS.charger; ctx.globalAlpha = 0.35 + 0.45 * hoverK; ctx.lineWidth = 5; ctx.setLineDash([7, 5]);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * (40 + hoverK * 100), 0); ctx.stroke();
+        ctx.setLineDash([]); ctx.globalAlpha = 1;
+      }
       
       // Eye
       ctx.fillStyle = "#fff";
@@ -147,20 +174,45 @@ export function initModelViewer(canvas, modelName) {
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 2.5; ctx.stroke();
       
-      // Eye / Turret
-      ctx.fillStyle = ink;
-      ctx.fillRect(-2, -r - 4 + hoverK*4, 4, 6); // retracts on hover
-      // Laser sight on hover
-      if (hoverK > 0) {
-        ctx.strokeStyle = COLORS.ranged;
-        ctx.globalAlpha = hoverK * 0.5;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath(); ctx.moveTo(faceDir * r, 0); ctx.lineTo(faceDir * (r + 100), 0); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
+      if (variant === "sentinel") {
+        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
+      } else if (variant === "marksman") {
+        ctx.fillStyle = ink; ctx.fillRect(-2, -r - 4, 4, 6);
       }
-      ctx.fillStyle = "#fff";
-      ctx.beginPath(); ctx.arc(faceDir * 6, Math.sin(t)*2, 4, 0, Math.PI*2); ctx.fill();
+      
+      // Turret
+      ctx.fillStyle = ink;
+      if (variant !== "sentinel" && variant !== "marksman") {
+        ctx.fillRect(-2, -r - 4 + hoverK*4, 4, 6);
+      }
+      
+      // Projectiles
+      if (hoverK > 0) {
+        ctx.fillStyle = COLORS.ranged;
+        if (variant === "marksman") {
+           ctx.globalAlpha = 0.4 + 0.5 * hoverK;
+           ctx.beginPath(); ctx.arc(0, 0, 4 + hoverK * 8, 0, Math.PI * 2); ctx.fill();
+           ctx.globalAlpha = 1;
+        } else if (variant === "sentinel") {
+           ctx.lineWidth = 1.2; ctx.strokeStyle = ink; ctx.globalAlpha = 0.5 + 0.4 * hoverK;
+           ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(faceDir * 100, hoverK * 30); ctx.stroke();
+           ctx.globalAlpha = 1;
+           ctx.fillStyle = COLORS.ranged;
+           ctx.beginPath(); ctx.arc(faceDir * (30 + hoverK * 20), hoverK * 30, 5, 0, Math.PI * 2); ctx.fill();
+        } else {
+           ctx.beginPath();
+           const px = faceDir * (r + 10 + hoverK * 20);
+           ctx.moveTo(px + faceDir * 6, 0);
+           ctx.lineTo(px, -3); ctx.lineTo(px - faceDir * 6, 0); ctx.lineTo(px, 3);
+           ctx.fill();
+           ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+      }
+      
+      if (variant !== "sentinel") {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath(); ctx.arc(faceDir * 6, Math.sin(t)*2, 4, 0, Math.PI*2); ctx.fill();
+      }
       drawDimensions(0, 0, r*2, r*2, 40, 40);
 
     } else if (modelName === "flyer") {
@@ -168,19 +220,34 @@ export function initModelViewer(canvas, modelName) {
       ctx.fillStyle = COLORS.flyer;
       ctx.beginPath();
       ctx.moveTo(faceDir * r, 0);
-      ctx.lineTo(-faceDir * r, -hh + hoverK * 8); // flap wings down on hover
+      
+      // Fix flyer shrinking: keep the wing length consistent, pull X in instead of shrinking Y
+      const flapY = hoverK * 8;
+      const flapX = hoverK * 4;
+      ctx.lineTo(-faceDir * (r - flapX), -hh + flapY);
       ctx.lineTo(-faceDir * r * 0.4, 0);
-      ctx.lineTo(-faceDir * r, hh - hoverK * 8); // flap wings up on hover
+      ctx.lineTo(-faceDir * (r - flapX), hh - flapY);
+      
       ctx.closePath();
       ctx.fill();
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
-      // Fang
-      ctx.fillStyle = ink;
-      ctx.beginPath(); ctx.moveTo(-4, hh - 2); ctx.lineTo(4, hh - 2); ctx.lineTo(0, hh + 6); ctx.fill();
+      
+      if (variant !== "swooper") {
+        ctx.fillStyle = ink;
+        ctx.beginPath(); ctx.moveTo(-4, hh - 2); ctx.lineTo(4, hh - 2); ctx.lineTo(0, hh + 6); ctx.fill();
+      }
       
       ctx.fillStyle = "#fff";
       ctx.fillRect(faceDir * 8 - 2, -2, 4, 4);
+      
+      if (variant === "divebomber" && hoverK > 0) {
+         ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = (0.35 + 0.5 * hoverK) * hoverK; ctx.lineWidth = 3;
+         ctx.beginPath(); ctx.arc(faceDir * 20, 50, 34 - 22 * hoverK, 0, Math.PI * 2); ctx.stroke();
+         ctx.beginPath(); ctx.moveTo(faceDir * 20, hh); ctx.setLineDash([4, 8]); ctx.lineTo(faceDir * 20, 50); ctx.stroke();
+         ctx.setLineDash([]); ctx.globalAlpha = 1;
+      }
+      
       drawDimensions(0, 0, r*2, hh*2, 46, 36);
 
     } else if (modelName === "bomber") {
@@ -190,9 +257,40 @@ export function initModelViewer(canvas, modelName) {
       ctx.beginPath(); ctx.arc(0, 0, hw + pulse, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.stroke();
+      
+      if (variant === "trapper") { ctx.fillStyle = "#fff"; ctx.fillRect(-6, -1, 12, 3); }
+      else if (variant === "juggler") { ctx.fillStyle = "#fff"; for(let i=0;i<3;i++) ctx.fillRect(-6 + i*5, -3, 3, 3); }
+      else if (variant === "sludge") { ctx.fillStyle = COLORS.sludge; ctx.beginPath(); ctx.arc(0, 0, hw * 0.5, 0, Math.PI*2); ctx.fill(); }
+      else if (variant === "geomancer") { ctx.fillStyle = "#fff"; ctx.fillRect(-5, -4, 10, 8); }
+      else { ctx.fillStyle = "#fff"; ctx.fillRect(-6, -1, 12, 3); }
+      
       ctx.fillStyle = ink; ctx.fillRect(-2, -hh - 8, 4, 8); // Launcher
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(-6, -1, 12, 3);
+      
+      if (hoverK > 0) {
+        const px = faceDir * hoverK * 30, py = -hh - 10 - hoverK * 20 + hoverK*hoverK * 30; // arcing path
+        if (variant === "trapper") {
+          ctx.fillStyle = COLORS.bomber;
+          ctx.beginPath(); ctx.arc(faceDir * 35, 45, 8, Math.PI, 0); ctx.fill();
+          ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = Math.floor(t * 10) % 2 === 0 ? COLORS.charger : ink;
+          ctx.beginPath(); ctx.arc(faceDir * 35, 44, 2.5, 0, Math.PI*2); ctx.fill();
+        } else if (variant === "sludge") {
+          const wob = Math.sin(t*4) * 1.4;
+          ctx.fillStyle = COLORS.sludge; ctx.beginPath(); ctx.ellipse(px, py, 6 + wob, 6 - wob, 0, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
+        } else if (variant === "geomancer") {
+          ctx.fillStyle = COLORS.sludge; ctx.globalAlpha = hoverK * 0.7;
+          ctx.fillRect(faceDir * 40 - 15, 45 - hoverK * 30, 30, hoverK * 30);
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.fillStyle = COLORS.bomber;
+          ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = Math.floor(t * 15) % 2 === 0 ? "#fff" : COLORS.bomber;
+          ctx.fillRect(px - 1, py - 9, 2, 3);
+        }
+      }
+      
       drawDimensions(0, 0, hw*2, hw*2, 44, 44);
 
     } else if (modelName === "armored") {
@@ -211,6 +309,14 @@ export function initModelViewer(canvas, modelName) {
       
       ctx.fillStyle = "#fff";
       ctx.fillRect(faceDir * 10 - 3, -6, 6, 6);
+      
+      // Shockwave stomp telegraph
+      if (hoverK > 0) {
+         ctx.strokeStyle = COLORS.slam; ctx.globalAlpha = (0.35 + 0.5 * hoverK) * hoverK; ctx.lineWidth = 3 + hoverK * 3;
+         ctx.beginPath(); ctx.moveTo(-(40 + 60 * hoverK), hh + 2); ctx.lineTo((40 + 60 * hoverK), hh + 2); ctx.stroke();
+         ctx.globalAlpha = 1;
+      }
+      
       drawDimensions(0, 0, hw*2 + 18, hh*2, 66, 52);
 
     } else if (modelName === "aldric") {
@@ -220,10 +326,8 @@ export function initModelViewer(canvas, modelName) {
       ctx.shadowBlur = 0;
       ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(-hw, -hh, hw*2, hh*2);
       
-      // Eye
       ctx.fillStyle = "#fff"; ctx.fillRect(faceDir * 16 - 8, 14, 16, 11);
       
-      // Big Cleaver
       const wAngle = -0.3 + hoverK * 0.8; 
       const hx = faceDir * hw * 0.5, hy = -4, L = 64;
       const tx = hx + faceDir * Math.cos(wAngle) * L, ty = hy + Math.sin(wAngle) * L;
@@ -231,7 +335,7 @@ export function initModelViewer(canvas, modelName) {
       ctx.strokeStyle = ink; ctx.lineWidth = 7; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
       ctx.save(); ctx.translate(tx, ty); ctx.rotate(Math.atan2(ty - hy, tx - hx)); ctx.fillStyle = ink;
-      ctx.fillRect(-6, -14, 26, 28); ctx.restore(); // Cleaver head
+      ctx.fillRect(-6, -14, 26, 28); ctx.restore();
       
       drawDimensions(0, 0, hw*2, hh*2, 64, 76);
     }

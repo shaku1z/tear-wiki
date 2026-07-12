@@ -1,15 +1,16 @@
 ---
 export interface Props {
   model: 'charger' | 'ranged' | 'flyer' | 'bomber' | 'armored' | 'aldric';
+  variant?: string;
 }
-const { model } = Astro.props;
+const { model, variant } = Astro.props;
 ---
 
-<tear-model-viewer data-model={model} class="tear-model-viewer">
+<tear-model-viewer data-model={model} data-variant={variant || ''} class="tear-model-viewer">
   <div class="model-canvas-wrapper">
     <canvas></canvas>
     <div class="model-ui-overlay">
-      <span class="model-label">[{model.toUpperCase()}]</span>
+      <span class="model-label">[{model.toUpperCase()}{variant ? `::${variant.toUpperCase()}` : ''}]</span>
       <span class="model-status">IDLE // HOVER TO ENGAGE</span>
     </div>
   </div>
@@ -27,8 +28,9 @@ const { model } = Astro.props;
     connectedCallback() {
       const canvas = this.querySelector('canvas');
       const modelName = this.dataset.model;
+      const variant = this.dataset.variant;
       if (canvas && modelName) {
-        this.cleanup = initModelViewer(canvas, modelName);
+        this.cleanup = initModelViewer(canvas, modelName, variant);
       }
     }
 

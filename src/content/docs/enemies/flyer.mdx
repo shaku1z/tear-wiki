@@ -7,36 +7,54 @@ gameVersion: v0.1
 import StatBlock from '../../../components/StatBlock.astro';
 import BiomeBadge from '../../../components/BiomeBadge.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 <BiomeBadge stages={["The Crimson Fields", "The Voidspire", "The Tear"]} />
 
 > Hovers above the ground, swoops down to strike, ignores platforms.
 
-<ModelViewer model="flyer" />
-
-<StatBlock
-  name="Flyer"
-  color="#8b3bd6"
-  stats={{
-    'HP': 44,
-    'Speed': '230 px/s',
-    'Contact Damage': 10,
-    'Knockback Taken': 14,
-    'Weight': 0.75,
-    'Size': '36×26 px',
-    'Hover Height': '150 px',
-    'Swoop Interval': '3.3s',
-    'Swoop Speed': '700 px/s',
-  }}
-/>
-
-## Variants
-
-| Name | Available | Description |
-|---|---|---|
-| **Flyer** | Wave 1+ | Base Weight: 1. Evolved variant. |
-| **Dive Bomber** | Wave 3+ | Base Weight: 0.8. Evolved variant. |
-| **Swooper** | Wave 5+ | Base Weight: 0.6. Evolved variant. |
+<Tabs>
+  <TabItem label="Flyer (Base)">
+    <ModelViewer model="flyer" variant="swooper" />
+    <StatBlock
+      name="Flyer"
+      color="#8b3bd6"
+      stats={{
+        'HP': 44,
+        'Speed': '230 px/s',
+        'Contact Damage': 10,
+        'Knockback Taken': 14,
+        'Weight': 0.75,
+        'Size': '36×26 px',
+        'Hover Height': '150 px',
+        'Swoop Interval': '3.3s',
+        'Swoop Speed': '700 px/s',
+      }}
+    />
+  </TabItem>
+  <TabItem label="Dive Bomber">
+    <ModelViewer model="flyer" variant="divebomber" />
+    <StatBlock
+      name="Dive Bomber"
+      color="#8b3bd6"
+      stats={{
+        'HP': 44,
+        'Behavior': 'Plunges straight down from above.'
+      }}
+    />
+  </TabItem>
+  <TabItem label="Swooper">
+    <ModelViewer model="flyer" variant="highdiver" />
+    <StatBlock
+      name="Swooper"
+      color="#8b3bd6"
+      stats={{
+        'HP': 44,
+        'Behavior': 'Extremely high swoop trajectory.'
+      }}
+    />
+  </TabItem>
+</Tabs>
 
 ## Strategies & Tips
 
