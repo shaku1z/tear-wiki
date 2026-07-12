@@ -17,6 +17,14 @@ function getLocalCommit() {
   }
 }
 
+function isLocalWorktreeClean() {
+  try {
+    return execFileSync('git', ['-C', LOCAL_GAME_DIR, 'status', '--porcelain'], { encoding: 'utf8' }).trim() === '';
+  } catch {
+    return false;
+  }
+}
+
 function fetchUrl(url, headers = {}) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { 'User-Agent': 'tear-wiki-sync', ...headers } }, (res) => {
@@ -38,8 +46,16 @@ async function resolveSource() {
   const requestedMode = process.env.GAME_SOURCE || 'auto';
   const hasLocalGame = fs.existsSync(path.join(LOCAL_GAME_DIR, 'js'));
 
-  if ((requestedMode === 'local' || requestedMode === 'auto') && hasLocalGame && !process.env.GAME_COMMIT_SHA) {
+  if (requestedMode === 'local' && hasLocalGame && !process.env.GAME_COMMIT_SHA) {
     return { mode: 'local', commit: getLocalCommit(), root: path.join(LOCAL_GAME_DIR, 'js') };
+  }
+
+  if (requestedMode === 'auto' && hasLocalGame && !process.env.GAME_COMMIT_SHA && isLocalWorktreeClean()) {
+    return { mode: 'local', commit: getLocalCommit(), root: path.join(LOCAL_GAME_DIR, 'js') };
+  }
+
+  if (requestedMode === 'auto' && hasLocalGame && !process.env.GAME_COMMIT_SHA) {
+    console.log('Local game checkout has uncommitted changes; using the committed remote revision instead.');
   }
 
   const commit = await resolveRemoteCommit();
