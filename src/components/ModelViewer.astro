@@ -4,6 +4,8 @@ export interface Props {
   variant?: string;
 }
 const { model, variant } = Astro.props;
+
+const isBoss = (model === "warden" || model === "aldric" || model === "iron-colossus" || model === "the-echo" || model === "the-source");
 ---
 
 <tear-model-viewer data-model={model} data-variant={variant || ''} class="tear-model-viewer">
