@@ -116,7 +116,7 @@
     <table class="t-table">
       <tbody>
         <tr><td>AERIAL_BONUS</td><td class="num" class:pos={m.airBonus > 0}>+{Math.round(m.airBonus * 100)}%</td></tr>
-        <tr><td>PARRY_SLOW</td><td class="num">{c.parrySlowScale.toFixed(2)}X</td></tr>
+        <tr><td>PARRY_SLOW</td><td class="num">{c.juice.parrySlowScale.toFixed(2)}X</td></tr>
         <tr><td>LIFESTEAL</td><td class="num" class:pos={m.lifesteal > 0}>+{m.lifesteal}</td></tr>
         <tr><td>DASH_CHARGE</td><td class="num" class:pos={p.maxDashCharges > 1}>{p.maxDashCharges}</td></tr>
         <tr><td>DMG_TAKEN</td><td class="num" class:neg={c.player.dmgTakenMult > 1} class:pos={c.player.dmgTakenMult < 1}>{c.player.dmgTakenMult.toFixed(2)}X</td></tr>
