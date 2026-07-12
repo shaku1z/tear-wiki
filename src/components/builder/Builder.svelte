@@ -26,18 +26,18 @@
   $: selectedCount = Object.values($loadout.specials).filter((tier) => tier > 0).length
     + $loadout.uniques.length
     + Object.values($loadout.stackables).reduce((total, count) => total + count, 0);
-  $: activeCount = ALL_ABILITIES.filter((ability) => isSelected(ability)).length;
   $: selectedEntries = ALL_ABILITIES.flatMap((ability) => {
     if (ability.type === 'special' && ($loadout.specials[ability.id] || 0) > 0) return [{ ability, quantity: $loadout.specials[ability.id], label: `T${$loadout.specials[ability.id]}` }];
     if (ability.type === 'unique' && $loadout.uniques.includes(ability.id)) return [{ ability, quantity: 1, label: 'OWNED' }];
     if (ability.type === 'stackable' && ($loadout.stackables[ability.id] || 0) > 0) return [{ ability, quantity: $loadout.stackables[ability.id], label: `×${$loadout.stackables[ability.id]}` }];
     return [];
   });
+  $: activeCount = selectedEntries.length;
 
-  function isSelected(ability) {
-    return (ability.type === 'special' && ($loadout.specials[ability.id] || 0) > 0)
-      || (ability.type === 'unique' && $loadout.uniques.includes(ability.id))
-      || (ability.type === 'stackable' && ($loadout.stackables[ability.id] || 0) > 0);
+  function isSelected(ability, currentLoadout) {
+    return (ability.type === 'special' && (currentLoadout.specials[ability.id] || 0) > 0)
+      || (ability.type === 'unique' && currentLoadout.uniques.includes(ability.id))
+      || (ability.type === 'stackable' && (currentLoadout.stackables[ability.id] || 0) > 0);
   }
 
   function toggleUnique(id) {
@@ -155,7 +155,7 @@
       {#if visibleAbilities.length}
         <div class="ability-grid">
           {#each visibleAbilities as ability}
-            <article class:selected={isSelected(ability)} class="ability-module cat-{ability.cat}">
+            <article class:selected={isSelected(ability, $loadout)} class="ability-module cat-{ability.cat}">
               <div class="module-head">
                 <span class="module-class">{ability.type === 'special' ? 'SPECIAL' : ability.type === 'unique' ? 'UNIQUE' : 'STACKS'}</span>
                 <span class="module-domain">{ability.cat}</span>
@@ -170,8 +170,8 @@
                   {/each}
                 </div>
               {:else if ability.type === 'unique'}
-                <button class="module-toggle" class:active={isSelected(ability)} aria-pressed={isSelected(ability)} on:click={() => toggleUnique(ability.id)}>
-                  {isSelected(ability) ? 'INSTALLED' : 'INSTALL MODULE'}
+                <button class="module-toggle" class:active={isSelected(ability, $loadout)} aria-pressed={isSelected(ability, $loadout)} on:click={() => toggleUnique(ability.id)}>
+                  {isSelected(ability, $loadout) ? 'INSTALLED' : 'INSTALL MODULE'}
                 </button>
               {:else}
                 <div class="stack-control" aria-label={`${ability.name} stack count`}>
