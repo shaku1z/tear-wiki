@@ -81,33 +81,33 @@
   <div class="radar-header">
     <div class="radar-row">
       <span class="label">AGL</span>
-      <div class="block-meter">
+      <div class="block-meter" role="meter" aria-label="Agility potential" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(agilityScore)}>
         {#each getBlocks(agilityScore) as active}
-          <div class="block b-agl" class:active></div>
+          <div class="block b-agl" class:active aria-hidden="true"></div>
         {/each}
       </div>
     </div>
     <div class="radar-row">
       <span class="label">LTH</span>
-      <div class="block-meter">
+      <div class="block-meter" role="meter" aria-label="Lethality potential" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(lethalityScore)}>
         {#each getBlocks(lethalityScore) as active}
-          <div class="block b-lth" class:active></div>
+          <div class="block b-lth" class:active aria-hidden="true"></div>
         {/each}
       </div>
     </div>
     <div class="radar-row">
       <span class="label">CTL</span>
-      <div class="block-meter">
+      <div class="block-meter" role="meter" aria-label="Control potential" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(controlScore)}>
         {#each getBlocks(controlScore) as active}
-          <div class="block b-ctl" class:active></div>
+          <div class="block b-ctl" class:active aria-hidden="true"></div>
         {/each}
       </div>
     </div>
     <div class="radar-row">
       <span class="label">SUS</span>
-      <div class="block-meter">
+      <div class="block-meter" role="meter" aria-label="Sustain potential" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(sustainScore)}>
         {#each getBlocks(sustainScore) as active}
-          <div class="block b-sus" class:active></div>
+          <div class="block b-sus" class:active aria-hidden="true"></div>
         {/each}
       </div>
     </div>
@@ -221,22 +221,27 @@
     gap: 8px;
     border-radius: 8px;
   }
+  .radar-header > * { margin: 0; min-width: 0; }
 
   .radar-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
     align-items: center;
     gap: 12px;
+    margin: 0;
   }
-  .label { width: 32px; font-weight: bold; color: var(--sl-color-gray-3); font-size: 0.9rem; }
+  .label { font-weight: bold; color: var(--sl-color-gray-3); font-size: 0.9rem; }
   
   .block-meter {
-    flex: 1;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    min-width: 0;
     gap: 2px;
   }
   .block {
-    flex: 1;
     height: 14px;
+    margin: 0;
+    min-width: 0;
     background: var(--sl-color-black);
     border-radius: 2px;
   }
@@ -260,6 +265,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
+  .t-grid > * { margin: 0; min-width: 0; }
   @media (min-width: 400px) {
     .t-grid { grid-template-columns: 1fr 1fr 1fr; }
   }
@@ -274,6 +280,7 @@
     gap: 4px;
     background: var(--sl-color-black);
     border-radius: 6px;
+    margin: 0;
   }
   .t-val { font-size: 1rem; font-weight: bold; color: var(--sl-color-white); text-align: center; }
   .t-sub { font-size: 0.65rem; color: var(--sl-color-gray-3); text-align: center; }
@@ -307,12 +314,14 @@
     border: 1px solid var(--sl-color-hairline);
     border-radius: 6px;
   }
+  .style-meter > * { margin: 0; min-width: 0; }
   .style-tier {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 4px 0;
     border-bottom: 1px solid var(--sl-color-gray-6);
+    margin: 0;
   }
   .style-tier:last-child { border-bottom: none; }
   .style-pts { font-size: 0.8rem; color: var(--sl-color-gray-3); width: 40px; }

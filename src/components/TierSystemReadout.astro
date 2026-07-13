@@ -21,9 +21,9 @@ const categories = [...new Set(tiered.map((upgrade) => upgrade.cat))];
   .tier-system { border: 1px solid var(--sl-color-hairline); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
   header, footer { align-items: center; background: var(--sl-color-gray-6); color: var(--sl-color-gray-3); display: flex; font-size: .64rem; font-weight: 800; gap: 1rem; justify-content: space-between; letter-spacing: .1em; padding: .65rem .75rem; text-transform: uppercase; }
   header { border-bottom: 1px solid var(--sl-color-hairline); } footer { border-top: 1px solid var(--sl-color-hairline); justify-content: flex-start; } code { color: var(--tear-cyan); font: inherit; }
-  .tier-flow { align-items: stretch; display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; }
-  .tier-flow > div { border-left: 3px solid var(--tear-cyan); padding: .85rem; } .tier-flow > div:nth-of-type(2) { border-left-color: color-mix(in srgb, var(--tear-cyan) 70%, var(--sl-color-gray-3)); } .tier-flow > div:nth-of-type(3) { border-left-color: var(--sl-color-white); }
+  .tier-flow { align-items: stretch; display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; } header > *, footer > *, .tier-flow > * { margin: 0; min-width: 0; }
+  .tier-flow > div { border-left: 3px solid var(--tear-cyan); margin: 0; padding: .85rem; } .tier-flow > div:nth-of-type(2) { border-left-color: color-mix(in srgb, var(--tear-cyan) 70%, var(--sl-color-gray-3)); } .tier-flow > div:nth-of-type(3) { border-left-color: var(--sl-color-white); }
   .tier-flow b, .tier-flow span { display: block; } .tier-flow b { color: var(--tear-cyan); font-size: 1.1rem; } .tier-flow span { color: var(--sl-color-gray-3); font-size: .58rem; font-weight: 800; letter-spacing: .08em; margin-top: .3rem; } .tier-flow p { color: var(--sl-color-gray-2); font-family: var(--sl-font); font-size: .76rem; line-height: 1.4; margin: .5rem 0 0; }
-  .tier-flow i { align-self: center; color: var(--tear-cyan); font-size: 1.2rem; font-style: normal; padding: 0 .45rem; }
+  .tier-flow i { align-self: center; color: var(--tear-cyan); font-size: 1.2rem; font-style: normal; margin: 0; padding: 0 .45rem; }
   @media (max-width: 650px) { .tier-flow { grid-template-columns: 1fr; } .tier-flow i { display: none; } .tier-flow > div { border-bottom: 1px solid var(--sl-color-hairline); } footer { flex-wrap: wrap; } }
 </style>

@@ -80,8 +80,10 @@ const POINTS: Record<string, number> = {
   }
 
   .trick-tiers { display: flex; flex-direction: column; gap: 4px; }
+  .trick-tiers > * { margin: 0; min-width: 0; }
 
   .trick-tier {
+    margin: 0;
     padding: 12px 16px;
     border-radius: 0;
     border: 1px solid var(--sl-color-hairline-light);
@@ -159,6 +161,7 @@ const POINTS: Record<string, number> = {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 4px;
   }
+  .trick-points__grid > * { margin: 0; min-width: 0; }
   .trick-point-row {
     display: flex;
     justify-content: space-between;
@@ -169,6 +172,7 @@ const POINTS: Record<string, number> = {
     border: 1px solid var(--sl-color-hairline-light);
     font-size: 0.8rem;
     font-family: var(--sl-font-mono);
+    margin: 0;
   }
   .trick-point-action { color: var(--sl-color-gray-2); }
   .trick-point-pts {
