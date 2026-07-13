@@ -139,6 +139,8 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
   if (!enemyInstance.color) enemyInstance.color = COLORS[modelName] || "#ff0000";
 
   let engineTime = 0;
+  let previousStateName = '';
+  let stateChangedAt = 0;
   let initialHp = enemyInstance.hp;
 
   function reset() {
@@ -178,11 +180,16 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     const dt = rawDt * (state.playing === false ? 0 : (state.timeScale || 1));
     engineTime += dt;
     const stateName = enemyInstance.state || enemyInstance.atk || enemyInstance.mode || 'idle';
+    if (String(stateName) !== previousStateName) {
+      previousStateName = String(stateName);
+      stateChangedAt = engineTime;
+    }
     if (!state.telemetryAt || timestamp - state.telemetryAt > 120) {
       state.telemetryAt = timestamp;
       canvas.dispatchEvent(new CustomEvent('modeltelemetry', { bubbles: true, detail: {
         state: String(stateName), hp: Math.max(0, Math.round(enemyInstance.hp)), maxHp: Math.round(enemyInstance.maxHp),
         variant: enemyInstance.variant || '', behavior: enemyInstance.behavior || '', speed: Math.round(Math.hypot(enemyInstance.vx || 0, enemyInstance.vy || 0)),
+        stateDuration: Math.max(0, engineTime - stateChangedAt),
       }}));
     }
     

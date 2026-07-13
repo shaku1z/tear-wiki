@@ -191,6 +191,8 @@ const modelConfig = gameManifest.config?.[configKey] || gameManifest.config?.bos
           : /lunge|swoop|fire|shoot|slam|stomp|attack|burst|cast/i.test(telemetry.state) ? 'active'
           : /stun|recover|cool/i.test(telemetry.state) ? 'recovery' : 'commit';
         this.querySelectorAll('[data-behavior]').forEach((item) => item.classList.toggle('current', item.dataset.behavior === phase));
+        const currentPhase = this.querySelector(`[data-behavior="${phase}"] small`);
+        if (currentPhase) currentPhase.textContent = `${telemetry.stateDuration.toFixed(1)}S LIVE`;
         for (const key of ['hp', 'speed', 'state']) {
           const output = this.querySelector(`[data-telemetry="${key}"]`);
           if (output) output.textContent = key === 'speed' ? `${telemetry[key]} PX/S` : String(telemetry[key]).toUpperCase();
@@ -206,6 +208,14 @@ const modelConfig = gameManifest.config?.[configKey] || gameManifest.config?.bos
         state.phase = button.dataset.phase;
       }));
       this.querySelector('.reset-btn')?.addEventListener('click', () => this.cleanup?.reset());
+      canvas?.addEventListener('dblclick', () => this.cleanup?.reset());
+      canvas?.addEventListener('wheel', (event) => {
+        if (!event.ctrlKey && state.mode === 'exhibit') return;
+        event.preventDefault();
+        state.camScale = Math.max(.75, Math.min(1.55, state.camScale - Math.sign(event.deltaY) * .08));
+        const slider = this.querySelector('.zoom-slider');
+        if (slider) slider.value = String((state.camScale - .75) / .8);
+      }, { passive: false });
       this.querySelectorAll('[data-layer]').forEach((button) => button.addEventListener('click', () => {
         const layer = button.dataset.layer;
         state.analysis[layer] = !state.analysis[layer];
@@ -310,6 +320,7 @@ const modelConfig = gameManifest.config?.[configKey] || gameManifest.config?.bos
   .archive-provenance code { color: var(--viewer-ink); background: none; padding: 0; }
   .model-stage { position: relative; height: clamp(330px, 52vw, 520px); overflow: hidden; background: radial-gradient(circle at 50% 46%, var(--viewer-glow), transparent 36%), var(--viewer-surface); isolation: isolate; }
   .model-stage canvas { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; display: block; filter: drop-shadow(0 16px 13px var(--viewer-shadow)); }
+  [data-mode='training'] .model-stage canvas, [data-mode='analysis'] .model-stage canvas { touch-action: none; cursor: crosshair; }
   .arena-atmosphere { position: absolute; inset: 0; z-index: 1; background-image: linear-gradient(var(--viewer-grid) 1px, transparent 1px), linear-gradient(90deg, var(--viewer-grid) 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 75%, transparent); }
   .arena-atmosphere i { position: absolute; background: var(--viewer-accent); opacity: .16; }
   .arena-atmosphere i:nth-child(1) { width: 1px; height: 48%; left: 22%; top: 26%; }
