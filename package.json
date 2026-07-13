@@ -9,7 +9,8 @@
     "verify:viewer": "node scripts/verify-model-viewer.mjs",
     "dev": "npm run sync:game && astro dev",
     "start": "npm run sync:game && astro dev",
-    "build": "npm run sync:game && astro build",
+    "build": "npm run sync:game && npm run generate:viewer-fallbacks && astro build",
+    "generate:viewer-fallbacks": "node scripts/generate-model-fallbacks.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

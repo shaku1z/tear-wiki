@@ -297,7 +297,7 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
       const stateStr = enemyInstance.state || enemyInstance.atk || enemyInstance.mode || "idle";
       let cueColor = "#15c2c2";
       if (enemyInstance.color && enemyInstance.color !== "#000") cueColor = enemyInstance.color;
-      
+
       drawAnnotation(enemyInstance.x + enemyInstance.hw, enemyInstance.y - enemyInstance.hh, enemyInstance.x + 50, enemyInstance.y - 50, `[STATE: ${stateStr.toUpperCase()}]`, cueColor);
       drawAnnotation(enemyInstance.x - enemyInstance.hw, enemyInstance.y - enemyInstance.hh, enemyInstance.x - 50, enemyInstance.y - 50, `[HP: ${Math.floor(enemyInstance.hp)}]`, "#fff");
       ctx.globalAlpha = 1;
@@ -305,34 +305,43 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     
     // Debug Telemetry Overlay
     if (state.mode === 'analysis' || state.debug) {
+      const layers = state.analysis || { hitbox: true, velocity: true, projectiles: true, target: true };
       ctx.lineWidth = 1;
-      
+
       // Hitbox
-      ctx.strokeStyle = "#ff00ff";
-      ctx.strokeRect(enemyInstance.x - enemyInstance.hw, enemyInstance.y - enemyInstance.hh, enemyInstance.hw * 2, enemyInstance.hh * 2);
+      if (layers.hitbox) {
+        ctx.strokeStyle = "#ff00ff";
+        ctx.strokeRect(enemyInstance.x - enemyInstance.hw, enemyInstance.y - enemyInstance.hh, enemyInstance.hw * 2, enemyInstance.hh * 2);
+      }
       
       // Velocity Vector
-      ctx.strokeStyle = "#00ff00";
-      ctx.beginPath();
-      ctx.moveTo(enemyInstance.x, enemyInstance.y);
-      ctx.lineTo(enemyInstance.x + (enemyInstance.vx || 0) * 0.2, enemyInstance.y + (enemyInstance.vy || 0) * 0.2);
-      ctx.stroke();
-      
-      // Projectile Hitboxes
-      ctx.strokeStyle = "#ffff00";
-      runtime.projectiles.forEach(p => {
+      if (layers.velocity) {
+        ctx.strokeStyle = "#00ff00";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r || 6, 0, Math.PI * 2);
+        ctx.moveTo(enemyInstance.x, enemyInstance.y);
+        ctx.lineTo(enemyInstance.x + (enemyInstance.vx || 0) * 0.2, enemyInstance.y + (enemyInstance.vy || 0) * 0.2);
         ctx.stroke();
-      });
+      }
+
+      // Projectile Hitboxes
+      if (layers.projectiles) {
+        ctx.strokeStyle = "#ffff00";
+        runtime.projectiles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r || 6, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+      }
       
       // Player Proxy crosshair
-      ctx.strokeStyle = "#15c2c2";
-      ctx.beginPath();
-      ctx.arc(runtime.player.x, runtime.player.y, 10, 0, Math.PI * 2);
-      ctx.moveTo(runtime.player.x - 15, runtime.player.y); ctx.lineTo(runtime.player.x + 15, runtime.player.y);
-      ctx.moveTo(runtime.player.x, runtime.player.y - 15); ctx.lineTo(runtime.player.x, runtime.player.y + 15);
-      ctx.stroke();
+      if (layers.target) {
+        ctx.strokeStyle = "#15c2c2";
+        ctx.beginPath();
+        ctx.arc(runtime.player.x, runtime.player.y, 10, 0, Math.PI * 2);
+        ctx.moveTo(runtime.player.x - 15, runtime.player.y); ctx.lineTo(runtime.player.x + 15, runtime.player.y);
+        ctx.moveTo(runtime.player.x, runtime.player.y - 15); ctx.lineTo(runtime.player.x, runtime.player.y + 15);
+        ctx.stroke();
+      }
     }
 
     ctx.restore();
