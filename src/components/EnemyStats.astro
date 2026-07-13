@@ -16,6 +16,7 @@ for (const [type, list] of Object.entries(VARIANTS)) {
 }
 
 if (!foundVariant && CONFIG[variant]) baseEnemyType = variant;
+if (variant === 'charger') baseEnemyType = 'enemy';
 const baseConfig = CONFIG[baseEnemyType] || {};
 const stats = { hp: baseConfig.hp || 0, maxHp: baseConfig.hp || 0, speedMult: 1, speed: baseConfig.speed || 0, contactDmg: baseConfig.contactDmg || 0 };
 if (foundVariant?.apply) foundVariant.apply(stats);

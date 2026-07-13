@@ -120,23 +120,22 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
   const Cls = MAP[modelName] || Enemy;
   let enemyInstance;
   const isBoss = BOSS_MODELS.has(modelName);
-  
-  if (isBoss) {
-    enemyInstance = new Cls(simX, simY, CONFIG[modelName.replace("iron-","").replace("the-","")] || CONFIG.boss);
-  } else {
-    enemyInstance = new Cls(simX, simY, CONFIG[modelName] || CONFIG.charger);
-  }
-  
-  if (variant) {
+
+  function createEnemy(nextVariant = variant) {
+    const configKey = modelName === 'charger' ? 'enemy' : modelName.replace('iron-', '').replace('the-', '');
+    const instance = isBoss
+      ? new Cls(simX, simY, CONFIG[configKey] || CONFIG.boss)
+      : new Cls(simX, simY, CONFIG[configKey] || CONFIG.enemy);
+    if (!nextVariant) return instance;
     let variantObj = null;
     for (const family in VARIANTS) {
-      const found = VARIANTS[family].find(v => v.id === variant);
+      const found = VARIANTS[family].find(v => v.id === nextVariant);
       if (found) { variantObj = found; break; }
     }
-    if (variantObj) {
-      applyVariant(enemyInstance, variantObj);
-    }
+    if (variantObj) applyVariant(instance, variantObj);
+    return instance;
   }
+  enemyInstance = createEnemy();
 
   const COLORS = {
     charger: "#e23b3b", ranged: "#2f6df0", flyer: "#8b3bd6", bomber: "#ef8a17",
@@ -146,7 +145,7 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
   if (!enemyInstance.color) enemyInstance.color = COLORS[modelName] || "#ff0000";
 
   let engineTime = 0;
-  const initialHp = enemyInstance.hp;
+  let initialHp = enemyInstance.hp;
 
   function reset() {
     enemyInstance.x = simX;
@@ -159,6 +158,14 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     engineTime = 0;
     realCamX = simX;
     realCamY = simY + profile.focusY;
+  }
+
+  function setVariant(nextVariant) {
+    variant = nextVariant;
+    enemyInstance = createEnemy(nextVariant);
+    if (!enemyInstance.color) enemyInstance.color = COLORS[modelName] || '#ff0000';
+    initialHp = enemyInstance.hp;
+    reset();
   }
 
   function drawAnnotation(x, y, tx, ty, text, color) {
@@ -190,6 +197,14 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     
     const dt = rawDt * (state.playing === false ? 0 : (state.timeScale || 1));
     engineTime += dt;
+    const stateName = enemyInstance.state || enemyInstance.atk || enemyInstance.mode || 'idle';
+    if (!state.telemetryAt || timestamp - state.telemetryAt > 120) {
+      state.telemetryAt = timestamp;
+      canvas.dispatchEvent(new CustomEvent('modeltelemetry', { bubbles: true, detail: {
+        state: String(stateName), hp: Math.max(0, Math.round(enemyInstance.hp)), maxHp: Math.round(enemyInstance.maxHp),
+        variant: enemyInstance.variant || '', behavior: enemyInstance.behavior || '', speed: Math.round(Math.hypot(enemyInstance.vx || 0, enemyInstance.vy || 0)),
+      }}));
+    }
     
     hoverK += (isHovered ? 1 : -1) * (rawDt / 0.15);
     hoverK = Math.max(0, Math.min(1, hoverK));
@@ -330,6 +345,7 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
 
   return {
     reset,
+    setVariant,
     destroy() {
       running = false;
     cancelAnimationFrame(rafId);

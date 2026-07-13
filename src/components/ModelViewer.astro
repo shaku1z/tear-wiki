@@ -12,6 +12,9 @@ const isBoss = BOSS_MODELS.has(model);
 const accentKey = model === 'iron-colossus' ? 'boss' : model === 'the-echo' ? 'boss' : model === 'the-source' ? 'boss' : model === 'aldric' || model === 'warden' ? 'boss' : model === 'support' ? 'priest' : model;
 const accent = gameManifest.config.colors?.[accentKey] || gameManifest.config.colors?.enemyShot || '#13c4d6';
 const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+const variants = gameManifest.variants?.[model] || [];
+const configKey = model === 'charger' ? 'enemy' : model.replace('iron-', '').replace('the-', '');
+const modelConfig = gameManifest.config?.[configKey] || gameManifest.config?.boss || {};
 ---
 
 <tear-model-viewer
@@ -49,6 +52,30 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
       <p class="interaction-hint">EXHIBIT PLAYS THE LIVE BEHAVIOR · TRAINING TRACKS YOUR POINTER · ANALYSIS REVEALS COMBAT GEOMETRY</p>
       <div class="corner-mark corner-a" aria-hidden="true"></div>
       <div class="corner-mark corner-b" aria-hidden="true"></div>
+    </div>
+
+    <div class="study-panel">
+      <div class="variant-bank">
+        <span class="study-label">RECONSTRUCTION</span>
+        <div class="variant-options" role="group" aria-label="Enemy variant">
+          <button type="button" class="variant-btn active" data-variant="" aria-pressed="true">BASE</button>
+          {variants.map((item) => <button type="button" class="variant-btn" data-variant={item.id} aria-pressed="false">{item.name}</button>)}
+        </div>
+      </div>
+      <div class="tactical-readout" aria-label="Live tactical telemetry">
+        <span><small>HP</small><b data-telemetry="hp">{modelConfig.hp || 0}</b></span>
+        <span><small>MOTION</small><b data-telemetry="speed">0</b></span>
+        <span><small>AI STATE</small><b data-telemetry="state">IDLE</b></span>
+      </div>
+      <div class="behavior-timeline" aria-label="Behavior timeline">
+        <span class="study-label">BEHAVIOR CYCLE</span>
+        <div>
+          <i data-behavior="telegraph"><b>TELEGRAPH</b><small>READ</small></i>
+          <i data-behavior="commit"><b>COMMIT</b><small>MOVE</small></i>
+          <i data-behavior="active"><b>ACTIVE</b><small>RESPOND</small></i>
+          <i data-behavior="recovery"><b>RECOVERY</b><small>PUNISH</small></i>
+        </div>
+      </div>
     </div>
 
     <footer class="command-rail">
@@ -124,6 +151,31 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
           console.error(`Unable to initialize ${modelName} model viewer`, error);
         }
       }
+
+      const activateVariant = (nextVariant, updateUrl = true) => {
+        this.cleanup?.setVariant(nextVariant);
+        this.dataset.variant = nextVariant;
+        this.selectButton('.variant-btn', this.querySelector(`[data-variant="${nextVariant}"]`));
+        if (updateUrl) {
+          const url = new URL(location.href);
+          nextVariant ? url.searchParams.set('variant', nextVariant) : url.searchParams.delete('variant');
+          history.replaceState({}, '', url);
+        }
+      };
+      this.querySelectorAll('.variant-btn').forEach((button) => button.addEventListener('click', () => activateVariant(button.dataset.variant)));
+      const requestedVariant = new URL(location.href).searchParams.get('variant') || this.dataset.variant;
+      if (requestedVariant && this.querySelector(`[data-variant="${requestedVariant}"]`)) activateVariant(requestedVariant, false);
+      canvas?.addEventListener('modeltelemetry', (event) => {
+        const telemetry = event.detail;
+        const phase = /wind|telegraph|aim|charge/i.test(telemetry.state) ? 'telegraph'
+          : /lunge|swoop|fire|shoot|slam|stomp|attack|burst|cast/i.test(telemetry.state) ? 'active'
+          : /stun|recover|cool/i.test(telemetry.state) ? 'recovery' : 'commit';
+        this.querySelectorAll('[data-behavior]').forEach((item) => item.classList.toggle('current', item.dataset.behavior === phase));
+        for (const key of ['hp', 'speed', 'state']) {
+          const output = this.querySelector(`[data-telemetry="${key}"]`);
+          if (output) output.textContent = key === 'speed' ? `${telemetry[key]} PX/S` : String(telemetry[key]).toUpperCase();
+        }
+      });
 
       this.querySelectorAll('.time-controls .ctrl-btn').forEach((button) => button.addEventListener('click', () => {
         this.selectButton('.time-controls .ctrl-btn', button);
@@ -226,6 +278,29 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
   .is-ready .model-fallback { opacity: 0; pointer-events: none; transition: opacity .25s ease; }
   .model-error { z-index: 10; background: var(--viewer-surface); color: var(--viewer-ink); }
   .model-error[hidden] { display: none; }
+  .study-panel { display: grid; grid-template-columns: 1.3fr .9fr; border-top: 1px solid var(--viewer-line); background: var(--viewer-surface); }
+  .variant-bank, .behavior-timeline { padding: .9rem 1rem; }
+  .variant-bank { border-right: 1px solid var(--viewer-line); }
+  .study-label { display: block; margin-bottom: .65rem; color: var(--viewer-muted); font: 700 .56rem/1 var(--sl-font-mono); letter-spacing: .14em; }
+  .variant-options { display: flex; gap: .35rem; overflow-x: auto; padding-bottom: .2rem; }
+  .variant-btn { min-height: 34px; padding: 0 .7rem; border: 1px solid var(--viewer-line); border-radius: 0; background: transparent; color: var(--viewer-muted); white-space: nowrap; font: 700 .6rem/1 var(--sl-font-mono); letter-spacing: .07em; cursor: pointer; }
+  .variant-btn:hover, .variant-btn:focus-visible { color: var(--viewer-ink); border-color: var(--viewer-accent); }
+  .variant-btn.active { color: var(--viewer-surface); border-color: var(--viewer-accent); background: var(--viewer-accent); }
+  .tactical-readout { display: grid; grid-template-columns: .6fr .9fr 1.25fr; grid-column: 2; grid-row: 1; }
+  .tactical-readout span { min-width: 0; padding: .9rem .75rem; border-right: 1px solid var(--viewer-line); }
+  .tactical-readout span:last-child { border: 0; }
+  .tactical-readout small, .tactical-readout b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--sl-font-mono); }
+  .tactical-readout small { color: var(--viewer-muted); font-size: .52rem; letter-spacing: .12em; }
+  .tactical-readout b { margin-top: .5rem; color: var(--viewer-ink); font-size: .7rem; }
+  .behavior-timeline { grid-column: 1 / -1; border-top: 1px solid var(--viewer-line); }
+  .behavior-timeline > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+  .behavior-timeline i { position: relative; min-height: 40px; padding: .55rem .65rem; background: var(--viewer-surface-raised); color: var(--viewer-muted); font-style: normal; transition: background .12s ease, color .12s ease; }
+  .behavior-timeline i::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 2px; background: var(--viewer-line); }
+  .behavior-timeline i.current { color: var(--viewer-ink); background: var(--viewer-glow); }
+  .behavior-timeline i.current::before { background: var(--viewer-accent); box-shadow: 0 0 12px var(--viewer-accent); }
+  .behavior-timeline b, .behavior-timeline small { display: block; font-family: var(--sl-font-mono); }
+  .behavior-timeline b { font-size: .61rem; letter-spacing: .08em; }
+  .behavior-timeline small { margin-top: .3rem; color: var(--viewer-muted); font-size: .48rem; letter-spacing: .1em; }
   .command-rail { min-height: 62px; padding: .65rem .8rem; display: flex; align-items: stretch; gap: .5rem; border-top: 1px solid var(--viewer-line); background: var(--viewer-surface-raised); overflow-x: auto; }
   .control-group, .zoom-control { display: flex; align-items: center; gap: .2rem; padding-right: .5rem; border-right: 1px solid var(--viewer-line); white-space: nowrap; }
   .control-label, .zoom-control span { padding: 0 .55rem; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .14em; }
@@ -259,6 +334,10 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
     .stage-readout { inset-inline: .8rem; }
     .command-rail { scroll-snap-type: x proximity; }
     .control-group, .zoom-control, .rail-action { scroll-snap-align: start; }
+    .study-panel { grid-template-columns: 1fr; }
+    .variant-bank { border-right: 0; }
+    .tactical-readout { grid-column: 1; grid-row: auto; border-top: 1px solid var(--viewer-line); }
+    .behavior-timeline > div { grid-template-columns: 1fr 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     .model-fallback::before { animation: none; }
