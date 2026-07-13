@@ -4,12 +4,14 @@
   import gameManifest from '../../data/game-manifest.json';
   import { loadout } from '../../stores/loadout.js';
   import StatPanel from './StatPanel.svelte';
+  import TierDeltaPanel from './TierDeltaPanel.svelte';
   import { encodeLoadout, decodeLoadout } from '../../lib/urlEncoder.js';
 
   let searchQuery = '';
   let activeDomain = 'All';
   let drawerOpen = false;
   let copied = false;
+  let focusedTierId = '';
 
   const domains = ['All', 'Offense', 'Resilience', 'Mobility', 'Throw', 'Parry', 'Utility'];
   const ALL_ABILITIES = [
@@ -33,17 +35,19 @@
     return [];
   });
   $: activeCount = selectedEntries.length;
+  $: activeTieredAbilities = ALL_ABILITIES.filter((ability) => ability.type === 'special' && ($loadout.specials[ability.id] || 0) > 0);
+  $: focusedTieredAbility = activeTieredAbilities.find((ability) => ability.id === focusedTierId) || activeTieredAbilities[0] || null;
 
-  function selectedTier(ability) {
-    return $loadout.specials[ability.id] || 0;
+  function selectedTier(ability, currentLoadout) {
+    return currentLoadout.specials[ability.id] || 0;
   }
 
-  function selectedTierLevel(ability) {
-    return ability.tierLevels?.[selectedTier(ability) - 1];
+  function selectedTierLevel(ability, currentLoadout) {
+    return ability.tierLevels?.[selectedTier(ability, currentLoadout) - 1];
   }
 
-  function nextTierLevel(ability) {
-    return ability.tierLevels?.[selectedTier(ability)] || null;
+  function nextTierLevel(ability, currentLoadout) {
+    return ability.tierLevels?.[selectedTier(ability, currentLoadout)] || null;
   }
 
   function isSelected(ability, currentLoadout) {
@@ -61,6 +65,7 @@
 
   function setSpecialTier(id, tier) {
     loadout.update((current) => ({ ...current, specials: { ...current.specials, [id]: tier } }));
+    focusedTierId = tier > 0 ? id : focusedTierId === id ? '' : focusedTierId;
   }
 
   function adjustStackable(id, delta) {
@@ -176,21 +181,21 @@
                 <div class="tier-identity"><span>T1 → T{ability.maxTier}</span><span>EVOLVABLE</span></div>
               {/if}
               <h3>{ability.name}</h3>
-              <p>{ability.type === 'special' && selectedTier(ability) > 0 ? selectedTierLevel(ability)?.desc : ability.desc}</p>
+              <p>{ability.type === 'special' && selectedTier(ability, $loadout) > 0 ? selectedTierLevel(ability, $loadout)?.desc : ability.desc}</p>
 
               {#if ability.type === 'special'}
                 <div class="evolution-state" aria-live="polite">
-                  {#if selectedTier(ability) > 0}
-                    <span>SIMULATING T{selectedTier(ability)} / {selectedTier(ability) === 1 ? 'DRAFT PICKUP' : 'BOSS EVOLUTION'}</span>
-                    {#if nextTierLevel(ability)}<b>NEXT: T{nextTierLevel(ability).level} / BOSS</b>{/if}
+                  {#if selectedTier(ability, $loadout) > 0}
+                    <span>SIMULATING T{selectedTier(ability, $loadout)} / {selectedTier(ability, $loadout) === 1 ? 'DRAFT PICKUP' : 'BOSS EVOLUTION'}</span>
+                    {#if nextTierLevel(ability, $loadout)}<b>NEXT: T{nextTierLevel(ability, $loadout).level} / BOSS</b>{/if}
                   {:else}
                     <span>SELECT A TIER TO SIMULATE</span><b>T1 / DRAFT PICKUP</b>
                   {/if}
                 </div>
                 <div class="tier-rail" aria-label={`${ability.name} tier selector`}>
-                  <button class="clear-tier" class:active={selectedTier(ability) === 0} on:click={() => setSpecialTier(ability.id, 0)}>CLEAR</button>
+                  <button class="clear-tier" class:active={selectedTier(ability, $loadout) === 0} on:click={() => setSpecialTier(ability.id, 0)}>CLEAR</button>
                   {#each ability.tierLevels as tier}
-                    <button class:active={selectedTier(ability) === tier.level} on:click={() => setSpecialTier(ability.id, tier.level)} aria-label={`${ability.name} Tier ${tier.level}: ${tier.source === 'draft' ? 'draft pickup' : 'boss evolution'}`}>T{tier.level}</button>
+                    <button class:active={selectedTier(ability, $loadout) === tier.level} on:click={() => setSpecialTier(ability.id, tier.level)} aria-label={`${ability.name} Tier ${tier.level}: ${tier.source === 'draft' ? 'draft pickup' : 'boss evolution'}`}>T{tier.level}</button>
                   {/each}
                 </div>
               {:else if ability.type === 'unique'}
@@ -216,7 +221,7 @@
       <button class="telemetry-toggle" on:click={() => drawerOpen = !drawerOpen} aria-expanded={drawerOpen}>
         <span>03 / COMBAT TELEMETRY</span><span>{drawerOpen ? 'CLOSE' : 'OPEN'}</span>
       </button>
-      <div class="telemetry-scroll"><StatPanel /></div>
+      <div class="telemetry-scroll"><TierDeltaPanel ability={focusedTieredAbility} tier={focusedTieredAbility ? selectedTier(focusedTieredAbility, $loadout) : 0} /><StatPanel /></div>
     </aside>
   </div>
 </section>
