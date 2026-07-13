@@ -12,7 +12,9 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
   <div class="model-perspective-container">
     <div class="model-canvas-wrapper">
       <div class="model-grid-bg"></div>
-      <canvas></canvas>
+      <div class="model-fallback" role="status"><span>RECONSTRUCTING</span><b>{model.toUpperCase()}</b></div>
+      <canvas aria-label={`Interactive ${model} model reconstruction`}></canvas>
+      <div class="model-error" hidden><b>RECONSTRUCTION FAILED</b><span>The tactical record remains available below.</span></div>
       <div class="model-ui-overlay">
         <div class="model-header">
           <span class="model-label">[{model.toUpperCase()}{variant ? `::${variant.toUpperCase()}` : ''}]</span>
@@ -68,13 +70,18 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
       const variant = this.dataset.variant;
       
       const isBossModel = (modelName === "the-source" || modelName === "iron-colossus" || modelName === "aldric" || modelName === "the-echo" || modelName === "warden");
-      const defaultZoom = isBossModel ? 0.4 : 1.0;
-
       // Setup state
-      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: defaultZoom };
+      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 1, playing: true };
 
       if (canvas && modelName) {
-        this.cleanup = initModelViewer(canvas, modelName, variant, state);
+        try {
+          canvas.addEventListener('modelready', () => this.classList.add('is-ready'), { once: true });
+          this.cleanup = initModelViewer(canvas, modelName, variant, state);
+        } catch (error) {
+          this.classList.add('has-error');
+          this.querySelector('.model-error')?.removeAttribute('hidden');
+          console.error(`Unable to initialize ${modelName} model viewer`, error);
+        }
       }
 
       // Parallax effect
@@ -123,20 +130,14 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
       if (zoomSlider) {
         zoomSlider.addEventListener('input', () => {
           const val = parseFloat(zoomSlider.value);
-          if (isBossModel) {
-            // Bosses scale from 0.4 up to 1.5
-            state.camScale = 0.4 + val * (1.5 - 0.4);
-          } else {
-            // Enemies scale from 1.0 up to 2.5
-            state.camScale = 1.0 + val * (2.5 - 1.0);
-          }
+          state.camScale = 0.75 + val * 0.8;
         });
       }
     }
 
     disconnectedCallback() {
       if (this.cleanup) {
-        this.cleanup();
+        this.cleanup.destroy();
         this.cleanup = null;
       }
     }
@@ -184,6 +185,21 @@ const isBoss = (model === "warden" || model === "aldric" || model === "iron-colo
     z-index: 10;
     filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
   }
+  .model-fallback, .model-error {
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    display: grid;
+    place-content: center;
+    gap: .45rem;
+    text-align: center;
+    font-family: var(--sl-font-mono);
+    letter-spacing: .16em;
+    color: var(--sl-color-gray-3);
+  }
+  .model-fallback b { color: var(--sl-color-white); font-size: 1.35rem; }
+  .is-ready .model-fallback { opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+  .model-error { z-index: 30; background: inherit; color: var(--sl-color-white); }
   .model-ui-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
