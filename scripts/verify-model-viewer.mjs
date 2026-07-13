@@ -19,6 +19,8 @@ assert.ok(!renderer.includes('performance.now ='), 'Viewer must not replace the 
 assert.ok(renderer.includes('IntersectionObserver'), 'Viewer must suspend rendering offscreen.');
 assert.ok(renderer.includes('withRuntime'), 'Viewer simulation globals must be scoped.');
 assert.ok(renderer.includes('setVariant'), 'Viewer must support live variant reconstruction.');
+assert.ok(!renderer.includes('ctx.fillText'), 'Viewer chrome must remain DOM-based rather than bypassing the UI system on canvas.');
+assert.ok(renderer.includes("typeof p.update === 'function'"), 'Viewer must tolerate non-projectile boss arena records.');
 
 const component = fs.readFileSync('src/components/ModelViewer.astro', 'utf8');
 assert.ok(component.includes('comparisonRuntime'), 'Viewer must expose isolated comparison mode.');

@@ -26,8 +26,6 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
   let inViewport = true;
   let pageVisible = !document.hidden;
   
-  let hoverK = 0; 
-  let isHovered = false;
   let mouseX = 0, mouseY = 0;
   
   // Camera State
@@ -87,14 +85,10 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     const rect = canvas.getBoundingClientRect();
     mouseX = e.clientX - rect.left;
     mouseY = e.clientY - rect.top;
-    isHovered = true;
   };
   canvas.addEventListener('pointermove', updatePointer);
   canvas.addEventListener('pointerdown', (e) => {
     if (state.mode === 'training') canvas.setPointerCapture?.(e.pointerId);
-  });
-  canvas.addEventListener('pointerleave', () => {
-    isHovered = false; 
   });
 
   canvas.addEventListener('contextmenu', e => e.preventDefault()); // Prevent right click menu
@@ -168,20 +162,6 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     reset();
   }
 
-  function drawAnnotation(x, y, tx, ty, text, color) {
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(tx, ty);
-    ctx.lineTo(tx + 40, ty);
-    ctx.stroke();
-    
-    ctx.font = '10px monospace';
-    ctx.fillText(text, tx, ty - 5);
-  }
-
   function schedule() {
     if (!rafId && running && inViewport && pageVisible) rafId = requestAnimationFrame(render);
   }
@@ -206,9 +186,6 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
       }}));
     }
     
-    hoverK += (isHovered ? 1 : -1) * (rawDt / 0.15);
-    hoverK = Math.max(0, Math.min(1, hoverK));
-
     const rect = canvas.getBoundingClientRect();
     const cx = rect.width / 2;
     const cy = rect.height / 2;
@@ -270,7 +247,7 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     withRuntime(() => {
       enemyInstance.update(dt, runtime.platforms, runtime.player, runtime.projectiles);
       window.projectiles = runtime.projectiles.filter(p => !p.dead && (p.life == null || p.life > 0));
-      window.projectiles.forEach(p => p.update(dt));
+      window.projectiles.forEach(p => { if (typeof p.update === 'function') p.update(dt); });
       if (FX.update) FX.update(dt);
     });
 
@@ -291,18 +268,6 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
 
     enemyInstance.draw(ctx);
 
-    // Schematic annotations layer
-    if (hoverK > 0 && state.mode !== 'exhibit') {
-      ctx.globalAlpha = hoverK;
-      const stateStr = enemyInstance.state || enemyInstance.atk || enemyInstance.mode || "idle";
-      let cueColor = "#15c2c2";
-      if (enemyInstance.color && enemyInstance.color !== "#000") cueColor = enemyInstance.color;
-
-      drawAnnotation(enemyInstance.x + enemyInstance.hw, enemyInstance.y - enemyInstance.hh, enemyInstance.x + 50, enemyInstance.y - 50, `[STATE: ${stateStr.toUpperCase()}]`, cueColor);
-      drawAnnotation(enemyInstance.x - enemyInstance.hw, enemyInstance.y - enemyInstance.hh, enemyInstance.x - 50, enemyInstance.y - 50, `[HP: ${Math.floor(enemyInstance.hp)}]`, "#fff");
-      ctx.globalAlpha = 1;
-    }
-    
     // Debug Telemetry Overlay
     if (state.mode === 'analysis' || state.debug) {
       const layers = state.analysis || { hitbox: true, velocity: true, projectiles: true, target: true };
