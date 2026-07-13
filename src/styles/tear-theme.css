@@ -104,7 +104,7 @@
 .site-title {
   font-family: var(--sl-font-mono);
   font-size: 1rem;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.12em;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--sl-color-white) !important;
@@ -116,6 +116,8 @@ header.header {
   backdrop-filter: none !important;
   background: var(--sl-color-bg) !important;
 }
+.site-title img { border: 1px solid var(--sl-color-hairline); height: 2rem; padding: .2rem; width: 2rem; }
+.header .right-group { gap: .75rem; }
 
 /* -- Sidebar --------------------------------------- */
 .sidebar-content {
@@ -234,6 +236,9 @@ site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-c
   box-sizing: border-box;
 }
 
+.tear-route { align-items:center; border-top:1px solid var(--sl-color-hairline); border-bottom:1px solid var(--sl-color-hairline); color:var(--sl-color-gray-3); display:flex; flex-wrap:wrap; font-family:var(--sl-font-mono); font-size:.61rem; font-weight:800; gap:.6rem; letter-spacing:.08em; margin:2rem 0; padding:.75rem 0; text-transform:uppercase; }
+.tear-route i { background:var(--tear-cyan); height:1px; min-width:1.4rem; opacity:.6; }
+
 /* -- Biome navigator ------------------------------- */
 .biome-nav { margin: 2rem 0; }
 .biome-nav-label {
@@ -318,7 +323,7 @@ site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-c
   color: var(--sl-color-text);
   position: relative;
   overflow: hidden;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, transform 0.12s, border-color .12s;
 }
 .tear-card::before {
   content: '';
@@ -331,7 +336,10 @@ site-search kbd { border-color: var(--sl-color-hairline); background: var(--sl-c
   transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .tear-card:hover::before { transform: scaleX(1); }
-.tear-card:hover { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
+.tear-card:hover { background: var(--sl-color-gray-6); border-color:var(--card-accent, var(--sl-color-accent)); color: var(--sl-color-white); transform:translateY(-2px); }
+.tear-card:focus-visible { outline:2px solid var(--card-accent, var(--tear-cyan)); outline-offset:3px; }
+.tear-card--featured { background:color-mix(in srgb,var(--card-accent) 7%,var(--sl-color-bg)); grid-column:1 / -1; min-height:118px; }
+.tear-card-index { color:var(--card-accent, var(--tear-cyan)); display:block; font-family:var(--sl-font-mono); font-size:.58rem; font-weight:800; letter-spacing:.11em; margin-bottom:.75rem; }
 .tear-card-title {
   font-family: var(--sl-font-mono);
   font-size: 0.76rem;

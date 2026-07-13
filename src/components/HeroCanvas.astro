@@ -1,298 +1,47 @@
 ---
-// HeroCanvas.astro
-// The Tear biome backdrop as a live homepage hero.
-// Ported from js/backdrop.js BIOME_ART["The Tear"] + Backdrop.baseSky()
-// No glow/shadowBlur — just the shapes themselves.
+// Light is the canonical 2D field composition; dark is its polarity-matched counterpart.
 ---
 
-<div class="tear-hero">
-  <canvas id="tear-hero-canvas" aria-hidden="true"></canvas>
-
-  <div class="tear-hero-content">
-    <p class="tear-hero-eyebrow">// OFFICIAL WIKI</p>
-    <h1 class="tear-hero-wordmark">T&thinsp;E&thinsp;A&thinsp;R</h1>
-    <p class="tear-hero-tagline">
-      The definitive manual for skill-based blade combat.<br/>
-      Stats, mechanics, enemies — nothing held back.
-    </p>
-    <div class="tear-hero-actions">
-      <a href="/getting-started/overview" class="tear-btn tear-btn-primary">Enter the Arena →</a>
-      <a href="/mechanics/the-blade" class="tear-btn tear-btn-ghost">Master the Blade</a>
-    </div>
+<section class="blade-field" aria-labelledby="blade-field-title">
+  <div class="blade-field__art" aria-hidden="true">
+    <img class="blade-field__image blade-field__image--light" src="/brand/tear-blade-field-light.png" alt="" />
+    <img class="blade-field__image blade-field__image--dark" src="/brand/tear-blade-field-dark.png" alt="" />
   </div>
-
-  <div class="tear-hero-scroll-hint" aria-hidden="true">SCROLL</div>
-</div>
+  <div class="blade-field__scrim" aria-hidden="true"></div>
+  <div class="blade-field__content">
+    <p class="blade-field__eyebrow"><span></span> Official field manual</p>
+    <h1 id="blade-field-title"><small>TEAR</small><strong>BLADE</strong></h1>
+    <p class="blade-field__lede">A living reference for a precision action game: systems, enemies, abilities, and the decisions between the cuts.</p>
+    <div class="blade-field__actions">
+      <a href="/builder" class="blade-field__primary">Open Ability Lab <span aria-hidden="true">→</span></a>
+      <a href="/getting-started/overview" class="blade-field__secondary">Read combat primer</a>
+    </div>
+    <dl class="blade-field__legend" aria-label="Tear combat language">
+      <div><dt class="red">01</dt><dd>Read</dd></div><div><dt class="cyan">02</dt><dd>Commit</dd></div><div><dt class="violet">03</dt><dd>Adapt</dd></div>
+    </dl>
+  </div>
+</section>
 
 <style>
-.tear-hero {
-  position: relative;
-  width: 100%;
-  height: 88vh;
-  min-height: 520px;
-  overflow: hidden;
-  background: #0a0a0d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#tear-hero-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.tear-hero-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  padding: 2rem 2rem;
-  width: 100%;
-  max-width: 680px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-
-.tear-hero-eyebrow {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.70rem;
-  letter-spacing: 0.22em;
-  color: rgba(19,196,214,0.55);
-  text-transform: uppercase;
-  margin: 0 0 1.2rem;
-  line-height: 1;
-}
-
-.tear-hero-wordmark {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: clamp(2.8rem, 9vw, 7.5rem);
-  font-weight: 800;
-  letter-spacing: 0.3em;
-  color: #ffffff;
-  line-height: 0.9;
-  text-transform: uppercase;
-  margin: 0 0 1.5rem;
-  /* Prevent horizontal overflow at any viewport width */
-  max-width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.tear-hero-tagline {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: clamp(0.78rem, 1.6vw, 0.95rem);
-  color: rgba(201,196,224,0.60);
-  max-width: 46ch;
-  line-height: 1.7;
-  margin: 0 0 2.5rem;
-}
-
-.tear-hero-actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.tear-btn {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.80rem;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  text-decoration: none;
-  padding: 0.7rem 1.6rem;
-  border: 1.5px solid currentColor;
-  transition: background 0.14s, color 0.14s, border-color 0.14s;
-  line-height: 1;
-  display: inline-block;
-}
-
-.tear-btn-primary {
-  background: #c9c4e0;
-  color: #0e0b1a;
-  border-color: #c9c4e0;
-}
-.tear-btn-primary:hover {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #0e0b1a;
-}
-
-.tear-btn-ghost {
-  background: transparent;
-  color: rgba(201,196,224,0.65);
-  border-color: rgba(201,196,224,0.25);
-}
-.tear-btn-ghost:hover {
-  border-color: rgba(201,196,224,0.7);
-  color: #c9c4e0;
-}
-
-.tear-hero-scroll-hint {
-  position: absolute;
-  bottom: 1.4rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.60rem;
-  letter-spacing: 0.28em;
-  color: rgba(201,196,224,0.28);
-  animation: hero-scroll-pulse 2.2s ease-in-out infinite;
-}
-@keyframes hero-scroll-pulse {
-  0%, 100% { opacity: 0.28; transform: translateX(-50%) translateY(0); }
-  50%       { opacity: 0.55; transform: translateX(-50%) translateY(5px); }
-}
+  .blade-field { isolation:isolate; min-height:min(720px,calc(100vh - 4rem)); overflow:hidden; position:relative; display:grid; place-items:center; border-bottom:1px solid var(--sl-color-hairline); background:var(--sl-color-bg); }
+  .blade-field__art,.blade-field__image,.blade-field__scrim { inset:0; position:absolute; width:100%; height:100%; }
+  .blade-field__image { display:block; object-fit:cover; object-position:center; }
+  .blade-field__image--dark { opacity:0; }
+  :global(:root[data-theme='dark']) .blade-field__image--light { opacity:0; }
+  :global(:root[data-theme='dark']) .blade-field__image--dark { opacity:1; }
+  .blade-field__scrim { background:linear-gradient(90deg,color-mix(in srgb,var(--sl-color-bg) 86%,transparent) 0%,color-mix(in srgb,var(--sl-color-bg) 54%,transparent) 38%,transparent 70%); pointer-events:none; }
+  .blade-field__content { box-sizing:border-box; max-width:76rem; padding:clamp(4rem,9vw,8rem) clamp(1.35rem,6vw,5rem); position:relative; width:100%; z-index:1; }
+  .blade-field__eyebrow { align-items:center; color:var(--sl-color-gray-2); display:flex; font-family:var(--sl-font-mono); font-size:.66rem; font-weight:800; gap:.55rem; letter-spacing:.16em; margin:0 0 1.25rem; text-transform:uppercase; }
+  .blade-field__eyebrow span { background:var(--tear-cyan); display:block; height:.6rem; width:.6rem; }
+  h1 { color:var(--sl-color-white); font-family:var(--sl-font-mono); font-size:clamp(3.25rem,10vw,8.5rem); letter-spacing:-.09em; line-height:.74; margin:0; max-width:7ch; }
+  h1 small,h1 strong { display:block; font:inherit; } h1 small { color:var(--sl-color-gray-3); font-size:.36em; letter-spacing:.24em; margin-left:.18em; margin-bottom:.35rem; } h1 strong { color:var(--sl-color-white); letter-spacing:.02em; }
+  .blade-field__lede { color:var(--sl-color-gray-2); font-family:var(--sl-font); font-size:clamp(.9rem,1.5vw,1.05rem); line-height:1.7; margin:2rem 0; max-width:48ch; text-transform:none; }
+  .blade-field__actions { display:flex; flex-wrap:wrap; gap:.65rem; }
+  .blade-field__actions a { font-family:var(--sl-font-mono); font-size:.7rem; font-weight:800; letter-spacing:.1em; padding:.82rem 1rem; text-decoration:none; text-transform:uppercase; }
+  .blade-field__primary { background:var(--sl-color-white); color:var(--sl-color-black); } .blade-field__primary span { color:var(--tear-cyan); font-size:1.15em; margin-left:.35rem; }
+  .blade-field__secondary { border:1px solid var(--sl-color-hairline); color:var(--sl-color-white); background:color-mix(in srgb,var(--sl-color-bg) 56%,transparent); }
+  .blade-field__actions a:hover,.blade-field__actions a:focus-visible { outline:2px solid var(--tear-cyan); outline-offset:3px; }
+  .blade-field__legend { display:flex; gap:1.25rem; margin:4.5rem 0 0; } .blade-field__legend div { border-left:1px solid var(--sl-color-hairline); padding-left:.55rem; } .blade-field__legend dt { font-size:.61rem; font-weight:800; letter-spacing:.08em; } .blade-field__legend dd { color:var(--sl-color-gray-2); font-size:.58rem; letter-spacing:.12em; margin:.15rem 0 0; text-transform:uppercase; } .red{color:var(--tear-red)} .cyan{color:var(--tear-cyan)} .violet{color:var(--tear-purple)}
+  @media (max-width:700px) { .blade-field { min-height:620px; align-items:start; } .blade-field__image { object-position:62% center; } .blade-field__scrim { background:linear-gradient(180deg,color-mix(in srgb,var(--sl-color-bg) 92%,transparent) 0%,color-mix(in srgb,var(--sl-color-bg) 72%,transparent) 55%,transparent 100%); } .blade-field__content { padding-top:4.5rem; } .blade-field__legend { margin-top:3.25rem; } }
+  @media (prefers-reduced-motion:no-preference) { .blade-field__content { animation:field-enter .6s cubic-bezier(.16,1,.3,1) both; } } @keyframes field-enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
 </style>
-
-<script>
-(function () {
-  const canvas = document.getElementById('tear-hero-canvas');
-  if (!(canvas instanceof HTMLCanvasElement)) return;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  // Seeded RNG (matches backdrop.js _rng)
-  function rng(seed) {
-    let s = (seed >>> 0) || 1;
-    return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
-  }
-
-  // Mote system (starfield, from BIOME_ART["The Tear"].motes)
-  const r = rng(1337);
-  const motes = Array.from({ length: 50 }, () => ({
-    x: r(),
-    y: r(),
-    z: 0.3 + r() * 0.9,
-    rad: 0.4 + r() * 1.6,
-    phase: r() * Math.PI * 2,
-    speed: 3 + r() * 10,
-  }));
-
-  let W = 0, H = 0;
-  let t = 0, lastT = 0, rafId = 0;
-  let scrollY = 0;
-  let mobile = false;
-
-  function resize() {
-    W = canvas.offsetWidth;
-    H = canvas.offsetHeight;
-    canvas.width = W;
-    canvas.height = H;
-    mobile = W < 700;
-  }
-
-  window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
-
-  // ── baseSky (void gradient, faithful to Backdrop.baseSky) ───
-  function drawSky() {
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0,    '#080615');
-    g.addColorStop(0.55, '#0e0b1a');
-    g.addColorStop(1,    '#130e22');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  // ── The Tear rift (BIOME_ART["The Tear"].sky) ────────────────
-  // No shadowBlur — pure shape + alpha gradients only.
-  function drawRift(t) {
-    const cx  = W * 0.5;
-    const cyc = H * 0.42;
-    const pulse = 0.5 + 0.5 * Math.sin(t * 1.2);
-    const riftH = H * 0.52;
-    const riftW = 9 + 4 * pulse;
-
-    // Wide soft aura (very faint)
-    const aura = ctx.createRadialGradient(cx, cyc, 0, cx, cyc, riftH * 0.62);
-    aura.addColorStop(0,   `rgba(19,196,214,${0.06 + 0.04 * pulse})`);
-    aura.addColorStop(0.5, `rgba(19,196,214,${0.02 + 0.01 * pulse})`);
-    aura.addColorStop(1,    'rgba(19,196,214,0)');
-    ctx.fillStyle = aura;
-    ctx.fillRect(0, 0, W, H);
-
-    // Rift body — vertical gradient ellipse
-    const grd = ctx.createLinearGradient(0, cyc - riftH / 2, 0, cyc + riftH / 2);
-    grd.addColorStop(0,    'rgba(19,196,214,0)');
-    grd.addColorStop(0.3,  `rgba(170,235,255,${0.50 + 0.18 * pulse})`);
-    grd.addColorStop(0.5,  `rgba(205,248,255,${0.68 + 0.20 * pulse})`);
-    grd.addColorStop(0.7,  `rgba(170,235,255,${0.50 + 0.18 * pulse})`);
-    grd.addColorStop(1,    'rgba(19,196,214,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.ellipse(cx, cyc, riftW, riftH / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // ── Floating broken geometry (BIOME_ART["The Tear"].far) ─────
-  function drawGeometry(t, scrollY) {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(200,210,240,0.55)';
-    ctx.lineWidth = 1;
-    const parallax = scrollY * 0.05;
-    for (let i = 0; i < 6; i++) {
-      const x = (((i * 270 - parallax * 20) % W) + W) % W;
-      const y = 80 + ((i * 160) % (H * 0.55)) + Math.sin(t * 0.5 + i) * 8;
-      const s = 24 + i * 5;
-      ctx.globalAlpha = 0.12 + 0.04 * Math.sin(t * 0.4 + i);
-      ctx.strokeRect(x, y - parallax * 0.3 * ((i % 3) + 1), s, s * 0.55);
-    }
-    ctx.globalAlpha = 1;
-    ctx.restore();
-  }
-
-  // ── Motes / starfield ─────────────────────────────────────────
-  function drawMotes(t, scrollY) {
-    const limit = mobile ? 22 : motes.length;
-    const parallax = scrollY * 0.04;
-    ctx.save();
-    for (let i = 0; i < limit; i++) {
-      const m = motes[i];
-      const py  = ((m.y * H + t * m.speed) % (H + 60) + (H + 60)) % (H + 60) - 30;
-      const px  = m.x * W + Math.sin(t * 0.3 + m.phase) * 6;
-      const twinkle = 0.25 + 0.75 * Math.abs(Math.sin(t * 1.4 + m.phase));
-      ctx.globalAlpha = 0.45 * m.z * twinkle;
-      ctx.fillStyle = 'rgba(190,230,255,1)';
-      ctx.beginPath();
-      ctx.arc(px, py - parallax * m.z, m.rad * m.z, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    ctx.restore();
-  }
-
-  function frame(now) {
-    const dt = Math.min((now - lastT) / 1000, 0.05);
-    lastT = now;
-    t += dt;
-
-    // Mobile: ~30fps by skipping every other frame
-    if (!mobile || (Math.floor(now / 33) & 1) === 0) {
-      drawSky();
-      drawGeometry(t, scrollY);
-      drawRift(t);
-      drawMotes(t, scrollY);
-    }
-
-    rafId = requestAnimationFrame(frame);
-  }
-
-  const ro = new ResizeObserver(resize);
-  ro.observe(canvas);
-  resize();
-  lastT = performance.now();
-  rafId = requestAnimationFrame(frame);
-
-  // Clean up on Astro page transitions
-  document.addEventListener('astro:before-swap', () => {
-    cancelAnimationFrame(rafId);
-    ro.disconnect();
-  });
-})();
-</script>

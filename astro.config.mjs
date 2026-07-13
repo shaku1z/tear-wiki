@@ -10,8 +10,8 @@ export default defineConfig({
 	prefetch: true,
 	integrations: [
 		starlight({
-			title: 'T E A R  Wiki',
-			description: 'The complete community wiki for Tear — blades, bosses, and everything between.',
+			title: 'TEAR: BLADE Wiki',
+			description: 'The living field manual for TEAR: BLADE — abilities, enemies, systems, and precision combat.',
 			logo: {
 				light: './src/assets/logo-light.svg',
 				dark: './src/assets/logo-dark.svg',
