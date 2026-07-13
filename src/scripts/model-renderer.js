@@ -83,21 +83,25 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
   };
   document.addEventListener('visibilitychange', onVisibility);
 
-  canvas.addEventListener('mousemove', (e) => {
+  const updatePointer = (e) => {
     const rect = canvas.getBoundingClientRect();
     mouseX = e.clientX - rect.left;
     mouseY = e.clientY - rect.top;
     isHovered = true;
+  };
+  canvas.addEventListener('pointermove', updatePointer);
+  canvas.addEventListener('pointerdown', (e) => {
+    if (state.mode === 'training') canvas.setPointerCapture?.(e.pointerId);
   });
-  canvas.addEventListener('mouseleave', () => { 
+  canvas.addEventListener('pointerleave', () => {
     isHovered = false; 
   });
 
   canvas.addEventListener('contextmenu', e => e.preventDefault()); // Prevent right click menu
 
   // Interactive Striking (Left Click)
-  canvas.addEventListener('mousedown', (e) => {
-    if (e.button === 0 && enemyInstance && enemyInstance.hit) {
+  canvas.addEventListener('click', (e) => {
+    if (state.mode === 'training' && e.button === 0 && enemyInstance && enemyInstance.hit) {
       // Simulate a generic sword strike (25 damage, knockback away from mouse)
       const dirX = Math.sign(enemyInstance.x - window.player.x) * 400 || 400;
       withRuntime(() => {
@@ -215,8 +219,13 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     const worldMouseX = (mouseX - cx) / finalScale + realCamX;
     const worldMouseY = (mouseY - cy) / finalScale + realCamY;
     
-    runtime.player.x = worldMouseX;
-    runtime.player.y = worldMouseY;
+    if (state.mode === 'training' || state.mode === 'analysis') {
+      runtime.player.x = worldMouseX;
+      runtime.player.y = worldMouseY;
+    } else {
+      runtime.player.x = simX - 260;
+      runtime.player.y = simY - 10;
+    }
     
     // Fake the ground
     enemyInstance.onGround = !enemyInstance.cfg.hoverY;
@@ -268,7 +277,7 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     enemyInstance.draw(ctx);
 
     // Schematic annotations layer
-    if (hoverK > 0) {
+    if (hoverK > 0 && state.mode !== 'exhibit') {
       ctx.globalAlpha = hoverK;
       const stateStr = enemyInstance.state || enemyInstance.atk || enemyInstance.mode || "idle";
       let cueColor = "#15c2c2";
@@ -280,7 +289,7 @@ export function initModelViewer(canvas, modelName, variant, state = {}) {
     }
     
     // Debug Telemetry Overlay
-    if (state.debug) {
+    if (state.mode === 'analysis' || state.debug) {
       ctx.lineWidth = 1;
       
       // Hitbox

@@ -46,11 +46,19 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
         <span class="model-state">EXHIBIT / RUNNING</span>
         <span>{profile.range.toUpperCase()} RANGE</span>
       </div>
+      <p class="interaction-hint">EXHIBIT PLAYS THE LIVE BEHAVIOR · TRAINING TRACKS YOUR POINTER · ANALYSIS REVEALS COMBAT GEOMETRY</p>
       <div class="corner-mark corner-a" aria-hidden="true"></div>
       <div class="corner-mark corner-b" aria-hidden="true"></div>
     </div>
 
     <footer class="command-rail">
+      <div class="control-group mode-controls" role="group" aria-label="Viewer mode">
+        <span class="control-label">MODE</span>
+        <button class="ctrl-btn active" type="button" data-mode="exhibit" aria-pressed="true">EXHIBIT</button>
+        <button class="ctrl-btn" type="button" data-mode="training">TRAIN</button>
+        <button class="ctrl-btn" type="button" data-mode="analysis">ANALYZE</button>
+      </div>
+      <button class="play-btn rail-action" type="button" aria-pressed="false" aria-label="Pause model">PAUSE</button>
       <div class="control-group time-controls" role="group" aria-label="Playback speed">
         <span class="control-label">SPEED</span>
         <button class="ctrl-btn" type="button" data-time="0.25">¼</button>
@@ -67,7 +75,6 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
         </div>
       )}
       <label class="zoom-control"><span>FRAME</span><input type="range" class="zoom-slider" min="0" max="1" step="0.01" value="0.3125" aria-label="Model framing" /></label>
-      <button class="analysis-toggle rail-action" type="button" aria-pressed="false">ANALYSIS</button>
       <button class="reset-btn rail-action" type="button">RESET</button>
     </footer>
   </section>
@@ -85,6 +92,26 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
       const modelName = this.dataset.model;
       const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 1, playing: true, mode: 'exhibit' };
       this.viewerState = state;
+      const status = this.querySelector('.model-state');
+      const announce = () => {
+        if (status) status.textContent = `${state.mode.toUpperCase()} / ${state.playing ? 'RUNNING' : 'PAUSED'}`;
+      };
+      const setMode = (mode) => {
+        state.mode = mode;
+        state.debug = mode === 'analysis';
+        this.selectButton('.mode-controls .ctrl-btn', this.querySelector(`[data-mode="${mode}"]`));
+        announce();
+      };
+      this.querySelectorAll('.mode-controls .ctrl-btn').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
+      const playButton = this.querySelector('.play-btn');
+      const togglePlayback = () => {
+        state.playing = !state.playing;
+        playButton.textContent = state.playing ? 'PAUSE' : 'PLAY';
+        playButton.setAttribute('aria-label', state.playing ? 'Pause model' : 'Play model');
+        playButton.setAttribute('aria-pressed', String(!state.playing));
+        announce();
+      };
+      playButton?.addEventListener('click', togglePlayback);
 
       if (canvas && modelName) {
         try {
@@ -106,15 +133,31 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
         this.selectButton('.phase-controls .ctrl-btn', button);
         state.phase = button.dataset.phase;
       }));
-      this.querySelector('.analysis-toggle')?.addEventListener('click', (event) => {
-        state.debug = !state.debug;
-        event.currentTarget.setAttribute('aria-pressed', String(state.debug));
-        event.currentTarget.classList.toggle('active', state.debug);
-      });
       this.querySelector('.reset-btn')?.addEventListener('click', () => this.cleanup?.reset());
       this.querySelector('.zoom-slider')?.addEventListener('input', (event) => {
         state.camScale = 0.75 + Number(event.currentTarget.value) * 0.8;
       });
+      this.addEventListener('keydown', (event) => {
+        if (event.target instanceof HTMLInputElement) return;
+        const actions = {
+          ' ': () => togglePlayback(),
+          r: () => this.cleanup?.reset(),
+          a: () => setMode('analysis'),
+          t: () => setMode('training'),
+          e: () => setMode('exhibit'),
+          '1': () => this.querySelector('[data-phase="1"]')?.click(),
+          '2': () => this.querySelector('[data-phase="2"]')?.click(),
+          '3': () => this.querySelector('[data-phase="3"]')?.click(),
+        };
+        const action = actions[event.key.toLowerCase()];
+        if (action) { event.preventDefault(); action(); }
+      });
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        state.playing = false;
+        playButton.textContent = 'PLAY';
+        playButton.setAttribute('aria-label', 'Play model');
+        announce();
+      }
     }
     selectButton(selector, selected) {
       this.querySelectorAll(selector).forEach((button) => {
@@ -171,6 +214,8 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
   .arena-measurements { position: absolute; z-index: 2; inset: 1rem auto 1rem 1rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--viewer-muted); opacity: .45; font: 600 .55rem/1 var(--sl-font-mono); }
   .arena-ground { position: absolute; z-index: 2; left: 8%; right: 8%; bottom: 18%; height: 1px; background: linear-gradient(90deg, transparent, var(--viewer-line) 15%, var(--viewer-accent) 50%, var(--viewer-line) 85%, transparent); box-shadow: 0 18px 40px var(--viewer-glow); }
   .stage-readout { position: absolute; z-index: 7; inset: auto 1.25rem 1rem; display: flex; justify-content: space-between; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .14em; pointer-events: none; }
+  .interaction-hint { position: absolute; z-index: 7; top: 1rem; left: 50%; transform: translateX(-50%); width: min(80%, 620px); margin: 0; color: var(--viewer-muted); text-align: center; font: 600 .52rem/1.5 var(--sl-font-mono); letter-spacing: .1em; opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+  .tear-model-viewer:focus-within .interaction-hint, .tear-model-viewer:hover .interaction-hint { opacity: .8; }
   .model-state { color: var(--viewer-accent); }
   .corner-mark { position: absolute; z-index: 7; width: 22px; height: 22px; pointer-events: none; }
   .corner-a { top: 14px; left: 14px; border-top: 1px solid var(--viewer-accent); border-left: 1px solid var(--viewer-accent); }
@@ -184,7 +229,8 @@ const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => lett
   .command-rail { min-height: 62px; padding: .65rem .8rem; display: flex; align-items: stretch; gap: .5rem; border-top: 1px solid var(--viewer-line); background: var(--viewer-surface-raised); overflow-x: auto; }
   .control-group, .zoom-control { display: flex; align-items: center; gap: .2rem; padding-right: .5rem; border-right: 1px solid var(--viewer-line); white-space: nowrap; }
   .control-label, .zoom-control span { padding: 0 .55rem; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .14em; }
-  .ctrl-btn, .rail-action { min-width: 38px; height: 40px; border: 1px solid transparent; border-radius: 0; background: transparent; color: var(--viewer-muted); font: 700 .68rem/1 var(--sl-font-mono); letter-spacing: .08em; cursor: pointer; }
+  .ctrl-btn, .rail-action { min-width: 40px; min-height: 44px; border: 1px solid transparent; border-radius: 0; background: transparent; color: var(--viewer-muted); font: 700 .68rem/1 var(--sl-font-mono); letter-spacing: .08em; cursor: pointer; }
+  .mode-controls .ctrl-btn { padding-inline: .7rem; }
   .ctrl-btn:hover, .rail-action:hover { color: var(--viewer-ink); border-color: var(--viewer-line); }
   .ctrl-btn:focus-visible, .rail-action:focus-visible, .zoom-slider:focus-visible { outline: 2px solid var(--viewer-accent); outline-offset: -2px; }
   .ctrl-btn.active, .rail-action.active { color: var(--viewer-surface); background: var(--viewer-accent); border-color: var(--viewer-accent); }
