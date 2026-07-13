@@ -1,380 +1,221 @@
 ---
+import gameManifest from '../data/game-manifest.json';
+import { BOSS_MODELS, getModelProfile } from '../scripts/model-viewer-data.js';
+
 export interface Props {
   model: 'charger' | 'ranged' | 'flyer' | 'bomber' | 'armored' | 'support' | 'chimera' | 'wraith' | 'aldric' | 'iron-colossus' | 'the-echo' | 'the-source' | 'warden';
   variant?: string;
 }
 const { model, variant } = Astro.props;
-
-const isBoss = (model === "warden" || model === "aldric" || model === "iron-colossus" || model === "the-echo" || model === "the-source");
+const profile = getModelProfile(model);
+const isBoss = BOSS_MODELS.has(model);
+const accentKey = model === 'iron-colossus' ? 'boss' : model === 'the-echo' ? 'boss' : model === 'the-source' ? 'boss' : model === 'aldric' || model === 'warden' ? 'boss' : model === 'support' ? 'priest' : model;
+const accent = gameManifest.config.colors?.[accentKey] || gameManifest.config.colors?.enemyShot || '#13c4d6';
+const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 ---
 
-<tear-model-viewer data-model={model} data-variant={variant || ''} class="tear-model-viewer">
-  <div class="model-perspective-container">
-    <div class="model-canvas-wrapper">
-      <div class="model-grid-bg"></div>
-      <div class="model-fallback" role="status"><span>RECONSTRUCTING</span><b>{model.toUpperCase()}</b></div>
-      <canvas aria-label={`Interactive ${model} model reconstruction`}></canvas>
-      <div class="model-error" hidden><b>RECONSTRUCTION FAILED</b><span>The tactical record remains available below.</span></div>
-      <div class="model-ui-overlay">
-        <div class="model-header">
-          <span class="model-label">[{model.toUpperCase()}{variant ? `::${variant.toUpperCase()}` : ''}]</span>
-          <span class="model-status">IDLE // HOVER TO ENGAGE</span>
-        </div>
-        
-        <div class="model-zoom-container">
-          <input type="range" class="zoom-slider" min="0" max="1" step="0.01" value="0">
-        </div>
-        
-        <div class="model-controls">
-          <div class="control-group time-controls">
-            <span class="control-label">TIME</span>
-            <button class="ctrl-btn" data-time="0.25">0.25x</button>
-            <button class="ctrl-btn" data-time="0.5">0.5x</button>
-            <button class="ctrl-btn active" data-time="1">1.0x</button>
-          </div>
-          
-          {(isBoss) && (
-            <div class="control-group phase-controls">
-              <span class="control-label">PHASE</span>
-              <button class="ctrl-btn active" data-phase="auto">AUTO</button>
-              <button class="ctrl-btn" data-phase="1">I</button>
-              <button class="ctrl-btn" data-phase="2">II</button>
-              <button class="ctrl-btn" data-phase="3">III</button>
-            </div>
-          )}
-          
-          <div class="control-group debug-controls">
-            <span class="control-label">DEBUG</span>
-            <button class="ctrl-btn debug-toggle">OFF</button>
-          </div>
-        </div>
+<tear-model-viewer
+  data-model={model}
+  data-variant={variant || ''}
+  data-motif={profile.motif}
+  class="tear-model-viewer"
+  style={`--viewer-accent:${accent}`}
+  tabindex="0"
+  aria-label={`${displayName} combat archive`}
+>
+  <section class="archive-shell">
+    <header class="archive-heading">
+      <div class="archive-index" aria-hidden="true"><i></i><span>TACTICAL ARCHIVE</span></div>
+      <div class="archive-identity">
+        <p>{isBoss ? 'BOSS RECORD' : 'ENEMY FAMILY'} / {profile.role.toUpperCase()}</p>
+        <h2>{displayName}</h2>
       </div>
+      <div class="archive-provenance" title="Generated from the live game repository">
+        <span>LIVE MODEL</span><code>{gameManifest.source.commit.slice(0, 7)}</code>
+      </div>
+    </header>
+
+    <div class="model-stage">
+      <div class="arena-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="arena-measurements" aria-hidden="true"><span>00</span><span>01</span><span>02</span><span>03</span></div>
+      <div class="arena-ground" aria-hidden="true"></div>
+      <div class="model-fallback" role="status"><span>RECONSTRUCTING</span><b>{displayName}</b></div>
+      <canvas aria-label={`Live game reconstruction of ${displayName}`}></canvas>
+      <div class="model-error" hidden><b>RECONSTRUCTION FAILED</b><span>The tactical record remains available below.</span></div>
+      <div class="stage-readout" aria-live="polite">
+        <span class="model-state">EXHIBIT / RUNNING</span>
+        <span>{profile.range.toUpperCase()} RANGE</span>
+      </div>
+      <div class="corner-mark corner-a" aria-hidden="true"></div>
+      <div class="corner-mark corner-b" aria-hidden="true"></div>
     </div>
-  </div>
+
+    <footer class="command-rail">
+      <div class="control-group time-controls" role="group" aria-label="Playback speed">
+        <span class="control-label">SPEED</span>
+        <button class="ctrl-btn" type="button" data-time="0.25">¼</button>
+        <button class="ctrl-btn" type="button" data-time="0.5">½</button>
+        <button class="ctrl-btn active" type="button" data-time="1" aria-pressed="true">1×</button>
+      </div>
+      {isBoss && (
+        <div class="control-group phase-controls" role="group" aria-label="Boss phase">
+          <span class="control-label">PHASE</span>
+          <button class="ctrl-btn active" type="button" data-phase="auto" aria-pressed="true">AUTO</button>
+          <button class="ctrl-btn" type="button" data-phase="1">I</button>
+          <button class="ctrl-btn" type="button" data-phase="2">II</button>
+          <button class="ctrl-btn" type="button" data-phase="3">III</button>
+        </div>
+      )}
+      <label class="zoom-control"><span>FRAME</span><input type="range" class="zoom-slider" min="0" max="1" step="0.01" value="0.3125" aria-label="Model framing" /></label>
+      <button class="analysis-toggle rail-action" type="button" aria-pressed="false">ANALYSIS</button>
+      <button class="reset-btn rail-action" type="button">RESET</button>
+    </footer>
+  </section>
 </tear-model-viewer>
 
 <script>
   import { initModelViewer } from '../scripts/model-renderer.js';
 
   class TearModelViewer extends HTMLElement {
-    constructor() {
-      super();
-      this.cleanup = null;
-    }
-
+    cleanup = null;
     connectedCallback() {
-      const container = this.querySelector('.model-perspective-container');
-      const wrapper = this.querySelector('.model-canvas-wrapper');
+      if (this.dataset.connected === 'true') return;
+      this.dataset.connected = 'true';
       const canvas = this.querySelector('canvas');
       const modelName = this.dataset.model;
-      const variant = this.dataset.variant;
-      
-      const isBossModel = (modelName === "the-source" || modelName === "iron-colossus" || modelName === "aldric" || modelName === "the-echo" || modelName === "warden");
-      // Setup state
-      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 1, playing: true };
+      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 1, playing: true, mode: 'exhibit' };
+      this.viewerState = state;
 
       if (canvas && modelName) {
         try {
           canvas.addEventListener('modelready', () => this.classList.add('is-ready'), { once: true });
-          this.cleanup = initModelViewer(canvas, modelName, variant, state);
+          this.cleanup = initModelViewer(canvas, modelName, this.dataset.variant, state);
         } catch (error) {
           this.classList.add('has-error');
+          this.dataset.error = error instanceof Error ? error.message : String(error);
           this.querySelector('.model-error')?.removeAttribute('hidden');
           console.error(`Unable to initialize ${modelName} model viewer`, error);
         }
       }
 
-      // Parallax effect
-      wrapper.addEventListener('mousemove', (e) => {
-        const rect = wrapper.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const cx = rect.width / 2;
-        const cy = rect.height / 2;
-        const rotateX = ((y - cy) / cy) * -1.5; // subtle tilt
-        const rotateY = ((x - cx) / cx) * 1.5;
-        wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      this.querySelectorAll('.time-controls .ctrl-btn').forEach((button) => button.addEventListener('click', () => {
+        this.selectButton('.time-controls .ctrl-btn', button);
+        state.timeScale = Number(button.dataset.time);
+      }));
+      this.querySelectorAll('.phase-controls .ctrl-btn').forEach((button) => button.addEventListener('click', () => {
+        this.selectButton('.phase-controls .ctrl-btn', button);
+        state.phase = button.dataset.phase;
+      }));
+      this.querySelector('.analysis-toggle')?.addEventListener('click', (event) => {
+        state.debug = !state.debug;
+        event.currentTarget.setAttribute('aria-pressed', String(state.debug));
+        event.currentTarget.classList.toggle('active', state.debug);
       });
-      
-      wrapper.addEventListener('mouseleave', () => {
-        wrapper.style.transform = `rotateX(0deg) rotateY(0deg)`;
+      this.querySelector('.reset-btn')?.addEventListener('click', () => this.cleanup?.reset());
+      this.querySelector('.zoom-slider')?.addEventListener('input', (event) => {
+        state.camScale = 0.75 + Number(event.currentTarget.value) * 0.8;
       });
-
-      // UI Controls bindings
-      this.querySelectorAll('.time-controls .ctrl-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          this.querySelectorAll('.time-controls .ctrl-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          state.timeScale = parseFloat(btn.dataset.time);
-        });
-      });
-
-      this.querySelectorAll('.phase-controls .ctrl-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          this.querySelectorAll('.phase-controls .ctrl-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          state.phase = btn.dataset.phase;
-        });
-      });
-
-      const debugBtn = this.querySelector('.debug-toggle');
-      if (debugBtn) {
-        debugBtn.addEventListener('click', () => {
-          state.debug = !state.debug;
-          debugBtn.textContent = `DEBUG: ${state.debug ? 'ON' : 'OFF'}`;
-          debugBtn.classList.toggle('active', state.debug);
-        });
-      }
-
-      const zoomSlider = this.querySelector('.zoom-slider') as HTMLInputElement;
-      if (zoomSlider) {
-        zoomSlider.addEventListener('input', () => {
-          const val = parseFloat(zoomSlider.value);
-          state.camScale = 0.75 + val * 0.8;
-        });
-      }
     }
-
+    selectButton(selector, selected) {
+      this.querySelectorAll(selector).forEach((button) => {
+        const active = button === selected;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+    }
     disconnectedCallback() {
-      if (this.cleanup) {
-        this.cleanup.destroy();
-        this.cleanup = null;
-      }
+      this.cleanup?.destroy();
+      this.cleanup = null;
+      delete this.dataset.connected;
     }
   }
-
-  customElements.define('tear-model-viewer', TearModelViewer);
+  if (!customElements.get('tear-model-viewer')) customElements.define('tear-model-viewer', TearModelViewer);
 </script>
 
 <style>
   .tear-model-viewer {
+    --viewer-surface: #0a0b0e;
+    --viewer-surface-raised: #111318;
+    --viewer-ink: #f5f7f8;
+    --viewer-muted: #858a92;
+    --viewer-line: rgba(245, 247, 248, .16);
+    --viewer-grid: rgba(245, 247, 248, .055);
+    --viewer-glow: color-mix(in srgb, var(--viewer-accent) 20%, transparent);
+    --viewer-shadow: rgba(0, 0, 0, .48);
     display: block;
-    margin: 2.5rem 0;
-  }
-  .model-perspective-container {
-    perspective: 1000px;
-  }
-  .model-canvas-wrapper {
-    position: relative;
-    width: 100%;
-    height: 450px; /* Taller for cinematic feel */
-    border: 1px solid var(--sl-color-hairline);
-    background: #0a0a0d;
-    overflow: hidden;
-    cursor: crosshair;
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    transform-style: preserve-3d;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-  .model-grid-bg {
-    position: absolute;
-    top: -50%; left: -50%; right: -50%; bottom: -50%;
-    background-image: 
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 30px 30px;
-    transform: translateZ(-50px);
-    pointer-events: none;
-  }
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    z-index: 10;
-    filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
-  }
-  .model-fallback, .model-error {
-    position: absolute;
-    inset: 0;
-    z-index: 9;
-    display: grid;
-    place-content: center;
-    gap: .45rem;
-    text-align: center;
-    font-family: var(--sl-font-mono);
-    letter-spacing: .16em;
-    color: var(--sl-color-gray-3);
-  }
-  .model-fallback b { color: var(--sl-color-white); font-size: 1.35rem; }
-  .is-ready .model-fallback { opacity: 0; pointer-events: none; transition: opacity .25s ease; }
-  .model-error { z-index: 30; background: inherit; color: var(--sl-color-white); }
-  .model-ui-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 20;
-    transform: translateZ(20px); /* UI floats above canvas */
-  }
-  .model-header {
-    display: flex;
-    justify-content: space-between;
-  }
-  .model-label, .model-status {
-    font-family: var(--sl-font-mono);
-    font-size: 0.75rem;
-    color: var(--sl-color-white);
-    letter-spacing: 0.2em;
-    background: rgba(10, 10, 13, 0.7);
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .model-controls {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
-    margin-bottom: 0.5rem;
-  }
-  .control-group {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    margin: 0;
-    box-sizing: border-box;
-    background: rgba(15, 15, 20, 0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px;
-    padding: 0 0.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  }
-  .control-label {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    font-family: var(--sl-font-mono);
-    font-size: 0.65rem;
-    line-height: 1;
-    color: var(--sl-color-gray-3);
-    padding: 0 0.75rem;
-    letter-spacing: 0.15em;
-    font-weight: bold;
-    text-transform: uppercase;
-  }
-  .ctrl-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 28px;
-    background: transparent;
-    border: none;
-    color: var(--sl-color-gray-3);
-    font-family: var(--sl-font-mono);
-    font-size: 0.75rem;
-    line-height: 1;
-    padding: 0 0.85rem;
-    margin: 0 0.15rem;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .ctrl-btn:hover {
-    color: var(--sl-color-white);
-    background: rgba(255,255,255,0.08);
-  }
-  .ctrl-btn.active {
-    color: #15c2c2;
-    background: rgba(21, 194, 194, 0.15);
-  }
-  .debug-toggle.active {
-    color: #ff00ff;
-    background: rgba(255, 0, 255, 0.15);
-  }
-  
-  .model-zoom-container {
-    position: absolute;
-    right: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: auto;
-    background: rgba(15, 15, 20, 0.75);
-    padding: 1rem 0.5rem;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.12);
-    backdrop-filter: blur(8px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-  
-  .zoom-slider {
-    -webkit-appearance: slider-vertical;
-    appearance: slider-vertical;
-    width: 6px;
-    height: 120px;
-    cursor: ns-resize;
-    background: rgba(255,255,255,0.1);
-    border-radius: 4px;
+    margin: 2.5rem 0 3rem;
+    color: var(--viewer-ink);
     outline: none;
   }
-  
-  .zoom-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #15c2c2;
-    cursor: ns-resize;
-    box-shadow: 0 0 10px rgba(21, 194, 194, 0.5);
-  }
+  .tear-model-viewer:focus-visible .archive-shell { outline: 2px solid var(--viewer-accent); outline-offset: 4px; }
+  .archive-shell { border: 1px solid var(--viewer-line); background: var(--viewer-surface); box-shadow: 0 24px 60px var(--viewer-shadow); clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px)); }
+  .archive-heading { min-height: 96px; display: grid; grid-template-columns: minmax(120px, .7fr) 1.4fr auto; align-items: stretch; border-bottom: 1px solid var(--viewer-line); }
+  .archive-index, .archive-provenance { padding: 1rem 1.25rem; display: flex; align-items: center; gap: .65rem; font: 700 .62rem/1 var(--sl-font-mono); letter-spacing: .15em; color: var(--viewer-muted); }
+  .archive-index { border-right: 1px solid var(--viewer-line); }
+  .archive-index i { width: 24px; height: 2px; background: var(--viewer-accent); box-shadow: 8px 0 16px var(--viewer-accent); }
+  .archive-identity { padding: 1rem 1.4rem; align-self: center; }
+  .archive-identity p { margin: 0 0 .35rem; color: var(--viewer-accent); font: 700 .64rem/1 var(--sl-font-mono); letter-spacing: .17em; }
+  .archive-identity h2 { margin: 0; color: var(--viewer-ink); font: 800 clamp(1.3rem, 3vw, 2rem)/1 var(--sl-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .archive-provenance { justify-content: flex-end; border-left: 1px solid var(--viewer-line); flex-wrap: wrap; max-width: 170px; }
+  .archive-provenance span::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: .5rem; background: #1faf5a; box-shadow: 0 0 10px #1faf5a; }
+  .archive-provenance code { color: var(--viewer-ink); background: none; padding: 0; }
+  .model-stage { position: relative; height: clamp(330px, 52vw, 520px); overflow: hidden; background: radial-gradient(circle at 50% 46%, var(--viewer-glow), transparent 36%), var(--viewer-surface); isolation: isolate; }
+  .model-stage canvas { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; display: block; filter: drop-shadow(0 16px 13px var(--viewer-shadow)); }
+  .arena-atmosphere { position: absolute; inset: 0; z-index: 1; background-image: linear-gradient(var(--viewer-grid) 1px, transparent 1px), linear-gradient(90deg, var(--viewer-grid) 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 75%, transparent); }
+  .arena-atmosphere i { position: absolute; background: var(--viewer-accent); opacity: .16; }
+  .arena-atmosphere i:nth-child(1) { width: 1px; height: 48%; left: 22%; top: 26%; }
+  .arena-atmosphere i:nth-child(2) { height: 1px; width: 42%; left: 44%; top: 31%; }
+  .arena-atmosphere i:nth-child(3) { width: 9rem; height: 9rem; border: 1px solid var(--viewer-accent); background: transparent; border-radius: 50%; left: calc(50% - 4.5rem); top: calc(50% - 4.5rem); opacity: .09; }
+  [data-motif='blast'] .arena-atmosphere i:nth-child(3), [data-motif='sight'] .arena-atmosphere i:nth-child(3) { opacity: .22; }
+  [data-motif='rush'] .arena-atmosphere { transform: skewX(-7deg); }
+  .arena-measurements { position: absolute; z-index: 2; inset: 1rem auto 1rem 1rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--viewer-muted); opacity: .45; font: 600 .55rem/1 var(--sl-font-mono); }
+  .arena-ground { position: absolute; z-index: 2; left: 8%; right: 8%; bottom: 18%; height: 1px; background: linear-gradient(90deg, transparent, var(--viewer-line) 15%, var(--viewer-accent) 50%, var(--viewer-line) 85%, transparent); box-shadow: 0 18px 40px var(--viewer-glow); }
+  .stage-readout { position: absolute; z-index: 7; inset: auto 1.25rem 1rem; display: flex; justify-content: space-between; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .14em; pointer-events: none; }
+  .model-state { color: var(--viewer-accent); }
+  .corner-mark { position: absolute; z-index: 7; width: 22px; height: 22px; pointer-events: none; }
+  .corner-a { top: 14px; left: 14px; border-top: 1px solid var(--viewer-accent); border-left: 1px solid var(--viewer-accent); }
+  .corner-b { right: 14px; bottom: 14px; border-right: 1px solid var(--viewer-accent); border-bottom: 1px solid var(--viewer-accent); }
+  .model-fallback, .model-error { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; gap: .45rem; text-align: center; font-family: var(--sl-font-mono); letter-spacing: .16em; color: var(--viewer-muted); }
+  .model-fallback::before { content: ''; width: 1px; height: 90px; margin: auto; background: linear-gradient(transparent, var(--viewer-accent), transparent); animation: reconstruct 1.1s ease-in-out infinite; }
+  .model-fallback b { color: var(--viewer-ink); font-size: 1.35rem; }
+  .is-ready .model-fallback { opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+  .model-error { z-index: 10; background: var(--viewer-surface); color: var(--viewer-ink); }
+  .model-error[hidden] { display: none; }
+  .command-rail { min-height: 62px; padding: .65rem .8rem; display: flex; align-items: stretch; gap: .5rem; border-top: 1px solid var(--viewer-line); background: var(--viewer-surface-raised); overflow-x: auto; }
+  .control-group, .zoom-control { display: flex; align-items: center; gap: .2rem; padding-right: .5rem; border-right: 1px solid var(--viewer-line); white-space: nowrap; }
+  .control-label, .zoom-control span { padding: 0 .55rem; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .14em; }
+  .ctrl-btn, .rail-action { min-width: 38px; height: 40px; border: 1px solid transparent; border-radius: 0; background: transparent; color: var(--viewer-muted); font: 700 .68rem/1 var(--sl-font-mono); letter-spacing: .08em; cursor: pointer; }
+  .ctrl-btn:hover, .rail-action:hover { color: var(--viewer-ink); border-color: var(--viewer-line); }
+  .ctrl-btn:focus-visible, .rail-action:focus-visible, .zoom-slider:focus-visible { outline: 2px solid var(--viewer-accent); outline-offset: -2px; }
+  .ctrl-btn.active, .rail-action.active { color: var(--viewer-surface); background: var(--viewer-accent); border-color: var(--viewer-accent); }
+  .zoom-control { flex: 1; min-width: 150px; }
+  .zoom-slider { width: 100%; min-width: 80px; accent-color: var(--viewer-accent); cursor: ew-resize; }
+  .rail-action { padding: 0 .9rem; min-width: max-content; }
+  @keyframes reconstruct { 0%, 100% { transform: scaleY(.35); opacity: .35; } 50% { transform: scaleY(1); opacity: 1; } }
 
-  /* --- LIGHT MODE OVERRIDES --- */
-  :global([data-theme='light']) .model-canvas-wrapper {
-    background: #e2e8f0;
-    border-color: #cbd5e1;
+  :global([data-theme='light']) .tear-model-viewer {
+    --viewer-surface: #f3f5f7;
+    --viewer-surface-raised: #e8ecef;
+    --viewer-ink: #111419;
+    --viewer-muted: #636a73;
+    --viewer-line: rgba(17, 20, 25, .2);
+    --viewer-grid: rgba(17, 20, 25, .07);
+    --viewer-glow: color-mix(in srgb, var(--viewer-accent) 13%, transparent);
+    --viewer-shadow: rgba(30, 42, 55, .18);
   }
-  :global([data-theme='light']) .model-grid-bg {
-    background-image: 
-      linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+  @media (max-width: 640px) {
+    .archive-heading { grid-template-columns: 1fr auto; min-height: 82px; }
+    .archive-index { display: none; }
+    .archive-identity { padding: .9rem 1rem; }
+    .archive-provenance { max-width: 120px; padding: .75rem; }
+    .archive-provenance span { display: none; }
+    .model-stage { height: clamp(300px, 82vw, 410px); }
+    .stage-readout { inset-inline: .8rem; }
+    .command-rail { scroll-snap-type: x proximity; }
+    .control-group, .zoom-control, .rail-action { scroll-snap-align: start; }
   }
-  :global([data-theme='light']) .model-label, 
-  :global([data-theme='light']) .model-status {
-    background: rgba(255, 255, 255, 0.85);
-    color: #0f172a;
-    border-color: rgba(0,0,0,0.15);
-  }
-  :global([data-theme='light']) .control-group,
-  :global([data-theme='light']) .model-zoom-container {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(0,0,0,0.15);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
-  :global([data-theme='light']) .control-label {
-    color: #475569;
-  }
-  :global([data-theme='light']) .ctrl-btn {
-    color: #475569;
-  }
-  :global([data-theme='light']) .ctrl-btn:hover {
-    color: #0f172a;
-    background: rgba(0,0,0,0.05);
-  }
-  :global([data-theme='light']) .ctrl-btn.active {
-    color: #fff;
-    background: #0284c7;
-    box-shadow: 0 0 8px rgba(2, 132, 199, 0.4);
-  }
-  :global([data-theme='light']) .debug-toggle.active {
-    background: #dc2626;
-    box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
-  }
-  :global([data-theme='light']) .zoom-slider {
-    background: rgba(0,0,0,0.1);
-  }
-  :global([data-theme='light']) .zoom-slider::-webkit-slider-thumb {
-    background: #0284c7;
-    box-shadow: 0 0 8px rgba(2, 132, 199, 0.4);
+  @media (prefers-reduced-motion: reduce) {
+    .model-fallback::before { animation: none; }
+    .is-ready .model-fallback { transition: none; }
   }
 </style>
