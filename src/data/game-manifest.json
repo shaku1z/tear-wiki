@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "source": {
     "repository": "shaku1z/tear",
-    "commit": "6dd4cda1a8c4edc775530563874b076d6e8504dc"
+    "commit": "acfb056d64a2b7c6ca19c174baffab55aaaca213"
   },
   "config": {
     "view": {
@@ -3169,7 +3169,9 @@
       "desc": "+12 starting max HP per level.",
       "baseCost": 160,
       "costMult": 1.5,
-      "maxLevel": 8
+      "maxLevel": 8,
+      "cat": "vit",
+      "glyph": "❤"
     },
     {
       "id": "sharp",
@@ -3177,7 +3179,9 @@
       "desc": "+6% damage per level.",
       "baseCost": 185,
       "costMult": 1.6,
-      "maxLevel": 8
+      "maxLevel": 8,
+      "cat": "blade",
+      "glyph": "⚔"
     },
     {
       "id": "swift",
@@ -3185,7 +3189,9 @@
       "desc": "+4% move speed per level.",
       "baseCost": 160,
       "costMult": 1.5,
-      "maxLevel": 6
+      "maxLevel": 6,
+      "cat": "tempo",
+      "glyph": "≫"
     },
     {
       "id": "recovery",
@@ -3193,14 +3199,18 @@
       "desc": "-6% dash cooldown per level.",
       "baseCost": 170,
       "costMult": 1.5,
-      "maxLevel": 6
+      "maxLevel": 6,
+      "cat": "tempo",
+      "glyph": "↯"
     },
     {
       "id": "headstart",
       "name": "Head Start",
       "desc": "Begin each run with a random upgrade.",
       "baseCost": 420,
-      "maxLevel": 1
+      "maxLevel": 1,
+      "cat": "fortune",
+      "glyph": "✦"
     },
     {
       "id": "greed",
@@ -3208,7 +3218,9 @@
       "desc": "+15% coins earned per level.",
       "baseCost": 200,
       "costMult": 1.6,
-      "maxLevel": 5
+      "maxLevel": 5,
+      "cat": "fortune",
+      "glyph": "◆"
     },
     {
       "id": "reach",
@@ -3216,7 +3228,9 @@
       "desc": "+ blade reach & length per level.",
       "baseCost": 200,
       "costMult": 1.5,
-      "maxLevel": 5
+      "maxLevel": 5,
+      "cat": "blade",
+      "glyph": "↔"
     },
     {
       "id": "throwarm",
@@ -3224,7 +3238,9 @@
       "desc": "+8% thrown-blade damage per level.",
       "baseCost": 185,
       "costMult": 1.5,
-      "maxLevel": 6
+      "maxLevel": 6,
+      "cat": "blade",
+      "glyph": "➹"
     },
     {
       "id": "thickskin",
@@ -3232,7 +3248,9 @@
       "desc": "Take -4% damage per level.",
       "baseCost": 220,
       "costMult": 1.6,
-      "maxLevel": 6
+      "maxLevel": 6,
+      "cat": "vit",
+      "glyph": "▣"
     },
     {
       "id": "warding",
@@ -3240,14 +3258,18 @@
       "desc": "Begin each run with a one-hit shield per level.",
       "baseCost": 400,
       "costMult": 1.8,
-      "maxLevel": 2
+      "maxLevel": 2,
+      "cat": "fortune",
+      "glyph": "⬡"
     },
     {
       "id": "aircharge",
       "name": "Aether Step",
       "desc": "Start with an extra mid-air dash charge.",
       "baseCost": 560,
-      "maxLevel": 1
+      "maxLevel": 1,
+      "cat": "tempo",
+      "glyph": "⇈"
     },
     {
       "id": "lifeline",
@@ -3255,14 +3277,18 @@
       "desc": "Recover +5 HP on each wave clear per level.",
       "baseCost": 270,
       "costMult": 1.5,
-      "maxLevel": 4
+      "maxLevel": 4,
+      "cat": "vit",
+      "glyph": "✚"
     },
     {
       "id": "phoenix",
       "name": "Second Wind",
       "desc": "Once per run, revive with 35% HP when you would fall.",
       "baseCost": 850,
-      "maxLevel": 1
+      "maxLevel": 1,
+      "cat": "vit",
+      "glyph": "❁"
     }
   ],
   "dailyChallenges": [
