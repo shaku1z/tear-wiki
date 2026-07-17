@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "source": {
     "repository": "shaku1z/tear",
-    "commit": "506c6678dd9ebe5bcb99fddfc1c5c0083d53fa62"
+    "commit": "81f6ea2b5c6c535629729b956c6408b6e342a9bc"
   },
   "config": {
     "view": {
@@ -634,7 +634,10 @@
       }
     ],
     "touch": {
-      "aimBoost": 1.5
+      "aimBoost": 1.5,
+      "stickRadius": 130,
+      "stickDead": 10,
+      "joyFollow": 96
     }
   },
   "upgrades": [
