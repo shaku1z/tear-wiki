@@ -6,7 +6,7 @@ import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
-	site: process.env.SITE_URL || 'https://tear-wiki.pages.dev',
+	site: process.env.SITE_URL || 'https://wiki.tearblade.com',
 	prefetch: true,
 	integrations: [
 		starlight({
