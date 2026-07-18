@@ -12,6 +12,16 @@ function json(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+// ACH.list may be a runtime getter in newer game builds. It filters through the
+// browser-only PROFILE singleton, so the wiki must snapshot the authored backing
+// catalogue rather than serialize the runtime facade.
+const achievementList = Array.isArray(ACH._all) ? ACH._all : ACH.list;
+const achievements = {
+  RARITY: json(ACH.RARITY),
+  CATS: json(ACH.CATS),
+  list: json(achievementList),
+};
+
 const manifest = {
   schemaVersion: 2,
   source,
@@ -34,7 +44,7 @@ const manifest = {
   stages: json(STAGES),
   variants: json(VARIANTS),
   affixes: { list: AFFIXES.map(({ id, color }) => ({ id, color })), presets: json(PRESETS) },
-  achievements: json(ACH),
+  achievements,
   shop: json(SHOP),
   dailyChallenges: DAILY.POOL.map(({ id, key, mode, goal, shards }) => ({ id, key, mode, goal, shards })),
 };
@@ -42,6 +52,7 @@ const manifest = {
 assert.ok(manifest.source.commit, 'Game source commit is required.');
 assert.ok(Array.isArray(manifest.upgrades) && manifest.upgrades.length > 0, 'No upgrades were extracted.');
 assert.ok(Array.isArray(manifest.stages) && manifest.stages.length > 0, 'No stages were extracted.');
+assert.ok(Array.isArray(manifest.achievements.list) && manifest.achievements.list.length > 0, 'No achievements were extracted.');
 assert.ok(manifest.config.colors?.perfect, 'The engine palette was not extracted.');
 assert.equal(new Set(manifest.upgrades.map((upgrade) => upgrade.id)).size, manifest.upgrades.length, 'Upgrade IDs must be unique.');
 for (const upgrade of manifest.upgrades.filter((item) => item.progression === 'tiered')) {

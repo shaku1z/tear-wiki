@@ -225,7 +225,10 @@ const CONFIG = {
   armored: { w: 46, h: 46, hp: 154, speed: 95, contactDmg: 14, knockbackTaken: 3, weight: 2.2, breakSpeed: 1500, groundDR: 0.5, airDR: 1.15,
     stompCd: 3.2, stompWindup: 0.55, stompRange: 400, shockSpeed: 560, shockDmg: 16, shockR: 15 },
   // boss: large, multi-phase (very heavy -> barely flinchable)
-  boss: { w: 118, h: 118, hp: 1900, speed: 70, contactDmg: 20, knockbackTaken: 0.6, weight: 6, fireBase: 2.0 },
+  boss: { w: 118, h: 118, hp: 2500, speed: 70, contactDmg: 20, knockbackTaken: 0.6, weight: 6, fireBase: 2.0 },
+  // shared boss ceremony timing. Individual fights supply the poses and attack grammar;
+  // the theater layer owns only the real-time pacing.
+  bossTheater: { introDur: 1.4, introScale: 0.25, deathDur: 0.9 },
   // The Echo (Stage 4 boss): your own silhouette — mirrors your tricks -> splits -> turns invisible
   echo: {
     w: 32, h: 50, hp: 3000, speed: 280, contactDmg: 18, knockbackTaken: 0.5, weight: 4,
@@ -235,39 +238,78 @@ const CONFIG = {
   // The Source (Stage 5 FINAL boss): a floating rift that cycles every fallen boss's
   // signature mechanic, collapses the floor, fakes its death, then erupts into a true form
   source: {
-    w: 116, h: 128, hp: 4200, speed: 125, contactDmg: 22, knockbackTaken: 0.35, weight: 7,
-    floorTier: 0.62, fakeTier: 0.34, reviveFrac: 0.46,
+    w: 116, h: 128, hp: 5400, speed: 125, contactDmg: 22, knockbackTaken: 0.35, weight: 7,
+    // the VOID RUN is the fight's centerpiece: it begins at voidTier and runs to
+    // the death; the kneel (fake death) happens ON the frozen conveyor
+    voidTier: 0.55, fakeTier: 0.28, kneelDur: 3.6, thawSpeedMult: 1.35,
+    voidDelay: 1.25,   // phase-2 entry: the whole floor shatters over this window, then the stream begins
+    // THE VOID DESCENT — the cinematic that opens the void run
+    voidCamZoom: 0.80,        // camera pulls this far OUT during the void (wider frame = plan your route)
+    descentLift: 0.75, descentDissolve: 0.65, descentArrival: 0.85,   // the three beats' durations
+    descentLiftV: -520,       // the void-updraft that catches the player during beat 1
     cycleCd: 2.5,           // seconds between mechanic casts (phase 1)
     shockDmg: 18, shockSpeed: 720, shockR: 16,
     sweeperDmg: 18, sweeperSpeed: 600,
     crossDmg: 16, crossSpeed: 740,
     copyDelay: 0.5,
-    collapseCd: 1.3,        // phase 2: rip a platform out this often
-    regenRate: 0.05,        // fake-death HP regen (fraction of max per second)
+    collapseCd: 1.3, crackWarn: 0.8,
+    // the rift LEARNS TO LUNGE — physical moves woven between the ranged casts
+    dashCd: 5.5, dashWindup: 0.55, dashSpeed: 2050, dashDmg: 22,   // RIFT DASH: a telegraphed flash-charge along a locked line
+    collapseCd: 8.0, collapseWindup: 0.7, collapseDmg: 18, collapseSpeed: 900,   // RIFT COLLAPSE: teleport above, drop a converging shard ring
+    scrollSpeed: 170, scrollRamp: 4, scrollSpeedMax: 260,   // the run tightens as it goes
+    voidFallDmg: 18, voidSlowMult: 0.58, voidSlowDur: 0.7,
+    voidGapMin: 105, voidGapMax: 185, voidPlatformMin: 180, voidPlatformMax: 290,
+    voidWispCd: 4.8, beamCd: 8.5, beamWarn: 0.9, beamSweep: 1.15, beamW: 52, beamDmg: 20,
+    stolenBladeSpeed: 1750, stolenBladeDmg: 18,
   },
   // The Berserker King / Aldric (Stage 3 boss): a duel -> a throne of fire -> a fake death & frenzy
   aldric: {
-    w: 116, h: 132, hp: 3400, speed: 130, contactDmg: 22, knockbackTaken: 0.3, weight: 7,
+    w: 116, h: 132, hp: 4300, speed: 130, contactDmg: 22, knockbackTaken: 0.3, weight: 7,
     atkCd: 1.7, windup: 0.45, lungeSpeed: 1150, shockDmg: 18, shockSpeed: 740, shockR: 20,
     fireTier: 0.65, fakeTier: 0.20, regenRate: 0.05, reviveFrac: 0.5,   // regen 5%/s up to 50% during the fake
     fireCols: 8, fireCycle: 3.0,                                        // checkerboard of fire, pulses every 3s
-    frenzyDmgTaken: 1.35, downedDmgTaken: 0.3, chargeCd: 13, chargeWindup: 0.5, chargeSpeed: 1550,
+    frenzyDmgTaken: 1.35, downedDmgTaken: 0.3, chargeCd: 9.5, chargeWindup: 0.5, chargeSpeed: 1550,
+    rallyWindow: 1.5, recoverableFrac: 0.65, rallyHealPerDamage: 0.55,
+    kneelDur: 6.0, witnessReviveFrac: 0.32, angerReviveFrac: 0.55, angerRegenMult: 2.4,
+    angerDamageMult: 1.25, seamLife: 2.6, crownfireCd: 7.2, crownfireWindup: 0.85,
+    emberDmg: 14, emberSpeed: 560,
+    pounceAfter: 1.0,   // NO SHELTER: hover above him this long and the pounce comes, every time
+    arcDmg: 16, arcSpeed: 620, arcRise: 210, arcGravity: 480,   // CLEAVER ARCS: fire crescents — parry food (rally)
+    overheadCd: 6.5, overheadWindup: 0.6, overheadDmg: 26, overheadRange: 150,   // OVERHEAD CLEAVER: a committed high-to-low slam + lingering fire seam
   },
   // The Iron Colossus (Stage 2 boss): a tank with a front shield -> a thrown sweeping arm -> an exposed core
   colossus: {
-    w: 152, h: 150, hp: 2900, speed: 58, contactDmg: 24, knockbackTaken: 0, weight: 9,
+    w: 152, h: 150, hp: 3700, speed: 58, contactDmg: 24, knockbackTaken: 0, weight: 9,
     atkCd: 2.5, windup: 0.6, shockDmg: 20, shockSpeed: 720, shockR: 24,
+    quakeSpeedMult: 0.78, quakeRMult: 1.25,   // his waves are QUAKES: taller, slower, his alone
     chargeWindup: 0.7, chargeSpeed: 1350,
     sweeperDmg: 16, sweeperSpeed: 540, sweeperY: 540,
-    panelCount: 4, crossDmg: 14, crossSpeed: 640, crossCd: 2.2,
+    panelCount: 4, panelStep: 0.72, crossDmg: 14, crossSpeed: 640, crossCd: 2.2,
+    ventDur: 2.2, ventW: 150, ventLift: 2600,
+    staggerDur: 1.1, coreOpenDur: 2.5, coreOpenMult: 1.65,
+    shieldCrossings: 3, shieldEmbedDur: 2.2,
+    debrisDmg: 16, debrisGravity: 1750, meltdownCd: 8.5, meltdownWindup: 0.9,
+    campAfter: 4.0, pillarCd: 7.0, pillarWarn: 0.7, platRespawn: 6.0,   // NO SHELTER: the fortress breaks the perch you camp
+    // the BRUISER kit — heavy, telegraphed, punishable
+    chargeStopShort: 0.55,   // fraction of charges that halt short with a shoulder-check (no free self-stagger)
+    smashWindup: 0.7, smashDmg: 24, smashRange: 200,   // OVERHEAD SMASH: raise a fist, then a vertical kill-column at the player's x
+    grabRange: 130, grabWindup: 0.28, grabDmg: 20, grabKnock: 900,   // SEISMIC BACKHAND: punish point-blank camping
   },
   // The Warden (Stage 1 boss): a methodical guard who weaponizes the arena across 3 phases
   warden: {
     batonCd: 2.1, batonWindup: 0.5, mortarShots: 3, mortarSpeed: 760, mortarGravity: 900, mortarDmg: 14,
-    bashRange: 150, bashKnock: 620,
+    bashKnock: 620,   // the string finisher's shove
+    // BATON STRINGS (his kit is MELEE now — no ground waves): each beat opens a
+    // deflect window first, then lands; the P2 finisher beat is unparryable (peril)
+    stringRange: 270, stringDmg: 16, stringWind: 0.30, parryWin: 0.16,
+    lungeRange: 620, lungeWind: 0.42, lungeSpeed: 1350, lungeDmg: 18,   // SHIELD-BATON LUNGE: a mid-range gap-closer at a kiting player
     zoneCount: 3, zoneW: 200, zoneShift: 7, zoneTick: 7, zoneTickCd: 0.4,   // phase-2 prohibited zones
-    shockDmg: 18, shockSpeed: 700, shockR: 18,
     ceilingY: 150, ceilDropCd: 1.6, lungeCd: 7.5, lungeWindup: 0.55, lungeSpeed: 1500,   // phase-3 ceiling: lock + telegraph, then dive
+    guardParry: 0.24, guardPerfect: 0.36, guardDecay: 0.08, guardDecayDelay: 1.8,
+    guardBreakDur: 2.5, guardBreakMult: 1.65,
+    lockdownDur: 5.0, lockdownCd: 10.0, cageW: 125,
+    debrisDmg: 15, debrisGravity: 1650, trailLife: 2.5,
+    campAfter: 4.0, volleyCd: 6.0,   // NO SHELTER: perch too long and the skyward volley answers
   },
 
   // support: no real attack — they make every OTHER enemy worse, so they're priority kills
@@ -675,9 +717,27 @@ class Projectile {
     this.tint = null;         // shot colour, set by the firing enemy (else default enemyShot)
     this.kind = "dart";       // visual shape: "dart" (oriented bolt) | "orb" (caster)
     this.hist = [];           // recent positions -> a real motion trail for EVERY projectile
+    // Optional boss-pattern metadata. Neutral defaults preserve every legacy projectile.
+    this.owner = null;
+    this.landingX = null; this.landingY = null; this.landingT = null;
+    this.maxCrossings = 0; this.crossings = 0;
+    this.embeddedLife = 0;
+    this.groundImpact = false;
+    this.embedded = false;    // inert sweeper lodged in an arena wall
+    this.harmless = false;    // collision consumers can ignore an embedded prop
+    this._embedNotified = false;
+    this._groundImpactDone = false;
   }
 
   update(dt) {
+    if (this.embedded) {
+      this.vx = 0; this.vy = 0;
+      this.embeddedLife -= dt;
+      if (this.embeddedLife <= 0) this.dead = true;
+      return;
+    }
+
+    if (this.landingT != null) this.landingT = Math.max(0, this.landingT - dt);
     if (this.gravity) this.vy += this.gravity * dt;   // bombs arc; mines fall to the floor
     this.hist.push({ x: this.x, y: this.y });          // record the path for the motion trail
     if (this.hist.length > 7) this.hist.shift();
@@ -686,7 +746,19 @@ class Projectile {
     this.life -= dt;
     if (this.life <= 0) this.dead = true;
 
-    if (this.bounces > 0) {
+    // Optional falling-hazard impact. Bombs/mines keep their legacy game-owned handling
+    // unless their creator explicitly opts into groundImpact.
+    if (this.gravity && this.groundImpact && !this._groundImpactDone && this.vy > 0 &&
+        this.y + this.r >= (this.landingY != null ? this.landingY : CONFIG.world.groundY)) {
+      this.y = CONFIG.world.groundY - this.r;
+      this.vx = 0; this.vy = 0; this.landingT = 0;
+      this._groundImpactDone = true;
+      if (this.owner && typeof this.owner.onProjectileGroundImpact === "function") this.owner.onProjectileGroundImpact(this);
+      this.dead = true;
+      return;
+    }
+
+    if (this.bounces > 0 || (this.sweeper && this.maxCrossings > 0)) {
       // ricochet off the play-area edges
       const r = this.r, W = CONFIG.view.w, top = 0, bottom = CONFIG.world.groundY;
       let hit = false;
@@ -695,7 +767,22 @@ class Projectile {
       if (this.y < top + r) { this.y = top + r; this.vy = Math.abs(this.vy); hit = true; }
       else if (this.y > bottom - r) { this.y = bottom - r; this.vy = -Math.abs(this.vy); hit = true; }
       if (hit) {
-        if (this.sweeper) { FX.ring(this.x, this.y, 6, CONFIG.colors.armoredShield); }   // sweeper keeps its speed forever
+        if (this.sweeper) {
+          FX.ring(this.x, this.y, 6, this.tint || CONFIG.colors.armoredShield);
+          if (this.maxCrossings > 0) {
+            this.crossings++;
+            if (this.crossings >= this.maxCrossings) {
+              this.crossings = this.maxCrossings;
+              this.vx = 0; this.vy = 0;
+              this.embedded = true; this.harmless = true;
+              this.hist.length = 0;
+              if (!this._embedNotified) {
+                this._embedNotified = true;
+                if (this.owner && typeof this.owner.onShieldEmbedded === "function") this.owner.onShieldEmbedded(this);
+              }
+            }
+          }
+        }   // maxCrossings=0 preserves the legacy infinite sweeper
         else { this.bounces--; this.vx *= 0.85; this.vy *= 0.85; FX.ring(this.x, this.y, 4); }
       }
       return;
@@ -746,22 +833,82 @@ class Projectile {
     const dark = (typeof THEME !== "undefined") && THEME.dark;
     const lowG = (typeof GFX !== "undefined") && GFX.low;
     // universal motion trail (skipped only for the stationary mine once it settles)
-    if (!(this.mine && this.armed)) {
+    if (!(this.mine && this.armed) && !this.embedded) {
       const tcol = this.deflected ? (this.perfect ? C.perfect : C.deflected) : (this.tint || (this.shock ? C.slam : this.mud ? C.sludge : this.bomb ? C.bomber : C.enemyShot));
       this._trail(ctx, tcol, dark, lowG);
     }
-    if (this.sweeper) {                    // Colossus's thrown shield arm: a rotating bar of death
-      ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(performance.now() / 200);
-      if (!lowG) { ctx.shadowColor = C.armoredShield; ctx.shadowBlur = 12; }
-      ctx.fillStyle = C.armoredShield; ctx.fillRect(-44, -9, 88, 18);
-      ctx.shadowBlur = 0; ctx.strokeStyle = ink; ctx.lineWidth = 2.5; ctx.strokeRect(-44, -9, 88, 18);
-      ctx.fillStyle = ink; ctx.fillRect(-6, -6, 12, 12);
+    if (this.sweeper) {
+      const col = this.tint || C.armoredShield;
+      const rr = 30, t2 = performance.now();
+      ctx.save(); ctx.translate(this.x, this.y);
+      if (this.sweeperStyle === "shard") {
+        // THE SOURCE's echo: a VOID SHARD RING — angular shards orbiting a dark core
+        ctx.rotate(this.embedded ? 0 : t2 / 260);
+        ctx.globalAlpha = this.embedded ? 0.6 : 1;
+        if (!lowG && !this.embedded) { ctx.shadowColor = col; ctx.shadowBlur = 14; }
+        const n = 6;
+        for (let i = 0; i < n; i++) {
+          const a = i / n * Math.PI * 2, px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+          ctx.save(); ctx.translate(px, py); ctx.rotate(a + Math.PI / 4);
+          ctx.fillStyle = col; ctx.beginPath();
+          ctx.moveTo(-9, 0); ctx.lineTo(0, -6); ctx.lineTo(11, 0); ctx.lineTo(0, 6); ctx.closePath(); ctx.fill();
+          ctx.shadowBlur = 0; ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.stroke();
+          ctx.restore();
+        }
+        ctx.shadowBlur = 0; ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 0.9; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+        ctx.restore(); return;
+      }
+      // THE IRON COLOSSUS: an industrial SAW BLADE — toothed steel disc + hub,
+      // grinding sparks off the leading edge; embedded = bitten into the wall
+      ctx.rotate(this.embedded ? 0.3 : t2 / 90);
+      ctx.globalAlpha = this.embedded ? 0.66 : 1;
+      if (!lowG && !this.embedded) { ctx.shadowColor = col; ctx.shadowBlur = 10; }
+      const teeth = 12;
+      ctx.fillStyle = col; ctx.strokeStyle = ink; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < teeth; i++) {
+        const a0 = (i / teeth) * Math.PI * 2, a1 = ((i + 0.5) / teeth) * Math.PI * 2;
+        ctx.lineTo(Math.cos(a0) * rr, Math.sin(a0) * rr);            // tooth tip
+        ctx.lineTo(Math.cos(a1) * rr * 0.78, Math.sin(a1) * rr * 0.78); // valley
+      }
+      ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+      // hub + bolt holes
+      ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
+      if (!this.embedded) {   // spin-blur arc + grind sparks off the rim
+        ctx.globalAlpha = 0.4; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, rr - 3, 0, Math.PI * 1.2); ctx.stroke();
+        if (!lowG) { ctx.globalAlpha = 0.8; ctx.fillStyle = "#ffd66e";
+          for (let s = 0; s < 3; s++) { const sa = t2 / 40 + s * 2.1, sr2 = rr + 3 + (s * 5); ctx.fillRect(Math.cos(sa) * sr2, Math.sin(sa) * sr2, 3, 3); } }
+      } else {   // lodged prongs read it as bitten into the wall
+        ctx.globalAlpha = 0.7; ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.setLineDash([5, 4]);
+        ctx.beginPath(); ctx.arc(0, 0, rr + 4, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      }
       ctx.restore(); return;
     }
     if (this.shock) {                      // armored stomp shockwave: a ground spike you jump
+      const col = this.tint || C.slam;
+      if (this.quake) {                    // IRON COLOSSUS: a TREMOR COLUMN — tall, jagged, debris at the crown
+        const hgt = this.r * 3.0, wob = Math.sin(performance.now() / 38 + this.x * 0.03) * 3;
+        ctx.save();
+        if (!lowG) { ctx.shadowColor = col; ctx.shadowBlur = 12; }
+        ctx.fillStyle = col; ctx.globalAlpha = 0.88;
+        ctx.beginPath();
+        ctx.moveTo(this.x - this.r, this.y + this.r);
+        ctx.lineTo(this.x - this.r * 0.45 + wob, this.y + this.r - hgt * 0.55);
+        ctx.lineTo(this.x + wob, this.y + this.r - hgt);
+        ctx.lineTo(this.x + this.r * 0.45 + wob, this.y + this.r - hgt * 0.5);
+        ctx.lineTo(this.x + this.r, this.y + this.r);
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0; ctx.globalAlpha = 1; ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = ink; ctx.globalAlpha = 0.7;   // debris chips shaken loose at the crown
+        for (let i = 0; i < 3; i++) ctx.fillRect(this.x + wob + (i - 1) * 9, this.y + this.r - hgt - 7 - (i % 2) * 7, 4, 4);
+        ctx.globalAlpha = 1; ctx.restore(); return;
+      }
       ctx.save();
-      if (!lowG) { ctx.shadowColor = C.slam; ctx.shadowBlur = 10; }
-      ctx.fillStyle = C.slam; ctx.globalAlpha = 0.92;
+      if (!lowG) { ctx.shadowColor = col; ctx.shadowBlur = 10; }
+      ctx.fillStyle = col; ctx.globalAlpha = 0.92;
       ctx.beginPath(); ctx.moveTo(this.x - this.r, this.y + this.r);
       ctx.lineTo(this.x, this.y - this.r); ctx.lineTo(this.x + this.r, this.y + this.r);
       ctx.closePath(); ctx.fill();
@@ -1031,6 +1178,12 @@ class Enemy {
     this.elite = false;
     this.color = "#000";
     this.spawnT = 0;       // >0 while materializing (telegraph + can't act)
+    // Bosses linger for a short authored collapse instead of disappearing on the
+    // lethal simulation tick. Ordinary enemies still die immediately.
+    this.dying = false;
+    this.deathT = 0;
+    this.deathDur = (CONFIG.bossTheater && CONFIG.bossTheater.deathDur) || 0.9;
+    this._deathCause = "";
     this.weight = cfg.weight || 1;   // resists launches (heavier = less pop)
     this.spiked = false;   // slammed downward while airborne -> ground-impact on landing
     // variant / affix state
@@ -1090,18 +1243,44 @@ class Enemy {
   applyBurn() { const S = CONFIG.status; this.burnT = Math.max(this.burnT, S.burnDur); this.burnDps = Math.max(this.burnDps, S.burnDps); }
   applyMark() { this.markT = Math.max(this.markT, CONFIG.status.markDur); }
   bleedPool() { return this.bleedStacks * CONFIG.status.bleedDps * Math.max(this.bleedT, 0); }   // remaining bleed if it ran out
-  detonateBleed() { const d = this.bleedPool(); this.bleedStacks = 0; this.bleedT = 0; if (d > 0) this._dot(d); return d; }
+  detonateBleed() { const d = this.bleedPool(); this.bleedStacks = 0; this.bleedT = 0; return d > 0 ? this._dot(d) : 0; }
   _dot(dmg) {   // damage with no i-frame / knockback (used by DoTs + detonations)
+    if (this.dead || this.dying) return 0;
+    const context = { type: "status", aerial: false };
+    if (this.blocksDamage(context)) return 0;
+    dmg *= this.damageTakenMult(context);
+    const before = this.hp;
     if (this.shield > 0) { this.shield -= dmg; if (this.shield < 0) { this.hp += this.shield; this.shield = 0; } }
     else this.hp -= dmg;
     if (this.hp <= 0) {
       if (this._deathLocked()) { this.hp = 1; }   // scripted-invulnerable boss phase (fake-death): DoTs can't kill either
-      else { this.dead = true; if (this.isBoss && typeof Clipper !== 'undefined') Clipper.stop(); }
+      else this._beginDeath("skill");
     }
+    return Math.max(0, before - Math.max(this.hp, 0));
   }
   // bosses override: true while in a scripted fake-death/kneel phase where NO damage path
   // (blade hit OR DoT) may be lethal — the fight must reach the scripted revival.
   _deathLocked() { return false; }
+  _beginDeath(cause) {
+    if (this.dead || this.dying) return;
+    if (this.isBoss && !this.isMiniBoss) {
+      this.hp = 0; this.dying = true; this.deathT = this.deathDur;
+      this._deathCause = cause || ""; this.contactDmg = 0; this.vx = 0; this.vy = 0;
+      if (typeof BOSSFX !== "undefined") BOSSFX.juice({ shake: 13, flash: 0.65, slowmo: 0.9,
+        zoom: 0.10, hitstop: 0.11, quiet: true });
+      if (this.onDeathStart) this.onDeathStart();
+    } else {
+      this.dead = true;
+      if (this.isBoss && typeof Clipper !== "undefined") Clipper.stop();
+    }
+  }
+  updateDeath(dt) {
+    if (!this.dying) return false;
+    this.deathT = Math.max(0, this.deathT - dt);
+    if (this.deathT <= 0) { this.dying = false; this.dead = true; return true; }
+    return false;
+  }
+  get deathP() { return this.deathDur > 0 ? clamp(1 - this.deathT / this.deathDur, 0, 1) : 1; }
   // returns damage dealt this tick (so the loop can credit DoT kills)
   tickStatus(dt) {
     let dealt = 0;
@@ -1118,6 +1297,7 @@ class Enemy {
   get radius() { return Math.max(this.hw, this.hh); }
   get speed() { return this.cfg.speed * this.speedMult * this.auraSpeed * this.slowStatus; }
   blocks() { return false; }            // armored overrides
+  blocksDamage() { return false; }      // bosses may gate non-melee damage too
   damageTakenMult() { return 1; }       // armored overrides (ground vs air)
 
   // turn this into a tougher elite variant
@@ -1248,8 +1428,10 @@ class Enemy {
   }
 
   hit(dmg, knockX, knockY) {
+    if (this.dead || this.dying) return 0;
     this.hitCd = CONFIG.blade.enemyHitIframe;
     this.flash = 0.08;
+    const before = this.hp;
     dmg *= this.auraDR * this.tetherDR;          // War Priest / Anchor protection
     if (this.markT > 0) dmg *= CONFIG.status.markMult;   // MARK: amplifies every hit
     if (this.shield > 0) {                       // Warded: shield absorbs first
@@ -1266,8 +1448,9 @@ class Enemy {
     }
     if (this.hp <= 0) {
       if (this._deathLocked()) { this.hp = 1; }   // scripted-invulnerable boss phase: a blade hit can't kill here either
-      else { this.dead = true; if (this.isBoss && typeof Clipper !== 'undefined') Clipper.stop(); }
+      else this._beginDeath();
     }
+    return Math.max(0, before - Math.max(this.hp, 0));
   }
 
   // additive shim: a uniform damage entrypoint for a symmetric actor-vs-actor collision loop
@@ -2357,6 +2540,90 @@ function chargeTelegraph(ctx, x, cy, hh, dir, k, color) {
 }
 
 // ====================================================================================
+//  BOSS THEATER — the shared ceremony layer every boss speaks through.
+//  BOSSFX mirrors the Echo's fxq (drained generically in game.js): any boss can push
+//  {shake, flash, hitstop, slowmo, zoom, txt, x, y, big, color, quiet} beats.
+// ====================================================================================
+const BOSSFX = {
+  q: [],
+  juice(ev) { this.q.push(ev); },
+};
+
+// a PHASE TURN, made ceremonial: slow-mo + flash + shake + a named banner + rings.
+// Also arms the HP bar's crack-flash (game.js reads boss._phaseFlashT).
+function bossPhaseBeat(boss, title, color) {
+  const c = color || boss.color;
+  BOSSFX.juice({ shake: 10, flash: 0.45, slowmo: 0.5, zoom: 0.055, hitstop: 0.09,
+    banner: title, color: c });
+  try { FX.ring(boss.x, boss.y, 26, c); FX.shockwave(boss.x, boss.y, 12, c, 260, 5); } catch (e) {}
+  boss._phaseFlashT = 0.7;
+}
+
+// a danger LANE — horizontal commitment for charges / sweeping beams.
+function dangerLane(ctx, x, y, w, h, dir, color, k) {
+  ctx.save();
+  const sx = dir >= 0 ? x : x - w;
+  ctx.fillStyle = color; ctx.globalAlpha = 0.07 + 0.13 * k; ctx.fillRect(sx, y, w, h);
+  ctx.strokeStyle = color; ctx.lineWidth = 2 + 2 * k; ctx.globalAlpha = 0.45 + 0.45 * k;
+  ctx.setLineDash([12, 9]); ctx.strokeRect(sx, y, w, h); ctx.setLineDash([]);
+  ctx.restore();
+}
+
+// a shared weapon GLINT: a sharp four-point tell that blooms at the striking tip.
+function weaponGlint(ctx, x, y, color, k) {
+  const r = 5 + 13 * clamp(k, 0, 1);
+  ctx.save(); ctx.translate(x, y); ctx.strokeStyle = color; ctx.globalAlpha = 0.45 + 0.55 * k;
+  ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.moveTo(0, -r); ctx.lineTo(0, r); ctx.stroke();
+  ctx.rotate(Math.PI / 4); ctx.globalAlpha *= 0.55; ctx.beginPath(); ctx.moveTo(-r * 0.55, 0); ctx.lineTo(r * 0.55, 0); ctx.moveTo(0, -r * 0.55); ctx.lineTo(0, r * 0.55); ctx.stroke();
+  ctx.restore();
+}
+
+// TELEGRAPH LANGUAGE 2.0 (shared grammar, promoted from the Echo):
+// a danger COLUMN — the vertical strike/landing zone — with a pulsing ground ring
+function dangerColumn(ctx, x, w, yTop, yGround, color, k) {
+  ctx.save();
+  ctx.fillStyle = color; ctx.globalAlpha = 0.08 + 0.10 * k;
+  ctx.fillRect(x - w / 2, yTop, w, yGround - yTop);
+  const pr = (performance.now() / 500) % 1;
+  ctx.globalAlpha = (0.5 + 0.4 * k) * (1 - pr);
+  ctx.strokeStyle = color; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(x, yGround, (w * 0.55) * (0.4 + pr * 0.6), 9, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+
+// a landing RETICLE (mortars, falling debris): rotating quarter-arcs closing in as k -> 1
+function dangerReticle(ctx, x, y, r, k, color) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.5 + 0.5 * k;
+  const rot = performance.now() / 400, rr = r * (1.4 - 0.4 * k);
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath(); ctx.arc(x, y, rr, rot + i * Math.PI / 2, rot + i * Math.PI / 2 + 0.7); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(x - 6, y); ctx.lineTo(x + 6, y); ctx.moveTo(x, y - 6); ctx.lineTo(x, y + 6); ctx.stroke();
+  ctx.restore();
+}
+
+// the PERIL FLASH — the "this one cannot be parried" tell (crimson diamond + sting).
+// Call perilPing(boss) at the wind-up; the boss's draw calls drawPeril each frame.
+function perilPing(boss) {
+  boss._perilUntil = performance.now() + 600;   // timestamp-based: no tick wiring needed
+  try { SFX.rankup(); } catch (e) {}
+  BOSSFX.juice({ txt: "⚠", x: boss.x, y: boss.y - boss.hh - 30, color: "#e23b3b", quiet: true });
+}
+function drawPeril(ctx, boss) {
+  const left = (boss._perilUntil || 0) - performance.now();
+  if (left <= 0) return;
+  const k = left / 600, s = 13 + (1 - k) * 8;
+  ctx.save();
+  ctx.translate(boss.x, boss.y - boss.hh - 34); ctx.rotate(Math.PI / 4);
+  ctx.globalAlpha = 0.85 * k; ctx.fillStyle = "#e23b3b";
+  ctx.fillRect(-s / 2, -s / 2, s, s);
+  ctx.globalAlpha = k; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+  ctx.strokeRect(-s / 2, -s / 2, s, s);
+  ctx.restore();
+}
+
+// ====================================================================================
 //  BOSS FRAMEWORK — The Warden (Stage 1). HP-gated phases, an attack scheduler, and
 //  arena-effect hooks (floor shockwaves, mortar fire, prohibited zones, platform vaulting,
 //  a fake-death beat, and a ceiling-cling finale). Later bosses follow the same shape.
@@ -2366,6 +2633,7 @@ class Warden extends Enemy {
     super(x, y, CONFIG.boss);
     this.color = CONFIG.colors.boss;
     this.kind = "boss"; this.isBoss = true; this.bossName = "THE WARDEN";
+    this.epithet = "KEEPER OF THE GROUNDS"; this.phaseMarks = [0.65, 0.30]; this.phaseTag = "ON DUTY";
     this.state = "idle"; this.stateT = 0;
     this.atkT = 1.8; this.pendingAtk = "baton";
     this.facing = 1;
@@ -2376,60 +2644,128 @@ class Warden extends Enemy {
     this.ceilDropT = 0;
     this.lungeT = CONFIG.warden.lungeCd;
     this.batonA = -0.6; this.batonPrevA = -0.6; this.batonStrike = 0;
+    this.guardMeter = 0; this.guardDelayT = 0; this.guardBrokenT = 0; this.batonParryCd = 0;
+    this.searchlights = []; this.cages = []; this.trails = []; this.lockdownT = 0; this.lockdownCd = 0;
+    this.mortarTargets = []; this.trailDropT = 0; this._playerRef = null;
+    this.volleyCd = 0; this.volleyTargetY = 0;   // NO SHELTER: the skyward volley answers perch-campers
+    this.stringIdx = 0; this.stringN = 2; this.beatPh = "wind"; this.beatHeavy = false; this.beatParried = false;   // baton strings
   }
   get phase() { const f = this.hp / this.maxHp; return f > 0.65 ? 1 : (f > 0.30 ? 2 : 3); }
+  damageTakenMult() { return this.guardBrokenT > 0 ? CONFIG.warden.guardBreakMult : 1; }
+  tickTimers(dt) {
+    super.tickTimers(dt);
+    if (this.batonParryCd > 0) this.batonParryCd -= dt;
+    if (this.guardBrokenT > 0) {
+      this.guardBrokenT -= dt;
+      this.guardMeter = 1;
+      if (this.guardBrokenT <= 0) this.guardMeter = 0;
+    } else if (this.guardDelayT > 0) this.guardDelayT -= dt;
+    else if (this.guardMeter > 0) this.guardMeter = Math.max(0, this.guardMeter - CONFIG.warden.guardDecay * dt);
+  }
 
-  // animate the baton: raised on a wind-up, slammed through on the strike
+  batonSegment() {
+    const hx = this.x + this.facing * this.hw * 0.4, hy = this.y - 6, L = 58;
+    return { x1: hx, y1: hy, x2: hx + this.facing * Math.cos(this.batonA) * L, y2: hy + Math.sin(this.batonA) * L };
+  }
+  parryBaton(perfect) {
+    if (this.dying || this.batonParryCd > 0 || this.batonStrike <= 0 || this.beatHeavy) return false;
+    this.beatParried = true;   // the string beat that was deflected does not land
+    const Wc = CONFIG.warden;
+    this.batonParryCd = 0.22; this.batonStrike = 0; this.guardDelayT = Wc.guardDecayDelay;
+    this.guardMeter = Math.min(1, this.guardMeter + (perfect ? Wc.guardPerfect : Wc.guardParry));
+    if (this.guardMeter >= 1) {
+      this.guardBrokenT = Wc.guardBreakDur; this.stun = Math.max(this.stun, Wc.guardBreakDur);
+      this.state = "idle"; this.vx = 0;
+      BOSSFX.juice({ banner: "GUARD BROKEN", color: "#e0a326", shake: 11, flash: 0.5, slowmo: 0.55, zoom: 0.07, hitstop: 0.08 });
+      FX.ring(this.x, this.y, 18, "#e0a326"); FX.burst(this.x, this.y, 0, -1, 14, "#e0a326");
+    }
+    return true;
+  }
+
+  _syncZones() { this.zones = this.searchlights.concat(this.cages, this.trails); }
+  _startLockdown() {
+    const Wc = CONFIG.warden;
+    this.lockdownT = Wc.lockdownDur; this.lockdownCd = Wc.lockdownCd;
+    this.cages = [
+      { kind: "cage", x: Wc.cageW / 2, w: Wc.cageW, fullHeight: true, dmg: Wc.zoneTick, tickCd: Wc.zoneTickCd, on: true },
+      { kind: "cage", x: CONFIG.view.w - Wc.cageW / 2, w: Wc.cageW, fullHeight: true, dmg: Wc.zoneTick, tickCd: Wc.zoneTickCd, on: true },
+    ];
+    BOSSFX.juice({ banner: "LOCKDOWN", color: this.color, shake: 7, flash: 0.25, quiet: true });
+    this._syncZones();
+  }
+
+  // animate the baton: raised on a wind-up, slammed through on the strike.
+  // String beats alternate the raise height so the rhythm READS (high-low-high).
   _animBaton(dt) {
     let wt = -0.45, k = 9;
     if (this.batonStrike > 0) { this.batonStrike -= dt; wt = 0.85; k = 30; }
+    else if (this.state === "string" && this.beatPh === "wind") { wt = this.stringIdx % 2 ? -1.05 : -1.65; k = 10; }
     else if (this.state === "windup") { wt = this.pendingAtk === "mortar" ? -1.7 : -1.45; k = 8; }
     else if (this.state === "lunge") { wt = 0.2; k = 14; }
     this.batonPrevA = this.batonA;
     this.batonA = lerp(this.batonA, wt, clamp(k * dt, 0, 1));
   }
 
-  _shock(projectiles, dir, footY) {
-    const Wc = CONFIG.warden;
-    const p = new Projectile(this.x + dir * this.hw, footY - Wc.shockR, dir * Wc.shockSpeed, 0);
-    p.shock = true; p.r = Wc.shockR; p.dmg = Wc.shockDmg; p.life = 2.0;
-    projectiles.push(p);
-  }
-  _mortar(player, projectiles) {
+  _mortar(player, projectiles, landY) {
     const Wc = CONFIG.warden, v = Wc.mortarSpeed, g = Wc.mortarGravity;
-    const t = (2 * v) / g, baseVx = (player.x - this.x) / t;   // ballistic so the middle shot lands on you
-    for (let i = -1; i <= 1; i++) {
-      const p = new Projectile(this.x, this.y - this.hh, baseVx + i * 130, -v);
-      p.gravity = g; p.dmg = Wc.mortarDmg; p.r = 11;
+    const t = (2 * v) / g;
+    const targets = this.mortarTargets.length ? this.mortarTargets : [-1, 0, 1].map((i) => clamp(player.x + i * 180, 60, CONFIG.view.w - 60));
+    for (const tx of targets) {
+      const p = new Projectile(this.x, this.y - this.hh, (tx - this.x) / t, -v);
+      p.gravity = g; p.dmg = Wc.mortarDmg; p.r = 11; p.owner = this; p.tint = this.color;
+      p.landingX = tx; p.landingY = landY != null ? landY : CONFIG.world.groundY;   // volleys burst at PLATFORM height
+      p.landingT = t; p.groundImpact = true; p.bossAttack = "mortar";
       projectiles.push(p);
     }
+    this.mortarTargets = [];
   }
 
   _enterPhase(ph, platforms) {
     const Wc = CONFIG.warden;
     if (ph === 2) {
-      this.zones = [];
-      for (let i = 0; i < Wc.zoneCount; i++) this.zones.push({ x: 240 + Math.random() * (CONFIG.view.w - 480) });
-      this.zoneShiftT = Wc.zoneShift;
+      this.phaseTag = "UNCHAINED";
+      this.searchlights = [];
+      for (let i = 0; i < Wc.zoneCount; i++) this.searchlights.push({ kind: "searchlight", x: 260 + i * (CONFIG.view.w - 520) / Math.max(1, Wc.zoneCount - 1),
+        w: Wc.zoneW * 0.72, phase: i * 2.1, fullHeight: true, dmg: Wc.zoneTick, tickCd: Wc.zoneTickCd, on: true });
+      this._startLockdown();
+      bossPhaseBeat(this, "THE WARDEN UNCHAINS", this.color);
     } else if (ph === 3) {
-      this.zones = [];
+      this.phaseTag = "NOTHING LEFT"; this.searchlights = []; this.cages = []; this.trails = []; this._syncZones();
       this.state = "fakedeath"; this.stateT = 2.2;   // The Fake: slump, then rise
+      bossPhaseBeat(this, "NOTHING LEFT TO GUARD", CONFIG.colors.charger);
       const ow = platforms.filter((p) => p.oneway);   // rip a platform out of the arena
       if (ow.length) { const idx = platforms.indexOf(ow[Math.floor(Math.random() * ow.length)]); if (idx >= 0) platforms.splice(idx, 1); }
     }
   }
 
-  _deathLocked() { return this.state === "fakedeath"; }   // P3 fake-death: don't let a hit/DoT skip the ceiling phase
+  _deathLocked() { return this.phaseMarker < 3 || this.state === "fakedeath"; }   // a huge hit cannot skip the graduation finale
   update(dt, platforms, player, projectiles) {
     this.tickTimers(dt);
     this._animBaton(dt);
     const Wc = CONFIG.warden, ph = this.phase;
+    this._playerRef = player;
     this.facing = Math.sign(player.x - this.x) || this.facing;
     if (ph !== this.phaseMarker) { this._enterPhase(ph, platforms); this.phaseMarker = ph; }
 
-    if (this.zones.length) {   // prohibited zones drift to new spots
-      this.zoneShiftT -= dt;
-      if (this.zoneShiftT <= 0) { for (const z of this.zones) z.x = 240 + Math.random() * (CONFIG.view.w - 480); this.zoneShiftT = Wc.zoneShift; }
+    // Searchlights sweep instead of teleporting. Lockdown bars and burning dive seams
+    // share the generic zone contract consumed by game.js.
+    if (this.searchlights.length) {
+      for (let i = 0; i < this.searchlights.length; i++) {
+        const z = this.searchlights[i];
+        z.x = clamp(CONFIG.view.w * 0.5 + Math.sin(this.aliveT * (0.48 + i * 0.07) + z.phase) * CONFIG.view.w * 0.34,
+          z.w / 2, CONFIG.view.w - z.w / 2);
+      }
+    }
+    if (this.lockdownT > 0) { this.lockdownT -= dt; if (this.lockdownT <= 0) this.cages = []; }
+    else if (ph === 2) { this.lockdownCd -= dt; if (this.lockdownCd <= 0) this._startLockdown(); }
+    for (const z of this.trails) z.life -= dt;
+    this.trails = this.trails.filter((z) => z.life > 0);
+    this._syncZones();
+
+    if (this.introT > 0) {
+      const ip = 1 - this.introT / ((CONFIG.bossTheater && CONFIG.bossTheater.introDur) || 1.4);
+      if (ip > 0.66 && !this._introBeat) { this._introBeat = true; FX.shockwave(this.x, this.y + this.hh, 10, this.color, 180, 4); }
+      this.vx = lerp(this.vx, 0, clamp(8 * dt, 0, 1)); this.integrate(dt, platforms); return;
     }
 
     if (this.state === "fakedeath") {
@@ -2443,31 +2779,103 @@ class Warden extends Enemy {
     // ---- grounded phases (1 & 2) ----
     const footY = this.y + this.hh, dist = Math.abs(player.x - this.x);
     const sp = CONFIG.boss.speed * (1 + (ph - 1) * 0.35);
-    if (this.state === "windup") {
+    if (this.state === "batonlunge") {
+      // SHIELD-BATON LUNGE — plant, then hop-strike forward to close on a kiter,
+      // flowing straight into a string on arrival
+      if (this.beatPh === "wind") {
+        this.vx = lerp(this.vx, 0, clamp(8 * dt, 0, 1)); this.stateT -= dt;
+        if (this.stateT <= 0) { this.beatPh = "go"; this.vx = this.facing * Wc.lungeSpeed; this.vy = -420; this.onGround = false; this.batonStrike = 0.4; }
+      } else {
+        this.x += this.vx * dt; this.vx = lerp(this.vx, this.facing * Wc.lungeSpeed * 0.4, clamp(3 * dt, 0, 1));
+        if (Math.abs(player.x - this.x) < this.hw + player.hw + 20 && Math.abs(player.y - this.y) < 90 && !player.invulnerable) player.takeDamage(Wc.lungeDmg, this.x, this);
+        if (this.onGround || this.x <= this.hw + 4 || this.x >= CONFIG.view.w - this.hw - 4) {
+          this.x = clamp(this.x, this.hw + 4, CONFIG.view.w - this.hw - 4);
+          this.state = "string"; this.stringIdx = 0; this.stringN = ph >= 2 ? 3 : 2; this.beatPh = "wind"; this.stateT = Wc.stringWind; this.beatHeavy = false; this.beatParried = false;
+        }
+      }
+      this.integrate(dt, platforms); return;
+    }
+    if (this.state === "string") {
+      // BATON STRINGS — the posture duel. Each beat: a wind (glint), then an
+      // OPEN deflect window (batonStrike), then the swing lands unless it was
+      // parried inside the window. P2's finisher beat is unparryable (peril).
+      this.vx = lerp(this.vx, this.facing * sp * 1.35, clamp(4 * dt, 0, 1));
+      this.stateT -= dt;
+      if (this.beatPh === "wind" && this.stateT <= 0) {
+        this.beatPh = "open"; this.stateT = Wc.parryWin;
+        this.batonStrike = Wc.parryWin + 0.05; this.beatParried = false;
+        try { SFX.swing(2200); } catch (e) {}   // the beat's whoosh
+      } else if (this.beatPh === "open" && this.stateT <= 0) {
+        if (!this.beatParried && Math.abs(player.x - this.x) < Wc.stringRange * 0.72 &&
+            Math.abs(player.y - this.y) < 95 && !player.invulnerable) {
+          player.takeDamage(Wc.stringDmg * (this.beatHeavy ? 1.5 : 1), this.x, this);
+          FX.burst(player.x, player.y, this.facing, -0.3, 7, this.color);
+          if (this.beatHeavy) { player.vx = this.facing * Wc.bashKnock * 0.85; player.vy = -280; }
+        }
+        this.stringIdx++;
+        if (this.stringIdx >= this.stringN) {
+          this.state = "idle"; this.beatHeavy = false;
+          this.atkT = Wc.batonCd / (1 + (ph - 1) * 0.3);
+        } else {
+          this.beatPh = "wind"; this.stateT = Wc.stringWind * (0.8 + Math.random() * 0.45);   // the rhythm varies — read it
+          this.beatHeavy = this.stringIdx === this.stringN - 1 && ph >= 2;
+          if (this.beatHeavy) perilPing(this);
+        }
+      }
+    } else if (this.state === "windup") {
       this.vx = lerp(this.vx, 0, clamp(8 * dt, 0, 1)); this.stateT -= dt;
       if (this.stateT <= 0) { this._fire(player, projectiles, footY, Wc); this.state = "idle"; this.atkT = Wc.batonCd / (1 + (ph - 1) * 0.3); }
     } else {
       this.vx = lerp(this.vx, this.facing * sp, clamp(3 * dt, 0, 1));
       this.atkT -= dt;
-      if (this.atkT <= 0) {
-        this.pendingAtk = dist < Wc.bashRange ? "bash" : (Math.random() < 0.5 ? "baton" : "mortar");
-        this.state = "windup"; this.stateT = Wc.batonWindup;
+      this.volleyCd -= dt;
+      // NO SHELTER: camp a perch too long and the volley comes for it — three
+      // shells onto YOUR platform, reticles first
+      if (this.campT > Wc.campAfter && this.volleyCd <= 0 && this.campPlat) {
+        const pl = this.campPlat;
+        this.pendingAtk = "volley"; this.state = "windup"; this.stateT = Wc.batonWindup * 1.25;
+        this.mortarTargets = [-1, 0, 1].map((i) => clamp(pl.x + pl.w / 2 + i * Math.min(95, pl.w / 3), pl.x + 16, pl.x + pl.w - 16));
+        this.volleyTargetY = pl.y;
+        this.volleyCd = Wc.volleyCd; this.campT = 1.2;
+        BOSSFX.juice({ banner: "SKYWARD VOLLEY", color: this.color, shake: 6, quiet: true });
       }
-      if (ph === 2 && this.onGround && Math.random() < 0.5 * dt) { this.vy = -1150; this.onGround = false; }   // vault to a platform
+      else if (this.atkT <= 0) {
+        // his kit is MELEE + ARTILLERY now: in reach he opens a string; at mid
+        // range he LUNGES to close on a kiter; far out the mortars arc in
+        if (dist < Wc.stringRange) {
+          this.state = "string"; this.stringIdx = 0; this.stringN = ph >= 2 ? 3 : 2;
+          this.beatPh = "wind"; this.stateT = Wc.stringWind; this.beatHeavy = false; this.beatParried = false;
+        } else if (dist < Wc.lungeRange && Math.random() < 0.55) {
+          this.state = "batonlunge"; this.beatPh = "wind"; this.stateT = Wc.lungeWind;
+          this.facing = Math.sign(player.x - this.x) || this.facing;
+        } else {
+          this.pendingAtk = "mortar"; this.state = "windup"; this.stateT = Wc.batonWindup;
+          this.mortarTargets = [-1, 0, 1].map((i) => clamp(player.x + i * 180, 60, CONFIG.view.w - 60));
+        }
+      }
+      // vault: random footwork in P2 — but a camping player makes it TARGETED
+      // (he lands on the perch, baton first)
+      if (ph === 2 && this.onGround && Math.random() < (this.campT > 2 ? 1.2 : 0.5) * dt) {
+        this.vy = -1150; this.onGround = false;
+        if (this.campT > 2 && this.campPlat) this.vx = (this.campPlat.x + this.campPlat.w / 2 - this.x) * 1.1;
+      }
     }
     this.integrate(dt, platforms);
   }
 
+  // artillery only — his melee lives in the string state now (no ground waves)
   _fire(player, projectiles, footY, Wc) {
-    if (this.pendingAtk === "mortar") this._mortar(player, projectiles);
-    else if (this.pendingAtk === "bash") {
-      this._shock(projectiles, this.facing, footY);
-      if (Math.abs(player.x - this.x) < Wc.bashRange + 40 && !player.invulnerable) {
-        player.vx = (Math.sign(player.x - this.x) || 1) * Wc.bashKnock; player.vy = -300;
-      }
-    } else { this._shock(projectiles, this.facing, footY); if (this.phase >= 2) this._shock(projectiles, -this.facing, footY); }
-    this.batonStrike = 0.18;   // snap the baton through on the strike
+    if (this.pendingAtk === "volley") this._mortar(player, projectiles, this.volleyTargetY);
+    else this._mortar(player, projectiles);
+    this.batonStrike = 0.18;   // the launch gesture still snaps the baton (parry it for posture)
     if (typeof SFX !== "undefined" && SFX.ctx && SFX.slam) SFX.slam();
+  }
+
+  onProjectileGroundImpact(p) {
+    const col = p.bossAttack === "mortar" ? this.color : CONFIG.colors.charger;
+    FX.explode(p.x, CONFIG.world.groundY, col, p.bossAttack === "mortar" ? 0.8 : 0.55);
+    const pl = this._playerRef;
+    if (pl && Math.abs(pl.x - p.x) < 62 + pl.hw && pl.y + pl.hh > CONFIG.world.groundY - 95) pl.takeDamage(p.dmg || CONFIG.warden.debrisDmg, p.x, this);
   }
 
   _ceiling(dt, player, projectiles, Wc) {
@@ -2486,6 +2894,12 @@ class Warden extends Enemy {
     }
     if (this.state === "lunge") {                 // committed diagonal dive toward the locked spot
       this.x += this.vx * dt; this.y += this.vy * dt;
+      this.trailDropT -= dt;
+      if (this.trailDropT <= 0) {
+        this.trailDropT = 0.11;
+        this.trails.push({ kind: "trail", x: this.x, w: 82, life: Wc.trailLife, dmg: Wc.zoneTick, tickCd: Wc.zoneTickCd, on: true });
+        FX.ember(this.x, this.y, CONFIG.colors.charger);
+      }
       const gy = CONFIG.world.groundY;
       if (this.x <= this.hw + 4 || this.x >= CONFIG.view.w - this.hw - 4 || this.y >= gy - this.hh) {
         this.y = Math.min(this.y, gy - this.hh); this.state = "idle"; this.lungeT = Wc.lungeCd;
@@ -2496,6 +2910,7 @@ class Warden extends Enemy {
     if (this.lungeT <= 0) {                        // commit: lock the target now, dive after a readable wind-up
       this.state = "lungewind"; this.lungeWT = Wc.lungeWindup || 0.5;
       this.diveTX = clamp(player.x, this.hw, CONFIG.view.w - this.hw); this.diveTY = player.y;
+      perilPing(this); this.trailDropT = 0;
       return;
     }
     // glide along the ceiling toward the player
@@ -2503,10 +2918,14 @@ class Warden extends Enemy {
     this.vx = lerp(this.vx, (player.x - this.x) * 1.1, clamp(1.5 * dt, 0, 1));
     this.x = clamp(this.x + this.vx * dt, this.hw, CONFIG.view.w - this.hw);
     this.ceilDropT -= dt;
-    if (this.ceilDropT <= 0) {                    // drop shock pulses to the floor below
-      const gy = CONFIG.world.groundY;
-      for (const d of [-1, 1]) { const p = new Projectile(this.x, gy - Wc.shockR, d * Wc.shockSpeed * 0.8, 0); p.shock = true; p.r = Wc.shockR; p.dmg = Wc.shockDmg; p.life = 1.6; projectiles.push(p); }
-      FX.ring(this.x, gy, 12, CONFIG.colors.slam);
+    if (this.ceilDropT <= 0) {                    // marked ceiling debris: read the landing, then move
+      for (const off of [-150, 0, 150]) {
+        const tx = clamp(player.x + off, 50, CONFIG.view.w - 50);
+        const p = new Projectile(tx, 36, 0, 80);
+        p.gravity = Wc.debrisGravity; p.dmg = Wc.debrisDmg; p.r = 13; p.owner = this;
+        p.tint = CONFIG.colors.charger; p.landingX = tx; p.landingY = CONFIG.world.groundY;
+        p.landingT = 0.82; p.groundImpact = true; p.bossAttack = "debris"; projectiles.push(p);
+      }
       this.ceilDropT = Wc.ceilDropCd;
     }
   }
@@ -2514,13 +2933,21 @@ class Warden extends Enemy {
   draw(ctx) {
     const x = this.x - this.hw, y = this.y - this.hh, w = this.hw * 2, h = this.hh * 2;
     const dim = this.state === "fakedeath";
+    ctx.save();
+    if (this.dying) {
+      ctx.translate(this.x, this.y + this.hh); ctx.rotate(-this.facing * this.deathP * 0.72);
+      ctx.scale(1, 1 - this.deathP * 0.28); ctx.translate(-this.x, -(this.y + this.hh));
+    }
     ctx.fillStyle = this.flash > 0 ? "#fff" : (dim ? "#7a1020" : this.color);
     ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = THEME.ink; ctx.lineWidth = 4; ctx.strokeRect(x, y, w, h);
     // animated baton (raised on wind-up, slammed through on strike; ignites crimson in P3)
     {
       const hx = this.x + this.facing * this.hw * 0.4, hy = this.y - 6, L = 58;
-      const a = this.batonA, tx = hx + this.facing * Math.cos(a) * L, ty = hy + Math.sin(a) * L;
+      const introP = this.introT > 0 ? clamp(1 - this.introT / ((CONFIG.bossTheater && CONFIG.bossTheater.introDur) || 1.4), 0, 1) : -1;
+      let a = this.dying ? lerp(this.batonA, 1.5, this.deathP) : this.batonA;
+      if (introP >= 0) a = introP < 0.62 ? lerp(-0.45, -1.55, introP / 0.62) : lerp(-1.55, 0.82, (introP - 0.62) / 0.38);
+      const tx = hx + this.facing * Math.cos(a) * L, ty = hy + Math.sin(a) * L;
       if (!dim && Math.abs(this.batonA - this.batonPrevA) > 0.06) {   // swoosh
         ctx.fillStyle = this.phase >= 3 ? CONFIG.colors.charger : CONFIG.colors.slam; ctx.globalAlpha = 0.3;
         ctx.beginPath(); ctx.moveTo(hx, hy);
@@ -2542,10 +2969,30 @@ class Warden extends Enemy {
     // wind-up telegraph
     if (this.state === "windup") {
       const gy = this.y + this.hh;
+      const wk = 1 - clamp(this.stateT / (CONFIG.warden.batonWindup || 0.5), 0, 1);
       ctx.strokeStyle = CONFIG.colors.slam; ctx.globalAlpha = 0.65; ctx.lineWidth = 4; ctx.setLineDash([8, 6]);
-      if (this.pendingAtk === "mortar") { ctx.beginPath(); ctx.arc(this.x, this.y - this.hh - 12, 16, 0, Math.PI * 2); ctx.stroke(); }
+      if (this.pendingAtk === "mortar") {
+        ctx.beginPath(); ctx.arc(this.x, this.y - this.hh - 12, 16, 0, Math.PI * 2); ctx.stroke();
+        { const ry = this.pendingAtk === "volley" ? this.volleyTargetY - 3 : CONFIG.world.groundY - 3;
+          for (const tx of this.mortarTargets) dangerReticle(ctx, tx, ry, 28, wk, this.color); }
+      }
+      else if (this.pendingAtk === "heavy") dangerLane(ctx, this.x, gy - 76, CONFIG.view.w, 82, this.facing, CONFIG.colors.charger, wk);
       else { ctx.beginPath(); ctx.moveTo(this.x, gy - 2); ctx.lineTo(this.x + this.facing * 210, gy - 2); ctx.stroke(); }
       ctx.setLineDash([]); ctx.globalAlpha = 1;
+      const bs = this.batonSegment(); weaponGlint(ctx, bs.x2, bs.y2, this.pendingAtk === "heavy" ? CONFIG.colors.charger : CONFIG.colors.slam, wk);
+    }
+    // string beats: the baton glints through every wind — crimson when the
+    // finisher (unparryable) is coming, gold when the beat can be deflected
+    if (this.state === "string" && this.beatPh === "wind") {
+      const sk = 1 - clamp(this.stateT / (CONFIG.warden.stringWind || 0.3), 0, 1);
+      const bs2 = this.batonSegment();
+      weaponGlint(ctx, bs2.x2, bs2.y2, this.beatHeavy ? CONFIG.colors.charger : "#e0a326", sk);
+    }
+    // SHIELD-BATON LUNGE telegraph: the lane he's about to hop-strike down
+    if (this.state === "batonlunge" && this.beatPh === "wind") {
+      const lk = 1 - clamp(this.stateT / (CONFIG.warden.lungeWind || 0.42), 0, 1);
+      dangerLane(ctx, this.x, this.y - this.hh, CONFIG.view.w, this.hh * 2, this.facing, this.color, lk * 0.7);
+      weaponGlint(ctx, this.x + this.facing * (this.hw + 12), this.y - 8, "#e0a326", lk);
     }
     // ceiling-dive telegraph: a marked line from the cling to the spot it locked onto
     if (this.state === "lungewind") {
@@ -2556,8 +3003,11 @@ class Warden extends Enemy {
       ctx.fillStyle = CONFIG.colors.charger; ctx.globalAlpha = 0.3 + 0.6 * k;   // target reticle
       ctx.beginPath(); ctx.arc(this.diveTX, this.diveTY, 16 - 8 * k, 0, Math.PI * 2); ctx.stroke();
       ctx.globalAlpha = 1;
+      dangerColumn(ctx, this.diveTX, 92, 30, CONFIG.world.groundY, CONFIG.colors.charger, k);
     }
+    drawPeril(ctx, this);
     this.drawHpBar && this.drawHpBar(ctx);   // (boss HP also shown in the HUD)
+    ctx.restore();
   }
 }
 
@@ -2566,59 +3016,194 @@ class Colossus extends Enemy {
   constructor(x, y) {
     super(x, y, CONFIG.colossus);
     this.color = CONFIG.colors.armored;
-    this.kind = "boss"; this.isBoss = true; this.bossName = "THE IRON COLOSSUS";
+    this.kind = "boss"; this.isBoss = true; this.bossName = "IRON COLOSSUS";
+    this.epithet = "THE CONTAINMENT ENGINE"; this.phaseMarks = [0.60, 0.25]; this.phaseTag = "SEALED";
+    this.blockStyle = "plate";   // blocked hits CLANG off fortress plating (not an Armored reskin)
     this.state = "idle"; this.stateT = 0; this.atkT = 2.2; this.pendingAtk = "sweep";
     this.facing = 1; this.exposed = false; this.shielded = true;
     this.phaseMarker = 1;
     this.zones = []; this.zoneColor = CONFIG.colors.slam;   // phase-3 hot floor panels (reuses the boss-zone system)
     this.crossT = 0;
+    this.ventT = 0; this.ventX = this.x; this.coreOpenT = 0; this.shieldEmbedT = 0;
+    this.panelIdx = -1; this.panelStepT = 0; this.meltdownCd = CONFIG.colossus.meltdownCd;
+    this.attackIdx = 0; this._playerRef = null;
+    this.chargeStop = false; this.smashTX = 0; this.grabCd = 0;   // bruiser kit
   }
   get phase() { const f = this.hp / this.maxHp; return f > 0.6 ? 1 : (f > 0.25 ? 2 : 3); }
   get guardSide() { return this.facing; }
   // phase-1 front shield: only an aerial hit (you striking from above) gets through
   blocks() { return this.shielded && !this.exposed; }
-  damageTakenMult() { return this.phase === 3 ? 1.35 : 1; }   // exposed core = vulnerable
+  blocksDamage(context) { return this.shielded && !(context && context.aerial); }
+  damageTakenMult() { return this.coreOpenT > 0 ? CONFIG.colossus.coreOpenMult : (this.phase === 3 ? 1.35 : 1); }
+  tickTimers(dt) {
+    super.tickTimers(dt);
+    if (this.ventT > 0) this.ventT -= dt;
+    if (this.coreOpenT > 0) this.coreOpenT -= dt;
+    if (this.shieldEmbedT > 0) this.shieldEmbedT -= dt;
+    if (this._playerRef) this._applyVent(dt, this._playerRef);
+  }
+  _startVent() {
+    this.ventT = CONFIG.colossus.ventDur;
+    this.ventX = clamp(this.x - this.facing * (this.hw + 46), CONFIG.colossus.ventW / 2, CONFIG.view.w - CONFIG.colossus.ventW / 2);
+  }
+  _applyVent(dt, player) {
+    if (this.ventT <= 0 || !player) return;
+    const C = CONFIG.colossus;
+    if (Math.abs(player.x - this.ventX) <= C.ventW / 2 + player.hw && player.y < CONFIG.world.groundY && player.y > 80) {
+      player.vy = Math.max(-1250, player.vy - C.ventLift * dt);
+      player.onGround = false;
+    }
+  }
 
   _shock(projectiles, dir) {
+    // QUAKES — the earthquake is HIS language alone now: taller, slower tremor
+    // columns (see the quake draw in projectile.js), nothing like the old ripples
     const C = this.cfg, footY = this.y + this.hh;
-    const p = new Projectile(this.x + dir * this.hw * 0.7, footY - C.shockR, dir * C.shockSpeed, 0);
-    p.shock = true; p.r = C.shockR; p.dmg = C.shockDmg; p.life = 2.4;
+    const p = new Projectile(this.x + dir * this.hw * 0.7, footY - C.shockR, dir * C.shockSpeed * (C.quakeSpeedMult || 0.78), 0);
+    p.shock = true; p.quake = true; p.r = C.shockR * (C.quakeRMult || 1.25); p.dmg = C.shockDmg; p.life = 2.8;
+    p.owner = this; p.tint = CONFIG.colors.armoredShield;
     projectiles.push(p);
+    FX.shockwave(p.x, footY, 8, CONFIG.colors.armoredShield, 130, 4);   // the ground jolts at the epicentre
   }
   _throwShield(projectiles) {
     const C = this.cfg;
-    const p = new Projectile(this.hw, C.sweeperY, C.sweeperSpeed, 0);
-    p.shock = true; p.sweeper = true; p.r = 22; p.dmg = C.sweeperDmg; p.bounces = 999; p.life = 60;
+    const p = new Projectile(this.x + this.facing * (this.hw + 12), this.y, this.facing * C.sweeperSpeed, 0);
+    p.shock = true; p.sweeper = true; p.sweeperStyle = "saw"; p.r = 22; p.dmg = C.sweeperDmg; p.bounces = 999; p.life = 60;
+    p.owner = this; p.tint = CONFIG.colors.armoredShield; p.maxCrossings = C.shieldCrossings; p.embeddedLife = C.shieldEmbedDur;
     projectiles.push(p);
     FX.ring(this.x, this.y, 20, CONFIG.colors.armoredShield);
   }
   _crossBurst(projectiles) {
     const C = this.cfg;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]]) {
       const p = new Projectile(this.x, this.y, dx * C.crossSpeed, dy * C.crossSpeed);
-      p.dmg = C.crossDmg; p.r = 12; projectiles.push(p);
+      p.dmg = C.crossDmg; p.r = 12; p.tint = CONFIG.colors.armoredShield; p.owner = this; projectiles.push(p);
     }
     FX.ring(this.x, this.y, 16, CONFIG.colors.boss);
   }
   _enterPhase(ph, projectiles) {
-    if (ph === 2) { this.shielded = false; this._throwShield(projectiles); }
+    if (ph === 2) {
+      this.shielded = false; this.phaseTag = "BREACHED"; this._throwShield(projectiles); this.crossT = 0.8;
+      bossPhaseBeat(this, "THE SHIELD FALLS", CONFIG.colors.armoredShield);
+    }
     else if (ph === 3) {
       const C = this.cfg; this.zones = [];
-      for (let i = 0; i < C.panelCount; i++) this.zones.push({ x: 220 + i * (CONFIG.view.w - 440) / (C.panelCount - 1) });
-      this.crossT = 1.6;
+      for (let i = 0; i < C.panelCount; i++) this.zones.push({ kind: "panel", x: 220 + i * (CONFIG.view.w - 440) / (C.panelCount - 1), w: CONFIG.warden.zoneW, on: false, arming: i === 0,
+        dmg: CONFIG.warden.zoneTick, tickCd: CONFIG.warden.zoneTickCd });
+      this.panelIdx = -1; this.panelStepT = 0.35; this.meltdownCd = C.meltdownCd * 0.65; this.phaseTag = "MELTDOWN";
+      bossPhaseBeat(this, "THE CORE IGNITES", CONFIG.colors.slam);
     }
+  }
+
+  _debris(projectiles) {
+    const C = this.cfg;
+    for (const tx of [this.x - 170, this.x, this.x + 170]) {
+      const x = clamp(tx, 55, CONFIG.view.w - 55), p = new Projectile(x, 32, 0, 50);
+      p.gravity = C.debrisGravity; p.dmg = C.debrisDmg; p.r = 14; p.owner = this; p.tint = CONFIG.colors.armoredShield;
+      p.landingX = x; p.landingY = CONFIG.world.groundY; p.landingT = 0.86; p.groundImpact = true; p.bossAttack = "debris";
+      projectiles.push(p);
+    }
+  }
+  _stagger(projectiles) {
+    const C = this.cfg;
+    this.state = "recover"; this.stateT = C.staggerDur; this.stun = C.staggerDur;
+    this.coreOpenT = C.coreOpenDur; this._startVent(); this._debris(projectiles);
+    BOSSFX.juice({ banner: "STAGGERED", color: CONFIG.colors.armoredShield, shake: 12, flash: 0.4, slowmo: 0.45, zoom: 0.08, hitstop: 0.08 });
+    FX.shockwave(this.x, this.y + this.hh, 14, CONFIG.colors.armoredShield, 230, 6);
+  }
+  onShieldEmbedded() {
+    this.shieldEmbedT = this.cfg.shieldEmbedDur; this.stun = Math.max(this.stun, this.cfg.shieldEmbedDur * 0.55);
+    BOSSFX.juice({ banner: "BREACH THE FORTRESS", color: CONFIG.colors.armoredShield, shake: 7, zoom: 0.04, quiet: true });
+  }
+  onProjectileGroundImpact(p) {
+    FX.explode(p.x, CONFIG.world.groundY, CONFIG.colors.armoredShield, 0.55);
+    const pl = this._playerRef;
+    if (pl && Math.abs(pl.x - p.x) < 64 + pl.hw && pl.y + pl.hh > CONFIG.world.groundY - 100) pl.takeDamage(p.dmg || this.cfg.debrisDmg, p.x, this);
   }
   update(dt, platforms, player, projectiles) {
     this.tickTimers(dt);
     const C = this.cfg, ph = this.phase;
+    this._playerRef = player;
     this.facing = Math.sign(player.x - this.x) || this.facing;
     this.exposed = player.y < this.y - this.hh * 0.15;   // attacking from above
     if (ph !== this.phaseMarker) { this._enterPhase(ph, projectiles); this.phaseMarker = ph; }
-    if (ph === 3) { this.crossT -= dt; if (this.crossT <= 0) { this._crossBurst(projectiles); this.crossT = C.crossCd; } }
+    if (this.introT > 0) {
+      const ip = 1 - this.introT / ((CONFIG.bossTheater && CONFIG.bossTheater.introDur) || 1.4);
+      if (ip > 0.64 && !this._introBeat) { this._introBeat = true; this._shock(projectiles, 1); this._shock(projectiles, -1); }
+      this.vx = 0; this.integrate(dt, platforms); return;
+    }
+    if (ph === 2) { this.crossT -= dt; if (this.crossT <= 0) { this._crossBurst(projectiles); this.crossT = C.crossCd; } }
+    if (ph === 3) {
+      this.panelStepT -= dt;
+      if (this.panelStepT <= 0) {
+        this.panelIdx = (this.panelIdx + 1) % this.zones.length;
+        for (let i = 0; i < this.zones.length; i++) { this.zones[i].on = i === this.panelIdx; this.zones[i].arming = i === (this.panelIdx + 1) % this.zones.length; }
+        this.panelStepT = C.panelStep;
+      }
+      this.meltdownCd -= dt;
+      if (this.meltdownCd <= 0 && this.state === "idle") {
+        this.state = "meltdown"; this.stateT = C.meltdownWindup; this.meltdownCd = C.meltdownCd; perilPing(this);
+      }
+    }
 
-    if (this.state === "charge") {                    // shoulder charge crosses the arena (no gravity)
+    if (this.state === "meltdown") {
+      this.stateT -= dt;
+      const k = 1 - clamp(this.stateT / C.meltdownWindup, 0, 1), gy = CONFIG.world.groundY - this.hh;
+      this.x = lerp(this.x, CONFIG.view.w / 2, clamp(5 * dt, 0, 1)); this.y = gy - Math.sin(k * Math.PI) * 220;
+      this.onGround = false;
+      if (this.stateT <= 0) {
+        this.x = CONFIG.view.w / 2; this.y = gy; this._shock(projectiles, 1); this._shock(projectiles, -1);
+        this._shock(projectiles, 1); this._shock(projectiles, -1);
+        for (const z of this.zones) { z.on = true; z.arming = false; }
+        FX.explode(this.x, this.y + this.hh, CONFIG.colors.slam, 1.6);
+        BOSSFX.juice({ banner: "MELTDOWN SLAM", color: CONFIG.colors.slam, shake: 14, flash: 0.55, slowmo: 0.45, zoom: 0.09 });
+        this.state = "recover"; this.stateT = 0.9;
+      }
+      return;
+    }
+
+    if (this.state === "charge") {                    // shoulder charge (no gravity)
       this.x += this.vx * dt;
-      if (this.x <= this.hw + 4 || this.x >= CONFIG.view.w - this.hw - 4) { this.state = "recover"; this.stateT = 1.0; this.stun = 0.7; }
+      // SMART CHARGE: most charges STOP SHORT with a shoulder-check shock once
+      // they blow past the player — only a charge baited into a WALL self-staggers
+      if (this.chargeStop && Math.sign(player.x - this.x) !== Math.sign(this.vx)) {
+        this.vx = 0; this._shock(projectiles, this.facing);
+        FX.shockwave(this.x, this.y + this.hh, 10, CONFIG.colors.armoredShield, 200, 5);
+        this.state = "recover"; this.stateT = 0.5; this.atkT = this.cfg.atkCd;
+        return;
+      }
+      if (this.x <= this.hw + 4 || this.x >= CONFIG.view.w - this.hw - 4) { this.x = clamp(this.x, this.hw + 4, CONFIG.view.w - this.hw - 4); this._stagger(projectiles); }
+      return;
+    }
+    if (this.state === "smashwind") {                 // OVERHEAD SMASH: rise, track the player's x, then plunge
+      this.stateT -= dt;
+      this.x = lerp(this.x, clamp(this.smashTX, this.hw, CONFIG.view.w - this.hw), clamp(3 * dt, 0, 1));
+      this.y = lerp(this.y, CONFIG.world.groundY - this.hh - 170, clamp(5 * dt, 0, 1)); this.onGround = false;
+      if (this.stateT <= 0) { this.state = "smash"; this.vy = 2600; }
+      return;
+    }
+    if (this.state === "smash") {
+      this.y += this.vy * dt; this.vy += 2600 * dt;
+      if (this.y >= CONFIG.world.groundY - this.hh) {
+        this.y = CONFIG.world.groundY - this.hh; this.onGround = true;
+        this._shock(projectiles, 1); this._shock(projectiles, -1);
+        if (Math.abs(player.x - this.x) < this.cfg.smashRange && player.y > this.y - 40 && !player.invulnerable) player.takeDamage(this.cfg.smashDmg, this.x, this);
+        FX.shockwave(this.x, this.y + this.hh, 16, CONFIG.colors.slam, 300, 7);
+        BOSSFX.juice({ shake: 13, flash: 0.4, slowmo: 0.4, zoom: 0.07, hitstop: 0.06 });
+        this.state = "recover"; this.stateT = 0.7; this.atkT = this.cfg.atkCd;
+      }
+      return;
+    }
+    if (this.state === "grab") {                      // SEISMIC BACKHAND — the point-blank punish
+      this.stateT -= dt;
+      if (this.stateT <= 0) {
+        if (Math.abs(player.x - this.x) < this.cfg.grabRange + player.hw && Math.abs(player.y - this.y) < this.hh && !player.invulnerable) {
+          player.takeDamage(this.cfg.grabDmg, this.x, this);
+          player.vx = (Math.sign(player.x - this.x) || 1) * this.cfg.grabKnock; player.vy = -360;
+        }
+        FX.burst(this.x + this.facing * this.hw, this.y, this.facing, -0.2, 10, CONFIG.colors.armoredShield);
+        this.state = "recover"; this.stateT = 0.45; this.atkT = this.cfg.atkCd;
+      }
       return;
     }
     if (this.state === "windup") {
@@ -2628,24 +3213,62 @@ class Colossus extends Enemy {
       this.vx = lerp(this.vx, 0, clamp(6 * dt, 0, 1)); this.stateT -= dt; if (this.stateT <= 0) this.state = "idle";
     } else {
       this.vx = lerp(this.vx, this.facing * C.speed * (1 + (ph - 1) * 0.3), clamp(2.5 * dt, 0, 1));
-      this.atkT -= dt;
-      if (this.atkT <= 0) {
-        this.pendingAtk = ["sweep", "stomp", "charge"][Math.floor(Math.random() * 3)];
-        this.state = "windup"; this.stateT = this.pendingAtk === "charge" ? C.chargeWindup : C.windup;
+      // NO SHELTER — PILLAR QUAKE: camp the gantry and the fortress slams its
+      // support out from under you (crack warning, then the perch gives way for a while)
+      this.pillarCd = (this.pillarCd || 0) - dt;
+      if (this.campT > C.campAfter && this.pillarCd <= 0 && this.campPlat && !(this.campPlat.crackT > 0)) {
+        const pl = this.campPlat;
+        pl.crackT = C.pillarWarn; pl.crackMax = C.pillarWarn;
+        pl.crackColor = CONFIG.colors.armoredShield; pl.respawnIn = C.platRespawn;
+        this.pillarCd = C.pillarCd; this.campT = 1.2;
+        BOSSFX.juice({ banner: "PILLAR QUAKE", color: CONFIG.colors.armoredShield, shake: 10, flash: 0.25, hitstop: 0.05 });
+        FX.shockwave(this.x, this.y + this.hh, 10, CONFIG.colors.armoredShield, 260, 5);
       }
-      if (ph === 2 && this.onGround && Math.random() < 0.3 * dt) { this.vy = -1000; this.onGround = false; }
+      // SEISMIC BACKHAND: crowd the fortress and it swats you (reactive, off the rotation)
+      if (this.state === "idle" && Math.abs(player.x - this.x) < C.grabRange && Math.abs(player.y - this.y) < this.hh && this.grabCd <= 0) {
+        this.pendingAtk = "grab"; this.state = "grabwind"; this.stateT = C.grabWindup; this.grabCd = 3.0; perilPing(this);
+      }
+      this.grabCd = (this.grabCd || 0) - dt;
+      this.atkT -= dt;
+      if (this.atkT <= 0 && this.state === "idle") {
+        // a bruiser's rhythm — charge is now just 1 option, not the whole fight;
+        // P2 adds the saw, P3 the smash + meltdown
+        const patterns = ph === 1 ? ["stomp", "smash", "sweep", "stomp", "charge"]
+          : (ph === 2 ? ["stomp", "sweep", "smash", "charge", "stomp", "sweep"]
+          : ["smash", "stomp", "charge", "sweep", "smash"]);
+        this.pendingAtk = patterns[this.attackIdx++ % patterns.length];
+        if (this.pendingAtk === "smash") { this.state = "smashwind"; this.stateT = C.smashWindup; this.smashTX = player.x; perilPing(this); }
+        else { this.state = "windup"; this.stateT = this.pendingAtk === "charge" ? C.chargeWindup : C.windup; }
+        if (this.pendingAtk === "charge") this.chargeStop = Math.random() < C.chargeStopShort;   // most charges halt short
+      }
+      if (this.pendingAtk === "grab" && this.state === "grabwind") { this.stateT -= dt; if (this.stateT <= 0) { this.state = "grab"; this.stateT = 0.12; } }
     }
     this.integrate(dt, platforms);
   }
   _fire(player, projectiles, C, ph) {
     const a = this.pendingAtk;
-    if (a === "stomp") { this._shock(projectiles, 1); this._shock(projectiles, -1); this.state = "idle"; this.atkT = C.atkCd / (1 + (ph - 1) * 0.25); }
+    if (a === "stomp") { this._shock(projectiles, 1); this._shock(projectiles, -1); this._startVent(); this.state = "idle"; this.atkT = C.atkCd / (1 + (ph - 1) * 0.25); }
     else if (a === "sweep") { this._shock(projectiles, this.facing); this.state = "idle"; this.atkT = C.atkCd / (1 + (ph - 1) * 0.25); }
     else { this.state = "charge"; this.vx = this.facing * C.chargeSpeed; }   // charges along its own (ground) level — telegraphed during wind-up, no teleport
     if (typeof SFX !== "undefined" && SFX.ctx && SFX.slam) SFX.slam();
   }
   draw(ctx) {
     const x = this.x - this.hw, y = this.y - this.hh, w = this.hw * 2, h = this.hh * 2, ph = this.phase;
+    ctx.save();
+    if (this.dying) {
+      ctx.translate(this.x, this.y + this.hh); ctx.scale(1 + this.deathP * 0.12, 1 - this.deathP * 0.58); ctx.translate(-this.x, -(this.y + this.hh));
+    }
+    if (this.ventT > 0) {
+      const vk = clamp(this.ventT / this.cfg.ventDur, 0, 1), top = 70;
+      ctx.fillStyle = CONFIG.colors.armoredShield; ctx.globalAlpha = 0.08 + 0.12 * vk;
+      ctx.fillRect(this.ventX - this.cfg.ventW / 2, top, this.cfg.ventW, CONFIG.world.groundY - top);
+      ctx.strokeStyle = CONFIG.colors.armoredShield; ctx.lineWidth = 3; ctx.globalAlpha = 0.35 + 0.4 * vk;
+      for (let i = -2; i <= 2; i++) {
+        const sx = this.ventX + i * this.cfg.ventW * 0.16, off = (performance.now() / 5 + i * 31) % 90;
+        ctx.beginPath(); ctx.moveTo(sx, CONFIG.world.groundY - off); ctx.lineTo(sx, CONFIG.world.groundY - off - 48); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
     // body (heavy plating + rivets)
     ctx.fillStyle = this.flash > 0 ? "#fff" : (this.stun > 0 ? "#9aa6b2" : this.color);
     ctx.fillRect(x, y, w, h);
@@ -2657,27 +3280,57 @@ class Colossus extends Enemy {
     // front shield (phase 1) or exposed molten core (phase 3)
     if (this.shielded) {
       const gx = this.x + this.facing * (this.hw + 12);
-      ctx.fillStyle = CONFIG.colors.armoredShield;
+      // PLATE CLANG: the struck plating flashes white for a beat
+      if (this._plateFlashT > 0) { this._plateFlashT -= 1 / 60; ctx.fillStyle = "#fff"; }
+      else ctx.fillStyle = CONFIG.colors.armoredShield;
       ctx.fillRect(gx - 6, y - 8, 12, h + 16);
       ctx.fillRect(gx - this.facing * 10 - 1, y - 8, this.facing * 11, 8);
       ctx.fillRect(gx - this.facing * 10 - 1, y + h + 1, this.facing * 11, 8);
-    } else if (ph === 3) {
+    } else if (ph === 3 || this.coreOpenT > 0) {
       const pulse = 0.6 + 0.4 * Math.sin(performance.now() / 120);
-      ctx.fillStyle = CONFIG.colors.boss; ctx.globalAlpha = pulse;
+      ctx.fillStyle = this.coreOpenT > 0 ? CONFIG.colors.armoredShield : CONFIG.colors.boss; ctx.globalAlpha = pulse;
       ctx.beginPath(); ctx.arc(this.x, this.y + 6, 22, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1; ctx.strokeStyle = CONFIG.colors.slam; ctx.lineWidth = 3; ctx.stroke();
     }
     // wind-up telegraph
     if (this.state === "windup") {
       const gy = this.y + this.hh, k = 1 - clamp(this.stateT / (this.pendingAtk === "charge" ? this.cfg.chargeWindup : this.cfg.windup), 0, 1);
-      if (this.pendingAtk === "charge") { chargeTelegraph(ctx, this.x, this.y, this.hh, this.facing, k, CONFIG.colors.slam); }
+      if (this.pendingAtk === "charge") { dangerLane(ctx, this.x, this.y - this.hh, CONFIG.view.w, this.hh * 2, this.facing, CONFIG.colors.slam, k); chargeTelegraph(ctx, this.x, this.y, this.hh, this.facing, k, CONFIG.colors.slam); }
       else {
         ctx.strokeStyle = CONFIG.colors.slam; ctx.globalAlpha = 0.35 + 0.5 * k; ctx.lineWidth = 4; ctx.setLineDash([8, 6]);
         if (this.pendingAtk === "stomp") { ctx.beginPath(); ctx.moveTo(this.x - (60 + 180 * k), gy - 2); ctx.lineTo(this.x + (60 + 180 * k), gy - 2); ctx.stroke(); }
         else { ctx.beginPath(); ctx.moveTo(this.x, gy - 2); ctx.lineTo(this.x + this.facing * (60 + 200 * k), gy - 2); ctx.stroke(); }
         ctx.setLineDash([]); ctx.globalAlpha = 1;
       }
+      weaponGlint(ctx, this.x + this.facing * (this.hw + 12), this.y - 4, CONFIG.colors.armoredShield, k);
     }
+    // OVERHEAD SMASH telegraph: the kill-column follows the raised fist
+    if (this.state === "smashwind") {
+      const k = 1 - clamp(this.stateT / this.cfg.smashWindup, 0, 1);
+      dangerColumn(ctx, this.x, this.cfg.smashRange * 1.4, this.y + this.hh, CONFIG.world.groundY, CONFIG.colors.slam, k);
+      weaponGlint(ctx, this.x, this.y - this.hh - 10, CONFIG.colors.slam, k);
+      drawPeril(ctx, this);
+    }
+    // SEISMIC BACKHAND telegraph: a short arc sweeping to the strike side
+    if (this.state === "grabwind") {
+      const k = 1 - clamp(this.stateT / this.cfg.grabWindup, 0, 1);
+      ctx.save(); ctx.strokeStyle = CONFIG.colors.armoredShield; ctx.globalAlpha = 0.4 + 0.5 * k; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.cfg.grabRange, this.facing > 0 ? -0.8 : Math.PI - 0.8, this.facing > 0 ? 0.8 : Math.PI + 0.8); ctx.stroke(); ctx.restore();
+    }
+    if (this.state === "meltdown") {
+      const k = 1 - clamp(this.stateT / this.cfg.meltdownWindup, 0, 1);
+      dangerColumn(ctx, CONFIG.view.w / 2, 190, 20, CONFIG.world.groundY, CONFIG.colors.slam, k);
+    }
+    if (this.dying) {
+      ctx.globalAlpha = 1 - this.deathP * 0.35; ctx.fillStyle = CONFIG.colors.armoredShield;
+      for (let i = 0; i < 5; i++) {
+        const d = this.deathP * (34 + i * 9), px = this.x + (i - 2) * 24, py = this.y - 30 + d * d * 0.035;
+        ctx.save(); ctx.translate(px, py); ctx.rotate((i - 2) * this.deathP); ctx.fillRect(-10, -7, 20, 14); ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    }
+    drawPeril(ctx, this);
+    ctx.restore();
   }
 }
 
@@ -2686,48 +3339,104 @@ class Aldric extends Enemy {
   constructor(x, y) {
     super(x, y, CONFIG.aldric);
     this.color = CONFIG.colors.charger;
-    this.kind = "boss"; this.isBoss = true; this.bossName = "THE BERSERKER KING";
+    this.kind = "boss"; this.isBoss = true; this.bossName = "ALDRIC";
+    this.epithet = "THE BERSERKER KING"; this.phaseMarks = [0.65, 0.20]; this.phaseTag = "THE DUEL";
     this.mode = "duel"; this.state = "idle"; this.stateT = 0; this.atkT = 1.6; this.facing = 1;
     this.zones = []; this.zoneColor = CONFIG.colors.bomber; this.zoneCycleT = 0;   // checkerboard fire
     this.spawnAdds = false; this.faked = false; this.reviveCap = 0; this.chargeT = 0;
     this.weaponA = -0.6; this.weaponPrevA = -0.6;
+    this.fireZones = []; this.seams = []; this.kneelT = 0; this.kneelStruck = false; this.anger = false;
+    this.crown = null; this.crownfireCd = CONFIG.aldric.crownfireCd; this.chainLeft = 0; this.ghostT = 0; this.seamDropT = 0;
+    this._playerRef = null; this.witnessEarned = false;
+    this.overheadCd = CONFIG.aldric.overheadCd; this.overTX = 0;   // OVERHEAD CLEAVER
   }
   damageTakenMult() { return this.mode === "frenzy" ? CONFIG.aldric.frenzyDmgTaken : (this.mode === "downed" ? CONFIG.aldric.downedDmgTaken : 1); }
   // during the fake he can't be killed (hit OR DoT) — he always rises into the frenzy
   _deathLocked() { return this.mode === "downed"; }
+  hit(dmg, knockX, knockY) {
+    if (this.mode === "downed" && dmg > 0 && !this.kneelStruck) {
+      this.kneelStruck = true; this.anger = true;
+      this.reviveCap = this.maxHp * CONFIG.aldric.angerReviveFrac;
+      this.kneelT = Math.min(this.kneelT, 2.2);
+      BOSSFX.juice({ banner: "THE KING REMEMBERS", color: CONFIG.colors.charger, shake: 8, flash: 0.25, quiet: true });
+    }
+    return super.hit(dmg, knockX, knockY);
+  }
 
   _shock(projectiles, dir, fire) {
     const C = CONFIG.aldric, footY = this.y + this.hh;
     const p = new Projectile(this.x + dir * this.hw * 0.7, footY - C.shockR, dir * C.shockSpeed, 0);
-    p.shock = true; p.r = C.shockR; p.dmg = C.shockDmg; p.life = 2.0;
+    p.shock = true; p.r = C.shockR; p.dmg = C.shockDmg; p.life = 2.0; p.owner = this;
+    p.tint = fire ? CONFIG.colors.bomber : CONFIG.colors.charger;
     projectiles.push(p);
   }
   _lightFire() {
-    const C = CONFIG.aldric, colW = CONFIG.view.w / C.fireCols; this.zones = [];
-    for (let i = 0; i < C.fireCols; i++) this.zones.push({ x: (i + 0.5) * colW, on: i % 2 === 0 });
+    const C = CONFIG.aldric, colW = CONFIG.view.w / C.fireCols; this.fireZones = [];
+    for (let i = 0; i < C.fireCols; i++) this.fireZones.push({ kind: "fire", x: (i + 0.5) * colW, w: colW, on: i % 2 === 0,
+      dmg: CONFIG.warden.zoneTick, tickCd: CONFIG.warden.zoneTickCd });
     this.zoneCycleT = C.fireCycle;
+    this._syncZones();
   }
+  _syncZones() { this.zones = this.fireZones.concat(this.seams); }
 
   update(dt, platforms, player, projectiles) {
     this.tickTimers(dt);
     const C = CONFIG.aldric;
+    this._playerRef = player;
     this.facing = Math.sign(player.x - this.x) || this.facing;
     this._animWeapon(dt);
     const f = this.hp / this.maxHp;
-    if (this.mode === "duel" && f < C.fireTier) { this.mode = "fire"; this._lightFire(); }
+    if (this.mode === "duel" && f < C.fireTier) {
+      this.mode = "fire"; this.phaseTag = "THRONE BURNS"; this._lightFire();
+      bossPhaseBeat(this, "THE THRONE BURNS", CONFIG.colors.bomber);
+    }
     if (this.mode === "fire" && f < C.fakeTier && !this.faked) { this._enterDowned(); }
     // checkerboard pulse
-    if (this.zones.length) { this.zoneCycleT -= dt; if (this.zoneCycleT <= 0) { for (const z of this.zones) z.on = !z.on; this.zoneCycleT = C.fireCycle; } }
+    if (this.fireZones.length) { this.zoneCycleT -= dt; if (this.zoneCycleT <= 0) { for (const z of this.fireZones) z.on = !z.on; this.zoneCycleT = C.fireCycle; } }
+    for (const z of this.seams) z.life -= dt;
+    this.seams = this.seams.filter((z) => z.life > 0); this._syncZones();
+    if (this.crown) {
+      this.crown.vy += CONFIG.world.gravity * dt; this.crown.x += this.crown.vx * dt; this.crown.y += this.crown.vy * dt; this.crown.rot += this.crown.vx * dt * 0.018;
+      const floor = CONFIG.world.groundY - 8;
+      if (this.crown.y > floor) { this.crown.y = floor; this.crown.vy *= -0.25; this.crown.vx *= 0.86; }
+    }
 
-    if (this.mode === "downed") {   // the fake: kneel and regenerate while you fight the adds
+    if (this.introT > 0) { this.vx = 0; this.integrate(dt, platforms); return; }
+
+    if (this.mode === "downed") {   // the kneel: strike, or stand witness
       this.vx = lerp(this.vx, 0, clamp(6 * dt, 0, 1));
-      this.hp = Math.min(this.reviveCap, this.hp + this.maxHp * C.regenRate * dt);
+      const regen = C.regenRate * (this.kneelStruck ? C.angerRegenMult : 1);
+      this.hp = Math.min(this.reviveCap, this.hp + this.maxHp * regen * dt);
+      this.kneelT -= dt;
       this.integrate(dt, platforms);
+      if (this.kneelT <= 0) this.revive(!this.kneelStruck);
       return;
     }
 
     const spd = C.speed * (this.mode === "frenzy" ? 1.5 : (this.mode === "fire" ? 1.2 : 1));
-    if (this.mode === "frenzy") { this.chargeT -= dt; if (this.chargeT <= 0 && this.state === "idle") { this.state = "chargewind"; this.stateT = C.chargeWindup; this.chargeT = C.chargeCd; } }
+    if (this.mode === "frenzy") {
+      this.chargeT -= dt; this.crownfireCd -= dt; this.ghostT -= dt;
+      if (this.ghostT <= 0) { this.ghostT = 0.11; FX.ghost(this.x, this.y, this.hw, this.hh, CONFIG.colors.bomber); }
+      if (this.crownfireCd <= 0 && this.state === "idle") { this.state = "crownfire"; this.stateT = C.crownfireWindup; this.crownfireCd = C.crownfireCd; }
+      else if (this.chargeT <= 0 && this.state === "idle") { this.state = "chargewind"; this.stateT = C.chargeWindup; this.chargeT = C.chargeCd / (this.anger ? 1.35 : 1); }
+    }
+
+    if (this.state === "crownfire") {
+      this.stateT -= dt;
+      const k = 1 - clamp(this.stateT / C.crownfireWindup, 0, 1), gy = CONFIG.world.groundY - this.hh;
+      this.x = lerp(this.x, CONFIG.view.w / 2, clamp(6 * dt, 0, 1)); this.y = gy - Math.sin(k * Math.PI) * 190;
+      if (this.stateT <= 0) {
+        this.x = CONFIG.view.w / 2; this.y = gy; this._shock(projectiles, 1, true); this._shock(projectiles, -1, true);
+        for (let i = 0; i < 7; i++) {
+          const a = Math.PI + i / 6 * Math.PI, p = new Projectile(this.x, this.y - 35, Math.cos(a) * C.emberSpeed, Math.sin(a) * C.emberSpeed - 120);
+          p.gravity = 520; p.dmg = C.emberDmg; p.r = 10; p.tint = CONFIG.colors.bomber; p.kind = "orb"; p.owner = this; projectiles.push(p);
+        }
+        FX.explode(this.x, this.y + this.hh, CONFIG.colors.bomber, 1.35);
+        BOSSFX.juice({ banner: "CROWNFIRE", color: CONFIG.colors.bomber, shake: 12, flash: 0.4, slowmo: 0.4, zoom: 0.07 });
+        this.state = "recover"; this.stateT = 0.45;
+      }
+      return;
+    }
 
     if (this.state === "chargewind") {            // plant, roar, telegraph the lane — then explode forward
       this.vx = lerp(this.vx, 0, clamp(9 * dt, 0, 1)); this.stateT -= dt;
@@ -2735,8 +3444,30 @@ class Aldric extends Enemy {
       this.integrate(dt, platforms);
       return;
     }
+    if (this.state === "overheadwind") {          // OVERHEAD CLEAVER: rise, track the player, then plunge
+      this.stateT -= dt;
+      this.x = lerp(this.x, clamp(this.overTX, this.hw, CONFIG.view.w - this.hw), clamp(4 * dt, 0, 1));
+      this.y = lerp(this.y, CONFIG.world.groundY - this.hh - 150, clamp(6 * dt, 0, 1)); this.onGround = false;
+      if (this.stateT <= 0) { this.state = "overhead"; this.vy = 2500; }
+      return;
+    }
+    if (this.state === "overhead") {
+      this.y += this.vy * dt; this.vy += 2500 * dt;
+      if (this.y >= CONFIG.world.groundY - this.hh) {
+        this.y = CONFIG.world.groundY - this.hh; this.onGround = true;
+        if (Math.abs(player.x - this.x) < C.overheadRange && !player.invulnerable) player.takeDamage(C.overheadDmg, this.x, this);
+        this.seams.push({ kind: "seam", x: this.x, w: 110, life: C.seamLife, on: true, dmg: CONFIG.warden.zoneTick, tickCd: CONFIG.warden.zoneTickCd });
+        FX.explode(this.x, this.y + this.hh, CONFIG.colors.bomber, 1.3); FX.shockwave(this.x, this.y + this.hh, 12, CONFIG.colors.bomber, 240, 6);
+        BOSSFX.juice({ banner: "OVERHEAD", color: CONFIG.colors.bomber, shake: 12, flash: 0.4, slowmo: 0.4, zoom: 0.06, hitstop: 0.05 });
+        this.state = "recover"; this.stateT = 0.55;
+      }
+      return;
+    }
     if (this.state === "charge") {
       this.x += this.vx * dt;
+      this.seamDropT -= dt;
+      if (this.seamDropT <= 0) { this.seamDropT = 0.12; this.seams.push({ kind: "seam", x: this.x, w: 76, life: C.seamLife, on: true, dmg: CONFIG.warden.zoneTick, tickCd: CONFIG.warden.zoneTickCd }); }
+      if (Math.random() < 16 * dt) FX.ember(this.x, CONFIG.world.groundY - 5, CONFIG.colors.bomber);
       if (this.x <= this.hw + 4 || this.x >= CONFIG.view.w - this.hw - 4) { this.state = "recover"; this.stateT = 0.7; }
       return;
     }
@@ -2746,34 +3477,92 @@ class Aldric extends Enemy {
     } else if (this.state === "lunge") {
       this.stateT -= dt; if (this.stateT <= 0) { this.state = "recover"; this.stateT = 0.35; }
     } else if (this.state === "recover") {
-      this.vx = lerp(this.vx, 0, clamp(7 * dt, 0, 1)); this.stateT -= dt; if (this.stateT <= 0) this.state = "idle";
+      this.vx = lerp(this.vx, 0, clamp(7 * dt, 0, 1)); this.stateT -= dt;
+      if (this.stateT <= 0) {
+        if (this.chainLeft > 0) { this.chainLeft--; this.state = "windup"; this.stateT = C.windup * 0.58; }
+        else this.state = "idle";
+      }
     } else {
-      this.vx = lerp(this.vx, this.facing * spd, clamp(4 * dt, 0, 1));
-      this.atkT -= dt;
-      if (this.atkT <= 0 && Math.abs(player.x - this.x) < 500) { this.state = "windup"; this.stateT = C.windup; }
-      if (this.onGround && player.y < this.y - 60 && Math.random() < (this.mode === "duel" ? 0.3 : 0.6) * dt) { this.vy = -1120; this.onGround = false; }
+      const dist = Math.abs(player.x - this.x);
+      const duelDir = this.mode === "duel" && dist < 190 ? -this.facing : this.facing;
+      this.vx = lerp(this.vx, duelDir * spd, clamp(4 * dt, 0, 1));
+      this.overheadCd = (this.overheadCd || 0) - dt;
+      // OVERHEAD CLEAVER — a committed vertical slam (fire/frenzy), his kingliest
+      // blow; complements the horizontal lunges + arcs
+      if (this.mode !== "duel" && this.overheadCd <= 0 && dist < 420 && this.onGround) {
+        this.state = "overheadwind"; this.stateT = C.overheadWindup; this.overTX = player.x;
+        this.overheadCd = C.overheadCd; perilPing(this);
+      } else {
+        this.atkT -= dt;
+        if (this.atkT <= 0 && Math.abs(player.x - this.x) < 500) { this.state = "windup"; this.stateT = C.windup; }
+      }
+      // NO SHELTER: hover above the king and the pounce COMES — deterministic,
+      // not a dice roll (tracks time-spent-above, leaps at the player)
+      this.aboveT = (player.y < this.y - 60) ? (this.aboveT || 0) + dt : 0;
+      if (this.onGround && this.aboveT > (C.pounceAfter || 1)) {
+        this.vy = -1120; this.vx = (player.x - this.x) * 1.1; this.onGround = false; this.aboveT = 0;
+      }
     }
     this.integrate(dt, platforms);
   }
   _strike(player, projectiles) {
     const C = CONFIG.aldric;
-    this._shock(projectiles, this.facing);
+    // his kit is the CLEAVER now, not ground waves: in reach the lunge IS the
+    // strike; out of reach he hurls burning CLEAVER ARCS (crescents — parry
+    // food, i.e. rally fuel)
+    if (Math.abs(this._playerRef ? this._playerRef.x - this.x : 999) > 235) {
+      this._arc(projectiles, this.mode === "frenzy" ? 2 : 1);
+    }
     this.state = "lunge"; this.stateT = 0.25; this.vx = this.facing * C.lungeSpeed;
+    if (this.mode === "fire" && this.chainLeft <= 0) this.chainLeft = 1;
+    if (this.mode === "frenzy" && this.chainLeft <= 0) this.chainLeft = this.anger ? 2 : 1;
     this.atkT = C.atkCd / (this.mode === "frenzy" ? 1.7 : (this.mode === "fire" ? 1.25 : 1));
     if (typeof SFX !== "undefined" && SFX.ctx && SFX.slam) SFX.slam();
   }
-  _enterDowned() { this.mode = "downed"; this.state = "idle"; this.spawnAdds = true; this.reviveCap = this.maxHp * CONFIG.aldric.reviveFrac; this.vx = 0; this.zones = []; }
-  // called by the game when the adds are cleared
-  revive() { this.mode = "frenzy"; this.faked = true; this.state = "idle"; this.atkT = 0.5; this.chargeT = CONFIG.aldric.chargeCd * 0.5; this._lightFire(); }
+  // a burning crescent thrown along the lunge line — arcs with gravity, fully
+  // parryable/deflectable through the game's own projectile loop
+  _arc(projectiles, n) {
+    const C = CONFIG.aldric;
+    for (let i = 0; i < n; i++) {
+      const p = new Projectile(this.x + this.facing * 34, this.y - 24 - i * 16,
+        this.facing * C.arcSpeed * (1 - i * 0.12), -C.arcRise - i * 70);
+      p.crescent = true; p.kind = "crescent"; p.tint = CONFIG.colors.bomber;
+      p.dmg = C.arcDmg; p.r = 24; p.gravity = C.arcGravity; p.deflectDmg = 30; p.owner = this;
+      projectiles.push(p);
+    }
+    FX.ring(this.x + this.facing * 28, this.y - 20, 10, CONFIG.colors.bomber);
+    try { SFX.crescent(); } catch (e) {}   // the cleaver tears the air
+  }
+  _enterDowned() {
+    const C = CONFIG.aldric;
+    this.mode = "downed"; this.state = "idle"; this.spawnAdds = false; this.kneelT = C.kneelDur; this.kneelStruck = false; this.anger = false;
+    this.reviveCap = this.maxHp * C.witnessReviveFrac; this.vx = 0; this.fireZones = []; this.seams = []; this._syncZones();
+    this.crown = { x: this.x + this.facing * 18, y: this.y - this.hh - 18, vx: this.facing * 330, vy: -420, rot: 0 };
+    this.phaseTag = "THE KNEEL";
+    bossPhaseBeat(this, "STRIKE — OR STAND WITNESS", CONFIG.colors.charger);
+  }
+  revive(witnessed) {
+    this.mode = "frenzy"; this.faked = true; this.state = "idle"; this.atkT = 0.35; this.phaseTag = witnessed ? "WITNESSED" : "FRENZY";
+    this.chargeT = CONFIG.aldric.chargeCd * 0.45; this.crownfireCd = CONFIG.aldric.crownfireCd * 0.55;
+    if (witnessed) { this.witnessEarned = true; this.hp = Math.min(this.hp, this.maxHp * CONFIG.aldric.witnessReviveFrac); }
+    else { this.anger = true; this.hp = Math.max(this.hp, this.maxHp * CONFIG.aldric.angerReviveFrac); this.contactDmg *= CONFIG.aldric.angerDamageMult; }
+    this._lightFire(); bossPhaseBeat(this, witnessed ? "THE LAST CROWN RISES" : "THE BEAST AWAKES", CONFIG.colors.bomber);
+  }
   _animWeapon(dt) {
     let wt = -0.6, k = 9;
-    if (this.state === "windup" || this.state === "chargewind") { wt = -1.5; k = 11; }
+    if (this.state === "overheadwind") { wt = -2.1; k = 12; }   // cleaver raised straight overhead
+    else if (this.state === "overhead") { wt = 1.4; k = 34; }   // driven down on the plunge
+    else if (this.state === "windup" || this.state === "chargewind") { wt = -1.5; k = 11; }
     else if (this.state === "lunge" || this.state === "charge") { wt = 0.8; k = 28; }
     this.weaponPrevA = this.weaponA; this.weaponA = lerp(this.weaponA, wt, clamp(k * dt, 0, 1));
   }
   draw(ctx) {
     const x = this.x - this.hw, y = this.y - this.hh, w = this.hw * 2, h = this.hh * 2;
-    const downed = this.mode === "downed", frenzy = this.mode === "frenzy";
+    const downed = this.mode === "downed" || this.dying, frenzy = this.mode === "frenzy";
+    ctx.save();
+    if (this.dying) {
+      ctx.translate(this.x, this.y + this.hh); ctx.scale(1, 1 - this.deathP * 0.38); ctx.translate(-this.x, -(this.y + this.hh));
+    }
     // regen glow during the fake
     if (downed) {
       const pulse = 0.3 + 0.3 * Math.sin(performance.now() / 150);
@@ -2794,7 +3583,9 @@ class Aldric extends Enemy {
     // cleaver (gone in frenzy — fights barehanded; animated otherwise)
     if (!frenzy && !downed) {
       const hx = this.x + this.facing * this.hw * 0.5, hy = this.y - 4, L = 64, a = this.weaponA;
-      const tx = hx + this.facing * Math.cos(a) * L, ty = hy + Math.sin(a) * L;
+      const introP = this.introT > 0 ? clamp(1 - this.introT / ((CONFIG.bossTheater && CONFIG.bossTheater.introDur) || 1.4), 0, 1) : -1;
+      const poseA = introP >= 0 ? lerp(-0.6, -1.75, Math.sin(introP * Math.PI)) : a;
+      const tx = hx + this.facing * Math.cos(poseA) * L, ty = hy + Math.sin(poseA) * L;
       if (Math.abs(this.weaponA - this.weaponPrevA) > 0.05) {   // swoosh
         ctx.fillStyle = this.mode === "fire" ? CONFIG.colors.bomber : CONFIG.colors.charger; ctx.globalAlpha = 0.3;
         ctx.beginPath(); ctx.moveTo(hx, hy);
@@ -2806,11 +3597,34 @@ class Aldric extends Enemy {
       ctx.save(); ctx.translate(tx, ty); ctx.rotate(Math.atan2(ty - hy, tx - hx)); ctx.fillStyle = THEME.ink;
       ctx.fillRect(-6, -14, 26, 28); ctx.restore();   // big cleaver head
     }
+    if (downed) {   // the cleaver remains buried beside the kneeling king
+      ctx.save(); ctx.translate(this.x + this.facing * 72, CONFIG.world.groundY - 18); ctx.rotate(this.facing * 0.32);
+      ctx.strokeStyle = THEME.ink; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(0, -50); ctx.stroke();
+      ctx.fillStyle = THEME.ink; ctx.fillRect(-13, -64, 26, 28); ctx.restore();
+    }
     // frenzy charge telegraph: the lane he's about to barrel down
     if (this.state === "chargewind") {
       const k = 1 - clamp(this.stateT / (CONFIG.aldric.chargeWindup || 0.5), 0, 1);
       chargeTelegraph(ctx, this.x, this.y, this.hh, this.facing, k, CONFIG.colors.charger);
+      weaponGlint(ctx, this.x + this.facing * (this.hw + 26), this.y - 10, CONFIG.colors.charger, k);
     }
+    if (this.state === "crownfire") {
+      const k = 1 - clamp(this.stateT / CONFIG.aldric.crownfireWindup, 0, 1);
+      dangerColumn(ctx, CONFIG.view.w / 2, 160, 30, CONFIG.world.groundY, CONFIG.colors.bomber, k);
+    }
+    if (this.state === "overheadwind") {   // OVERHEAD CLEAVER: the kill-column tracks the raised blade
+      const k = 1 - clamp(this.stateT / CONFIG.aldric.overheadWindup, 0, 1);
+      dangerColumn(ctx, this.x, CONFIG.aldric.overheadRange * 1.5, this.y + this.hh, CONFIG.world.groundY, CONFIG.colors.bomber, k);
+      weaponGlint(ctx, this.x, this.y - this.hh - 12, CONFIG.colors.bomber, k); drawPeril(ctx, this);
+    }
+    if (this.mode === "downed") UI.tag(ctx, "STRIKE — OR STAND WITNESS.", this.x, this.y - this.hh - 38,
+      this.kneelStruck ? CONFIG.colors.charger : CONFIG.colors.bomber, "center", UI.t.type.caption);
+    if (this.crown) {
+      ctx.save(); ctx.translate(this.crown.x, this.crown.y); ctx.rotate(this.crown.rot); ctx.strokeStyle = CONFIG.colors.bomber; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(-13, 7); ctx.lineTo(-9, -8); ctx.lineTo(0, 1); ctx.lineTo(9, -8); ctx.lineTo(13, 7); ctx.closePath(); ctx.stroke(); ctx.restore();
+    }
+    drawPeril(ctx, this);
+    ctx.restore();
   }
 }
 
@@ -2930,6 +3744,31 @@ class Echo extends Enemy {
   }
 }
 
+// Void-run utility add: a launchable air target, deliberately harmless and worth no
+// score. Its body is a moving foothold for the juggle system rather than another gun.
+class VoidWisp extends Enemy {
+  constructor(x, y) {
+    super(x, y, { w: 38, h: 38, hp: 85, speed: 105, contactDmg: 0, knockbackTaken: 14, weight: 0.65 });
+    this.kind = "wisp"; this.color = CONFIG.colors.perfect; this.noScore = true; this.isVoidWisp = true;
+    this.baseY = y; this.life = 9;
+  }
+  update(dt, platforms, player) {
+    this.tickTimers(dt); this.life -= dt;
+    this.vx = lerp(this.vx, -CONFIG.source.scrollSpeed * 0.42, clamp(1.6 * dt, 0, 1));
+    this.vy += CONFIG.world.gravity * 0.22 * dt;
+    this.vy = lerp(this.vy, (this.baseY + Math.sin(this.aliveT * 2.2) * 55 - this.y) * 2.1, clamp(1.3 * dt, 0, 1));
+    this.x += this.vx * dt; this.y += this.vy * dt;
+    if (this.x < -80 || this.life <= 0) this.dead = true;
+  }
+  draw(ctx) {
+    const p = 0.65 + 0.35 * Math.sin(performance.now() / 120 + this.x * 0.01);
+    ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.hw * 1.7, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = p; ctx.strokeStyle = this.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(this.x, this.y, this.hw * 0.7, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 0.8; ctx.fillStyle = "#fff"; ctx.fillRect(this.x - 4, this.y - 4, 8, 8); ctx.restore();
+    this.drawHpBar(ctx);
+  }
+}
+
 // ---- The Source (Stage 5 FINAL boss): cycles every fallen boss's mechanic, collapses
 //      the floor, fakes its death, then erupts into a true form. Reuses the boss-zone
 //      hazard system + the generic fake-death-adds-revive handler in game.js. ----
@@ -2937,40 +3776,52 @@ class Source extends Enemy {
   constructor(x, y) {
     super(x, y, CONFIG.source);
     this.color = "#8b3bd6"; this.kind = "boss"; this.isBoss = true; this.bossName = "THE SOURCE";
+    this.epithet = "THE TEAR ITSELF"; this.phaseMarks = [CONFIG.source.voidTier, CONFIG.source.fakeTier]; this.phaseTag = "THE CYCLE";
     this.mode = "cycle"; this.atkT = 2.2; this.castIdx = 0; this.facing = 1;
     this.zones = []; this.zoneColor = CONFIG.colors.bomber; this.zoneCycleT = 0;
-    this.collapsing = false; this.collapseT = 0; this.faked = false; this.spawnAdds = false; this.reviveCap = 0;
+    this.collapsing = false; this.collapseT = 0; this.phaseMarker = 1; this.requestVoid = false; this.freezeVoid = false;
+    this.thawVoid = false; this.voidDelayT = -1; this.downT = -1;   // phase-2 shatter countdown + the kneel clock
     this.seenTrickT = 0; this.copyKind = "hit"; this.copyT = -1; this.lastCopied = ""; this.copyOffset = 1;
-    this.downText = "...not yet"; this.reviveText = "TRUE FORM";
+    this.echoCaption = ""; this.captionT = 0; this.bladeCaught = false;
+    this.beamState = "idle"; this.beamT = 0; this.beamCd = CONFIG.source.beamCd; this.beamX = CONFIG.view.w + 100;
+    // physical kit: a flash-charge and a converging shard drop
+    this.dashState = "idle"; this.dashT = 0; this.dashCd = CONFIG.source.dashCd; this.dashTX = 0; this.dashTY = 0; this.dashDX = 0; this.dashDY = 0; this.dashGhosts = [];
+    this.collapseState = "idle"; this.collapseWT = 0; this.collapseCd = CONFIG.source.collapseCd;
+    this._burstN = 0; this._burstT = 0;
   }
-  damageTakenMult() { return this.mode === "final" ? 1.2 : (this.mode === "downed" ? 0.3 : 1); }
-  _deathLocked() { return this.mode === "downed"; }   // fake-death kneel: neither hit nor DoT may kill before revival
+  get phase() { const f = this.hp / this.maxHp, C = CONFIG.source; return f > C.voidTier ? 1 : (f > C.fakeTier ? 2 : 3); }
+  damageTakenMult() { return this.mode === "downed" ? 0.3 : (this.mode === "void" ? 1.2 : 1); }
+  _deathLocked() { return this.mode === "downed"; }   // the kneel cannot be a kill
 
-  _shot(player, projectiles) {
+  _shot(player, projectiles, tint) {
     const C = CONFIG.source, dx = player.x - this.x, dy = player.y - this.y, m = len(dx, dy) || 1;
-    const p = new Projectile(this.x, this.y, (dx / m) * C.shockSpeed, (dy / m) * C.shockSpeed); p.dmg = C.shockDmg; p.r = 11; p.tint = this.color; projectiles.push(p);
+    const drift = this.mode === "void" ? -C.scrollSpeed * 0.32 : 0;
+    const p = new Projectile(this.x, this.y, (dx / m) * C.shockSpeed + drift, (dy / m) * C.shockSpeed);
+    p.dmg = C.shockDmg; p.r = 11; p.tint = tint || this.color; p.owner = this; projectiles.push(p);
   }
-  _shock(projectiles, dir, footY) {
+  _shock(projectiles, dir, footY, tint) {
     const C = CONFIG.source, fy = (footY || CONFIG.world.groundY) - C.shockR;
     const p = new Projectile(this.x + dir * this.hw, fy, dir * C.shockSpeed, 0);
-    p.shock = true; p.r = C.shockR; p.dmg = C.shockDmg; p.life = 2.0; projectiles.push(p);
+    p.shock = true; p.r = C.shockR; p.dmg = C.shockDmg; p.life = 2.0; p.owner = this; p.tint = tint || CONFIG.colors.boss; projectiles.push(p);
   }
-  _sweeper(projectiles) {
+  _sweeper(projectiles, tint) {
     const C = CONFIG.source;
-    const p = new Projectile(this.hw, CONFIG.world.groundY - 24, C.sweeperSpeed, 0);
-    p.shock = true; p.sweeper = true; p.r = 22; p.dmg = C.sweeperDmg; p.bounces = 999; p.life = 60; projectiles.push(p);
-    FX.ring(this.x, this.y, 18, CONFIG.colors.armoredShield);
+    const p = new Projectile(this.x, Math.min(CONFIG.world.groundY - 24, this.y + 90), -C.sweeperSpeed, 0);
+    p.shock = true; p.sweeper = true; p.sweeperStyle = "shard"; p.r = 22; p.dmg = C.sweeperDmg; p.bounces = 999; p.life = 60;
+    p.owner = this; p.tint = tint || this.color; p.maxCrossings = 2; p.embeddedLife = 0.6; projectiles.push(p);
+    FX.ring(this.x, this.y, 18, this.color);
   }
   _cross(projectiles) {
     const C = CONFIG.source;
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]]) {
-      const p = new Projectile(this.x, this.y, dx * C.crossSpeed, dy * C.crossSpeed); p.dmg = C.crossDmg; p.r = 11; p.tint = this.color; projectiles.push(p);
+      const p = new Projectile(this.x, this.y, dx * C.crossSpeed, dy * C.crossSpeed); p.dmg = C.crossDmg; p.r = 11; p.tint = this.color; p.owner = this; projectiles.push(p);
     }
     FX.ring(this.x, this.y, 16, this.color);
   }
   _lightFire() {
     const A = CONFIG.aldric, colW = CONFIG.view.w / A.fireCols; this.zones = [];
-    for (let i = 0; i < A.fireCols; i++) this.zones.push({ x: (i + 0.5) * colW, on: i % 2 === 0 });
+    for (let i = 0; i < A.fireCols; i++) this.zones.push({ kind: "fire", x: (i + 0.5) * colW, w: colW, on: i % 2 === 0,
+      dmg: CONFIG.warden.zoneTick, tickCd: CONFIG.warden.zoneTickCd });
     this.zoneCycleT = A.fireCycle;
   }
   // Echo-style mirror: copy the player's last trick as a void attack
@@ -2983,23 +3834,94 @@ class Source extends Enemy {
   }
   _doCopy(player, projectiles) {
     const k = this.copyKind; this.lastCopied = k;
-    if (k === "slam" || k === "superslam" || k === "spike") { this._shock(projectiles, 1); this._shock(projectiles, -1); }
-    else this._shot(player, projectiles);
+    if (k === "slam" || k === "superslam" || k === "spike") { this._shock(projectiles, 1, null, this.color); this._shock(projectiles, -1, null, this.color); }
+    else this._shot(player, projectiles, this.color);
+    const label = ({ superslam: "SLAM", throwHit: "THROW", updraft: "UPDRAFT", launch: "LAUNCH" })[k] || (k || "CUT").toUpperCase();
+    this.echoCaption = "IT LEARNED YOUR " + label; this.captionT = 1.4;
     FX.ring(this.x, this.y, 13, this.color);
   }
   _cast(projectiles, count) {
     const picks = ["warden", "colossus", "aldric"];
     for (let i = 0; i < count; i++) {
       const m = picks[(this.castIdx++) % picks.length];
-      if (m === "warden") { this._shock(projectiles, 1); this._shock(projectiles, -1); }
-      else if (m === "colossus") this._sweeper(projectiles);
-      else this._lightFire();
+      if (m === "warden") {
+        // quotes the NEW kit: the baton string's rhythm as a three-count burst
+        this._burstN = 3; this._burstT = 0;
+        this.echoCaption = "ECHO OF THE WARDEN…";
+      } else if (m === "colossus") {
+        this._sweeper(projectiles, CONFIG.colors.armoredShield); this.echoCaption = "ECHO OF THE COLOSSUS…";
+      } else {
+        // over the void there's no ground for the fire checkerboard — the Aldric
+        // echo becomes a downward shard fan instead
+        if (this.mode === "void") this._cross(projectiles);
+        else this._lightFire();
+        this.echoCaption = "ECHO OF ALDRIC…";
+      }
+      this.captionT = 1.25;
     }
-    if (this.mode === "final") this._cross(projectiles);
+    if (this.mode === "void") this._cross(projectiles);
     FX.ring(this.x, this.y, 20, this.color);
   }
+  // RIFT DASH — a telegraphed flash-charge along a line locked to the player.
+  // A chromatic blink (afterimages), not a slow slide. In the void it charges
+  // along the horizontal lane so it shares the arena with the conveyor.
+  _startDash(player) {
+    const C = CONFIG.source;
+    this.dashState = "wind"; this.dashT = C.dashWindup;
+    if (this.mode === "void") { this.dashTX = -1; this.dashTY = 0; }   // sweep leftward across the lane
+    else { const dx = player.x - this.x, dy = player.y - this.y, m = len(dx, dy) || 1; this.dashTX = dx / m; this.dashTY = dy / m; }
+    perilPing(this);
+    this.echoCaption = "IT LUNGES"; this.captionT = 1.0;
+  }
+  _tickDash(dt, player, projectiles) {
+    const C = CONFIG.source;
+    if (this.dashState === "wind") {
+      this.dashT -= dt; this.vx = lerp(this.vx, 0, clamp(6 * dt, 0, 1)); this.vy = lerp(this.vy, 0, clamp(6 * dt, 0, 1));
+      if (this.dashT <= 0) {
+        this.dashState = "dash"; this.dashT = 0.34;
+        this.dashDX = this.dashTX * C.dashSpeed; this.dashDY = this.dashTY * C.dashSpeed;
+        BOSSFX.juice({ shake: 7, flash: 0.25, quiet: true });
+      }
+    } else if (this.dashState === "dash") {
+      this.dashT -= dt;
+      // chromatic afterimages trail the blink
+      this.dashGhosts.push({ x: this.x, y: this.y, t: 0.24 });
+      this.x += this.dashDX * dt; this.y += this.dashDY * dt;
+      const contact = len(player.x - this.x, player.y - this.y) < this.hw + player.hw + 8;
+      if (contact && !player.invulnerable) { player.takeDamage(C.dashDmg, this.x, this); FX.burst(player.x, player.y, this.dashTX, this.dashTY, 8, this.color); }
+      const off = this.x < -60 || this.x > CONFIG.view.w + 60 || this.y < 40 || this.y > CONFIG.world.groundY + 40;
+      if (this.dashT <= 0 || off) {
+        this.dashState = "idle"; this.dashCd = C.dashCd;
+        this.x = clamp(this.x, this.hw, CONFIG.view.w - this.hw); this.y = clamp(this.y, 80, CONFIG.world.groundY - this.hh);
+      }
+    }
+    for (const g of this.dashGhosts) g.t -= dt;
+    this.dashGhosts = this.dashGhosts.filter((g) => g.t > 0);
+  }
+  // RIFT COLLAPSE — teleport above the player, then drop a converging ring of shards
+  _startCollapse(player, projectiles) {
+    const C = CONFIG.source;
+    this.collapseState = "wind"; this.collapseWT = C.collapseWindup;
+    this.x = clamp(player.x, this.hw, CONFIG.view.w - this.hw); this.y = clamp(player.y - 230, 90, 360);
+    FX.ring(this.x, this.y, 22, this.color); this.echoCaption = "RIFT COLLAPSE"; this.captionT = 1.1;
+  }
+  _tickCollapse(dt, player, projectiles) {
+    const C = CONFIG.source;
+    if (this.collapseState !== "wind") return;
+    this.collapseWT -= dt;
+    if (this.collapseWT <= 0) {
+      this.collapseState = "idle"; this.collapseCd = C.collapseCd;
+      for (let i = 0; i < 10; i++) {
+        const a = i / 10 * Math.PI * 2 - Math.PI / 2;
+        const p = new Projectile(this.x + Math.cos(a) * 150, this.y + Math.sin(a) * 90, -Math.cos(a) * C.collapseSpeed, -Math.sin(a) * C.collapseSpeed * 0.6 + 260);
+        p.dmg = C.collapseDmg; p.r = 11; p.tint = this.color; p.owner = this; projectiles.push(p);
+      }
+      BOSSFX.juice({ shake: 8, flash: 0.3, zoom: 0.04 });
+    }
+  }
   _hover(dt, player) {
-    const tx = player.x, ty = Math.min(player.y - 70, CONFIG.world.groundY - 200);
+    const tx = this.mode === "void" ? CONFIG.view.w * 0.82 : player.x;
+    const ty = this.mode === "void" ? clamp(player.y - 90, 120, CONFIG.world.groundY - 230) : Math.min(player.y - 70, CONFIG.world.groundY - 200);
     this.vx = lerp(this.vx, (tx - this.x) * 1.3, clamp(2 * dt, 0, 1));
     this.vy = lerp(this.vy, (ty - this.y) * 1.3, clamp(2 * dt, 0, 1));
     this.x += this.vx * dt; this.y += this.vy * dt;
@@ -3007,70 +3929,185 @@ class Source extends Enemy {
     this.y = clamp(this.y, 70, CONFIG.world.groundY - this.hh);
     this.onGround = false;
   }
-  _enterDowned() {
-    this.mode = "downed"; this.faked = true; this.spawnAdds = true; this.collapsing = false;
-    this.reviveCap = this.maxHp * CONFIG.source.reviveFrac; this.vx = 0; this.zones = [];
+  _enterPhase(ph) {
+    const C = CONFIG.source;
+    if (ph === 2) {
+      // THE VOID RUN begins at the halfway mark: the whole floor shatters fast,
+      // then the platform stream replaces the world — the fight's centerpiece.
+      this.mode = "collapse"; this.collapsing = true; this.collapseT = 0.05;
+      this.voidDelayT = C.voidDelay; this.phaseTag = "WORLD UNMAKES";
+      this.zones = []; this.zoneCycleT = 0;   // no ground fire once the floor is going
+      bossPhaseBeat(this, "THE WORLD UNMAKES", this.color);
+    } else if (ph === 3) {
+      // THE KNEEL, on the void: the conveyor freezes mid-air while it gathers
+      // itself — then TRUE FORM thaws the stream, faster.
+      this.mode = "downed"; this.downT = C.kneelDur; this.freezeVoid = true;
+      this.beamState = "idle"; this.phaseTag = "IT REMEMBERS";
+      bossPhaseBeat(this, "IT REMEMBERS EVERY BLADE", this.color);
+    }
   }
-  revive() { this.mode = "final"; this.atkT = 0.4; this.color = CONFIG.colors.perfect; this.castIdx = 0; this._lightFire(); }
+  revive() {
+    const C = CONFIG.source;
+    this.mode = "void"; this.downT = -1; this.thawVoid = true; this.phaseTag = "TRUE FORM";
+    this.color = CONFIG.colors.perfect; this.castIdx = 0; this.atkT = 0.35; this.beamCd = C.beamCd * 0.55;
+    bossPhaseBeat(this, "TRUE FORM", CONFIG.colors.perfect);
+  }
+  tryCatchBlade(blade, player) {
+    if (this.mode !== "void" || this.bladeCaught || !blade || blade.state !== "flying" || blade.hostile) return false;
+    this.bladeCaught = true; blade.hostile = true; blade.stolenBy = this; blade.pierced = new Set([this]); blade.flyTime = 0;
+    const dx = player.x - blade.x, dy = player.y - blade.y, m = len(dx, dy) || 1;
+    blade.vx = dx / m * CONFIG.source.stolenBladeSpeed; blade.vy = dy / m * CONFIG.source.stolenBladeSpeed;
+    this.echoCaption = "IT TOOK YOUR BLADE"; this.captionT = 1.8;
+    BOSSFX.juice({ banner: "IT TOOK YOUR BLADE", color: CONFIG.colors.perfect, shake: 9, flash: 0.35, slowmo: 0.35, zoom: 0.06 });
+    return true;
+  }
+  onDeathStart() { this.freezeVoid = true; this.beamState = "idle"; this.zones = []; }
 
   update(dt, platforms, player, projectiles) {
     this.tickTimers(dt);
     this.facing = Math.sign(player.x - this.x) || this.facing;
-    const C = CONFIG.source, f = this.hp / this.maxHp;
+    const C = CONFIG.source, ph = this.phase;
+    if (this.captionT > 0) this.captionT -= dt;
+    while (this.phaseMarker < ph) { this.phaseMarker++; this._enterPhase(this.phaseMarker); }
+    if (this.introT > 0) { this.vx = lerp(this.vx, 0, clamp(5 * dt, 0, 1)); this.vy = lerp(this.vy, 0, clamp(5 * dt, 0, 1)); return; }
 
-    if (this.mode === "downed") {   // the fake: kneel + regen, passive (game spawns adds; revive() on their death)
-      this.hp = Math.min(this.reviveCap, this.hp + this.maxHp * C.regenRate * dt);
-      this.vx = lerp(this.vx, 0, clamp(4 * dt, 0, 1));
-      this.y = lerp(this.y, CONFIG.world.groundY - this.hh - 10, clamp(2 * dt, 0, 1));
+    // THE KNEEL: it gathers itself over the frozen stream — no attacks, then TRUE FORM
+    if (this.mode === "downed") {
+      this.downT -= dt;
+      this.vx = lerp(this.vx, (CONFIG.view.w / 2 - this.x) * 1.1, clamp(2 * dt, 0, 1));
+      this.vy = lerp(this.vy, (250 - this.y) * 1.1, clamp(2 * dt, 0, 1));
+      this.x += this.vx * dt; this.y += this.vy * dt;
+      if (this.downT <= 0) this.revive();
       return;
     }
-    if (this.zones.length) { this.zoneCycleT -= dt; if (this.zoneCycleT <= 0) { for (const z of this.zones) z.on = !z.on; this.zoneCycleT = CONFIG.aldric.fireCycle; } }
+    // phase-2 entry: the WHOLE floor shatters in ~a second, then the stream begins
+    if (this.voidDelayT > 0) {
+      if (!this._shatterStarted) {
+        this._shatterStarted = true;
+        for (const p of platforms) if (p.oneway && !(p.crackT > 0)) { p.crackT = C.crackWarn * (0.35 + Math.random() * 0.55); p.crackMax = p.crackT; p.crackColor = this.color; }
+      }
+      this.voidDelayT -= dt;
+      if (this.voidDelayT <= 0) {
+        this.mode = "void"; this.collapsing = false; this.requestVoid = true; this.phaseTag = "THE VOID RUN";
+        BOSSFX.juice({ banner: "THE VOID RUN", color: this.color, shake: 9, flash: 0.4, zoom: 0.06 });
+      }
+    }
+
+    if (this.zones.length) { this.zoneCycleT -= dt; if (this.zoneCycleT <= 0) { for (const z of this.zones) if (z.kind === "fire") z.on = !z.on; this.zoneCycleT = CONFIG.aldric.fireCycle; } }
     this._scheduleFrom(player);
     if (this.copyT > 0) { this.copyT -= dt; if (this.copyT <= 0) this._doCopy(player, projectiles); }
-
-    if (this.mode === "cycle") {
-      if (f < C.fakeTier && !this.faked) { this._enterDowned(); return; }
-      if (f < C.floorTier && !this.collapsing) { this.collapsing = true; this.collapseT = 0.5; }
+    // the Warden-echo burst: three shots on the baton string's beat
+    if (this._burstN > 0) {
+      this._burstT -= dt;
+      if (this._burstT <= 0) { this._shot(player, projectiles, CONFIG.colors.boss); this._burstN--; this._burstT = 0.18; }
     }
-    // THE FLOOR FALLS AWAY: rip out the one-way platforms one by one
+
+    // (platform crack ticking/splicing is GENERIC now — game.js runs it; this
+    // boss only SETS crackT on its victims)
     if (this.collapsing) {
       this.collapseT -= dt;
       if (this.collapseT <= 0) {
         this.collapseT = C.collapseCd;
-        const ow = platforms.filter((p) => p.oneway);
-        if (ow.length) { const pl = ow[Math.floor(Math.random() * ow.length)], idx = platforms.indexOf(pl); if (idx >= 0) { platforms.splice(idx, 1); FX.ring(pl.x + pl.w / 2, pl.y, 18, this.color); FX.burst(pl.x + pl.w / 2, pl.y, 0, 1, 8, this.color); } }
+        const ow = platforms.filter((p) => p.oneway && !(p.crackT > 0));
+        if (ow.length) { const pl = ow[Math.floor(Math.random() * ow.length)]; pl.crackT = C.crackWarn; pl.crackMax = C.crackWarn; pl.crackColor = this.color; }
       }
     }
+
+    if (this.mode === "void") {
+      if (this.beamState === "idle") {
+        this.beamCd -= dt;
+        if (this.beamCd <= 0) { this.beamState = "tell"; this.beamT = C.beamWarn; this.beamX = CONFIG.view.w - 70; perilPing(this); }
+      } else if (this.beamState === "tell") {
+        this.beamT -= dt;
+        if (this.beamT <= 0) { this.beamState = "sweep"; this.beamT = C.beamSweep; }
+      } else {
+        this.beamT -= dt;
+        const k = 1 - clamp(this.beamT / C.beamSweep, 0, 1);
+        this.beamX = lerp(CONFIG.view.w + C.beamW, -C.beamW, k);
+        if (Math.abs(player.x - this.beamX) < C.beamW / 2 + player.hw) player.takeDamage(C.beamDmg, this.beamX, this);
+        if (this.beamT <= 0) { this.beamState = "idle"; this.beamCd = C.beamCd; }
+      }
+    }
+
+    // physical moves run their own state machines (they suppress the hover/cast)
+    if (this.dashState !== "idle") { this._tickDash(dt, player, projectiles); return; }
+    if (this.collapseState !== "idle") { this._tickCollapse(dt, player, projectiles); this._hover(dt, player); return; }
+    this.dashCd -= dt; this.collapseCd -= dt;
 
     this._hover(dt, player);
     this.atkT -= dt;
     if (this.atkT <= 0) {
-      this.atkT = C.cycleCd / (this.mode === "final" ? 1.9 : (this.collapsing ? 1.35 : 1));
-      this._cast(projectiles, this.mode === "final" ? 2 : 1);
+      this.atkT = C.cycleCd / (this.mode === "void" ? 1.9 : (this.collapsing ? 1.35 : 1));
+      // MOVE BAG: weave the physical moves between ranged casts so the rift isn't
+      // a pure projectile turret. Dash/collapse fire when off cooldown; otherwise
+      // it casts (roughly halving the pure-projectile ratio).
+      if (this.dashCd <= 0 && (this.mode === "void" || Math.random() < 0.7)) this._startDash(player);
+      else if (this.collapseCd <= 0 && Math.random() < 0.6) this._startCollapse(player, projectiles);
+      else this._cast(projectiles, this.mode === "void" ? 2 : 1);
     }
   }
 
   draw(ctx) {
     const t = performance.now(), x = this.x, y = this.y, w = this.hw, h = this.hh;
-    const core = this.mode === "final" ? CONFIG.colors.perfect : (this.mode === "downed" ? "#4a4a55" : this.color);
+    const core = this.mode === "void" ? CONFIG.colors.perfect : this.color;
+    const introP = this.introT > 0 ? clamp(1 - this.introT / ((CONFIG.bossTheater && CONFIG.bossTheater.introDur) || 1.4), 0, 1) : 1;
+    const deathScale = this.dying ? Math.max(0.04, 1 - this.deathP * 0.92) : 1;
     ctx.save();
-    ctx.globalAlpha = 0.22 + 0.1 * Math.sin(t / 200); ctx.fillStyle = THEME.ink;
-    ctx.beginPath(); ctx.ellipse(x, y, w * 1.45, h * 1.45, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.translate(x, y);
-    const spin = this.mode === "downed" ? 0 : (this.mode === "final" ? t / 280 : t / 700);
-    ctx.rotate(spin);
-    ctx.fillStyle = this.flash > 0 ? "#fff" : "#191328";
-    ctx.beginPath();
-    const pts = 10;
-    for (let i = 0; i < pts; i++) { const a = i / pts * Math.PI * 2, r = (i % 2 ? w : w * 0.6) * (1 + 0.07 * Math.sin(t / 110 + i)); ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = core; ctx.lineWidth = 3; ctx.stroke();
-    ctx.rotate(-spin);
-    const cr = w * 0.34 * (0.8 + 0.2 * Math.sin(t / 100));
-    ctx.globalAlpha = 0.9; ctx.fillStyle = core; ctx.beginPath(); ctx.arc(0, 0, cr, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 0.7; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0, 0, cr * 0.45, 0, Math.PI * 2); ctx.fill();
+    ctx.translate(x, y); ctx.scale(deathScale, deathScale);
+    // Void wake: particles stream left as if the arena itself is being pulled in.
+    for (let i = 0; i < 18; i++) {
+      const a = i / 18 * Math.PI * 2 + t / (850 + i * 17), rr = w * (1.3 + (i % 4) * 0.22) * introP;
+      ctx.globalAlpha = 0.15 + (i % 3) * 0.06; ctx.fillStyle = i % 3 ? core : THEME.ink;
+      ctx.fillRect(Math.cos(a) * rr - (this.mode === "void" ? 22 : 0), Math.sin(a) * rr, 8 + (i % 4) * 3, 3);
+    }
+    // Three counter-rotating shard rings make every stolen cast feel housed in a
+    // single impossible body rather than a generic caster silhouette.
+    for (let ring = 0; ring < 3; ring++) {
+      const rr = w * (0.58 + ring * 0.34) * introP, spin = t / (620 - ring * 120) * (ring % 2 ? -1 : 1);
+      ctx.save(); ctx.rotate(spin); ctx.strokeStyle = ring === 1 ? core : THEME.ink; ctx.lineWidth = 2 + ring;
+      ctx.globalAlpha = 0.55 + ring * 0.12;
+      const n = 7 + ring * 3;
+      for (let i = 0; i < n; i++) {
+        const a = i / n * Math.PI * 2, px = Math.cos(a) * rr, py = Math.sin(a) * rr * 0.78;
+        ctx.save(); ctx.translate(px, py); ctx.rotate(a + Math.PI / 4);
+        ctx.beginPath(); ctx.moveTo(-8 - ring * 2, 0); ctx.lineTo(0, -4 - ring); ctx.lineTo(11 + ring * 2, 0); ctx.lineTo(0, 4 + ring); ctx.closePath(); ctx.stroke(); ctx.restore();
+      }
+      ctx.restore();
+    }
+    const cr = w * 0.36 * (0.82 + 0.18 * Math.sin(t / 100));
+    ctx.globalAlpha = 0.95; ctx.fillStyle = core; ctx.beginPath(); ctx.arc(0, 0, cr, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = this.dying ? this.deathP : 0.78; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0, 0, cr * (this.dying ? 1.8 : 0.46), 0, Math.PI * 2); ctx.fill();
     ctx.restore();
+    // RIFT DASH: chromatic afterimages of the blink, then a lane telegraph on wind
+    for (const g of this.dashGhosts) {
+      const gk = g.t / 0.24; ctx.save(); ctx.globalAlpha = gk * 0.4;
+      ctx.fillStyle = gk > 0.5 ? "#39f0ff" : "#ff4d8d";
+      ctx.fillRect(g.x - w + (gk - 0.5) * 8, g.y - h, w * 2, h * 2); ctx.restore();
+    }
+    if (this.dashState === "wind") {
+      const dk = 1 - clamp(this.dashT / CONFIG.source.dashWindup, 0, 1);
+      const ang = Math.atan2(this.dashTY, this.dashTX);
+      ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(ang);
+      ctx.globalAlpha = 0.2 + 0.35 * dk; ctx.fillStyle = core;
+      ctx.fillRect(0, -18, CONFIG.view.w * 1.4, 36);
+      ctx.globalAlpha = 0.6 + 0.4 * dk; ctx.fillRect(0, -2, CONFIG.view.w * 1.4, 4);
+      ctx.restore();
+    }
+    if (this.collapseState === "wind") {
+      const ck = 1 - clamp(this.collapseWT / CONFIG.source.collapseWindup, 0, 1);
+      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - Math.PI / 2;
+        dangerReticle(ctx, this.x + Math.cos(a) * 150 * (1 - ck * 0.3), this.y + Math.sin(a) * 90 * (1 - ck * 0.3), 14, ck, core); }
+    }
+    if (this.beamState === "tell") {
+      const k = 1 - clamp(this.beamT / CONFIG.source.beamWarn, 0, 1);
+      dangerColumn(ctx, this.beamX, CONFIG.source.beamW, 10, CONFIG.world.groundY, CONFIG.colors.perfect, k);
+    } else if (this.beamState === "sweep") {
+      ctx.save(); ctx.globalAlpha = 0.78; ctx.fillStyle = CONFIG.colors.perfect;
+      ctx.fillRect(this.beamX - CONFIG.source.beamW / 2, 0, CONFIG.source.beamW, CONFIG.view.h);
+      ctx.globalAlpha = 0.85; ctx.fillStyle = "#fff"; ctx.fillRect(this.beamX - 5, 0, 10, CONFIG.view.h); ctx.restore();
+    }
+    if (this.captionT > 0) UI.tag(ctx, this.echoCaption, this.x, this.y - this.hh - 48, core, "center", UI.t.type.caption);
+    drawPeril(ctx, this);
     this.drawHpBar(ctx);
   }
 }
@@ -3692,10 +4729,13 @@ const ACH = {
     return { id, cat, rarity, name, desc, stat, goal };
   },
 
-  list: [],   // filled by _build() below
+  _all: [],   // canonical list; includes locked hidden achievements for mastery logic
+  get list() {
+    return this._all.filter((a) => !a.hidden || PROFILE.unlocked(a.id));
+  },
   _build() {
     const S = this._s.bind(this);
-    this.list = [
+    this._all = [
       // ---- COMBAT: raw kills ----
       S("first_blood", "combat", "common", "First Blood", "Defeat your first enemy.", "kills", 1),
       S("centurion", "combat", "uncommon", "Centurion", "Defeat 100 enemies.", "kills", 100),
@@ -3755,6 +4795,10 @@ const ACH = {
       S("boss_aldric", "boss", "rare", "Regicide", "Defeat The Berserker King, Aldric.", "killAldric", 1),
       S("boss_echo", "boss", "epic", "Shattered Mirror", "Defeat The Echo.", "killEcho", 1),
       S("boss_source", "boss", "legendary", "The Wound Closes", "Defeat The Source.", "killSource", 1),
+      // Directly unlocked by Aldric's kneel choice. It intentionally has no stat/check,
+      // so the achievement timestamp is the only Witness-specific persisted state.
+      { id: "witness", cat: "boss", rarity: "epic", name: "Witness",
+        desc: "Stand witness through Aldric's kneel without striking him.", hidden: true, manual: true },
 
       // ---- ENDLESS MILESTONES (Endless mode only) ----
       S("endless_25", "survival", "uncommon", "Endless: Initiation", "Reach Wave 25 in Endless.", "bestWaveEndless", 25),
@@ -3828,18 +4872,18 @@ const ACH = {
     ];
     for (const m of CAT_MASTERY) {
       const ach = S(m.id, m.cat, "epic", m.name, m.desc);
-      ach.check = () => this.list.filter((a) => a.cat === m.cat && a.id !== m.id && !a.master).every((a) => PROFILE.unlocked(a.id));
+      ach.check = () => this._all.filter((a) => a.cat === m.cat && a.id !== m.id && !a.master).every((a) => PROFILE.unlocked(a.id));
       ach.master = true;   // excluded from other masters' checks so they don't wait on each other
-      this.list.push(ach);
+      this._all.push(ach);
     }
     // ---- THE PLATINUM: unlock literally everything else ----
     const platinum = S("completionist", "mastery", "legendary", "The Momentum Blade", "Unlock every other achievement in Tear.");
-    platinum.check = () => this.list.filter((a) => a.id !== "completionist").every((a) => PROFILE.unlocked(a.id));
+    platinum.check = () => this._all.filter((a) => a.id !== "completionist").every((a) => PROFILE.unlocked(a.id));
     platinum.master = true;
-    this.list.push(platinum);
+    this._all.push(platinum);
   },
 
-  byId(id) { return this.list.find((a) => a.id === id); },
+  byId(id) { return this._all.find((a) => a.id === id); },
   shardsFor(a) { return a.shards != null ? a.shards : (this.RARITY[a.rarity] || {}).shards || 5; },
   coinsFor(a) { return a.coins != null ? a.coins : (this.RARITY[a.rarity] || {}).coins || 0; },
   totalShards() { let s = 0; for (const a of this.list) s += this.shardsFor(a); return s; },
@@ -3847,6 +4891,7 @@ const ACH = {
   // 0..1 progress toward an achievement (for the menu's bars)
   progress(a) {
     if (PROFILE.unlocked(a.id)) return 1;
+    if (a.manual) return 0;
     if (a.check) return a.check(PROFILE) ? 1 : 0;
     const cur = PROFILE.stat(a.stat), goal = a.goal || 1;
     return clamp(cur / goal, 0, 1);
@@ -3861,8 +4906,9 @@ const ACH = {
 
   // evaluate every locked achievement; unlock + reward + queue toasts for newly-met ones
   check() {
-    for (const a of this.list) {
+    for (const a of this._all) {
       if (PROFILE.unlocked(a.id)) continue;
+      if (a.manual) continue;   // scripted/choice achievements unlock only at their authored event
       const met = a.check ? a.check(PROFILE) : PROFILE.stat(a.stat) >= (a.goal || 1);
       if (met) {
         a.shards = this.shardsFor(a);
@@ -3870,6 +4916,19 @@ const ACH = {
         if (PROFILE.unlock(a)) { this.pending.push(a); try { SFX.rankup(); } catch (e) {} }
       }
     }
+  },
+
+  // Scripted achievements use the same reward/toast path as check(), without needing a
+  // throwaway PROFILE stat. This keeps direct choice unlocks safe and idempotent.
+  unlock(id) {
+    const a = this.byId(id);
+    if (!a || PROFILE.unlocked(id)) return false;
+    a.shards = this.shardsFor(a);
+    a.coins = this.coinsFor(a);
+    if (!PROFILE.unlock(a)) return false;
+    this.pending.push(a);
+    try { SFX.rankup(); } catch (e) {}
+    return true;
   },
 };
 ACH._build();
