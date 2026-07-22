@@ -11,15 +11,21 @@
     "start": "npm run sync:game && astro dev",
     "build": "npm run sync:game && npm run generate:viewer-fallbacks && astro build",
     "generate:viewer-fallbacks": "node scripts/generate-model-fallbacks.mjs",
-    "preview": "astro preview",
-    "astro": "astro"
+    "preview": "npm run build && wrangler dev",
+    "astro": "astro",
+    "generate-types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.1.4",
     "@astrojs/mdx": "^7.0.2",
     "@astrojs/starlight": "^0.41.3",
     "@astrojs/svelte": "^9.0.1",
     "astro": "^7.0.2",
     "sharp": "^0.34.5",
     "svelte": "^5.56.4"
+  },
+  "devDependencies": {
+    "wrangler": "^4.113.0"
   }
 }
