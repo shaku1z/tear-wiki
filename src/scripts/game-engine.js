@@ -312,7 +312,7 @@ const CONFIG = {
     campAfter: 4.0, volleyCd: 6.0,   // NO SHELTER: perch too long and the skyward volley answers
   },
 
-  // support: no real attack �� they make every OTHER enemy worse, so they're priority kills
+  // support: no real attack — they make every OTHER enemy worse, so they're priority kills
   support: { w: 32, h: 42, hp: 44, speed: 125, contactDmg: 6, knockbackTaken: 13, weight: 1,
     range: 240, keepAway: 330, menderRate: 11,
     drMult: 0.5, dmgBuff: 1.35,        // War Priest: protects AND empowers nearby enemies
