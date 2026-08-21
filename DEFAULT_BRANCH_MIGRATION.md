@@ -9,15 +9,19 @@ replaced separately; it must not be treated as repaired by a branch rename.
 - Record the exact `master` commit, current Worker version, custom-domain
   routes, Workers Builds connection state, workflow inventory, and public
   response headers.
+- Cloudflare Workers Builds was disconnected from `tear-wiki` on 2026-08-21.
+  Configuration reads now fail closed with Cloudflare error `12040`, while the
+  existing `tear-wiki` Worker remains present. Do not reconnect repository
+  builds during the branch migration.
 - The audited source baseline is clean `origin/master` at
   `b57efdaa8774d889555f4708edbe5b1cc6d3ab17`. The stale local `master` at
   `f183b49` is not a migration source.
 - Preserve all refs in a verified Git bundle and create an annotated rollback
   tag at the recorded `master` commit.
 - Ruleset `21119805`, **Canonical branch authority**, currently protects only
-  `master`: it blocks deletion and force-push and requires pull requests, but
-  has no required status. Require the `check` job from the `Validate` workflow
-  on `master` before migration.
+  `master`: it blocks deletion and force-push, requires pull requests, and
+  requires the current `check` job from the `Validate` workflow with no bypass
+  actors. Preserve those controls while extending the ruleset to `main`.
 - Confirm the retained snapshot passes `npm run check:snapshot` from a clean
   checkout. Do not invoke the known-broken JS-era synchronizer as evidence.
 - Keep the public `tear-wiki` Worker frozen throughout the branch change.
