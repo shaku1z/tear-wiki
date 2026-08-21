@@ -7,6 +7,7 @@
     "verify:game": "node scripts/verify-game-data.mjs",
     "verify:tiers": "node scripts/verify-tier-system.mjs",
     "verify:viewer": "node scripts/verify-model-viewer.mjs",
+    "check:snapshot": "npm run verify:game && npm run verify:tiers && npm run verify:viewer && npx astro build",
     "dev": "npm run sync:game && astro dev",
     "start": "npm run sync:game && astro dev",
     "build": "npm run sync:game && npm run generate:viewer-fallbacks && astro build",
