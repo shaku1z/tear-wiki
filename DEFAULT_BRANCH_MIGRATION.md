@@ -9,23 +9,35 @@ replaced separately; it must not be treated as repaired by a branch rename.
 - Record the exact `master` commit, current Worker version, custom-domain
   routes, Workers Builds connection state, workflow inventory, and public
   response headers.
+- The audited source baseline is clean `origin/master` at
+  `b57efdaa8774d889555f4708edbe5b1cc6d3ab17`. The stale local `master` at
+  `f183b49` is not a migration source.
 - Preserve all refs in a verified Git bundle and create an annotated rollback
   tag at the recorded `master` commit.
-- Require the `check` status from the `Validate` workflow on `master`.
+- Ruleset `21119805`, **Canonical branch authority**, currently protects only
+  `master`: it blocks deletion and force-push and requires pull requests, but
+  has no required status. Require the `check` job from the `Validate` workflow
+  on `master` before migration.
 - Confirm the retained snapshot passes `npm run check:snapshot` from a clean
   checkout. Do not invoke the known-broken JS-era synchronizer as evidence.
 - Keep the public `tear-wiki` Worker frozen throughout the branch change.
 
 ## Migration slice
 
-1. Create `main` at the exact protected `master` commit. Do not delete or
-   rewrite `master`.
-2. Extend the canonical-branch ruleset to cover `main` before accepting any
-   change on it: block deletion and force-push, require pull requests, require
-   current `check`, and allow no routine bypass.
+1. Extend ruleset `21119805` to cover both `master` and the future `main`
+   before creating the new branch: block deletion and force-push, require pull
+   requests, require current `check`, and allow no routine bypass.
+2. Create `main` from the exact clean `origin/master` baseline. This is a new
+   protected ref plus a later default-branch switch—not a destructive rename.
+   Do not delete or rewrite `master`.
 3. Update branch-sensitive repository references together: workflow push
    filters, synchronization commit target, documentation edit links, local
    clone instructions, and release runbooks.
+   The existing synchronizer ends with a direct `git push`, which the protected
+   branch rejects; its replacement must open a reviewed synchronization PR or
+   use a narrowly documented automation exception. Do not add a broad bypass.
+   Also reconcile the current event mismatch: the game emits
+   `tear-game-deployed`, while the wiki listens for `tear-game-updated`.
 4. Update the `tear-wiki` Worker build/source configuration to use only the
    reviewed `main` path. Preserve its Worker name, custom-domain routes, and
    rollback version. Do not create a second Pages or Workers deployment path.
@@ -35,6 +47,9 @@ replaced separately; it must not be treated as repaired by a branch rename.
    a fresh clone selects `main`.
 7. Recheck the Worker source/build settings after the default-branch change.
    A branch rename must not silently reactivate Workers Builds or publish.
+8. Keep wiki PR #1, **DO NOT MERGE — UNSAFE**, unmerged. Its attempted Worker
+   conversion failed and does not establish source attribution for the live
+   Worker.
 
 ## Acceptance and rollback
 
@@ -44,6 +59,10 @@ replaced separately; it must not be treated as repaired by a branch rename.
   protected and green before it becomes the default.
 - Keep `master` protected as a rollback ref until the new default, workflows,
   Worker source, custom domain, and fresh-clone behavior are all recorded.
+- After switching the default, record the default-branch API result, ruleset
+  targets, fresh-clone selected branch, Worker source/build settings, preserved
+  `wiki.tearblade.com` route, and confirmation that no production publish
+  occurred.
 - If any branch, workflow, Worker-source, or domain check differs from the
   recorded baseline, restore the old default branch and Worker configuration;
   do not delete either ref.
