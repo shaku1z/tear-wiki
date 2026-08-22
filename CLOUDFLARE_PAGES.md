@@ -1,21 +1,27 @@
-# Cloudflare Pages deployment
+# Cloudflare Worker deployment (legacy filename)
 
-This wiki is a static Astro site deployed through Cloudflare Pages.
+The public wiki is served by the existing `tear-wiki` Cloudflare Worker, not
+by a Cloudflare Pages project. The canonical repository branch is `main`, but
+branch naming does not authorize a build or deployment.
 
-## Project configuration
+## Frozen production state
 
-Connect the `shaku1z/tear-wiki` repository in Cloudflare Pages and use:
+- Worker script tag: `44fc17ada5584668a117415e6e71c61d`.
+- Production deployment: `bbccf944-f0fd-4ef2-b179-78557529c0ed` with version
+  `b72b4f0e-5ae0-4439-9b74-cca7d3fd8d1c` at 100%.
+- Deployment source: `wrangler`.
+- Custom domain: `wiki.tearblade.com` enabled in production.
+- Workers Build configuration is absent (`12040`); triggers and deploy hooks
+  are both empty (`[]`).
 
-- Production branch: `master`
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Node.js version: `22`
-- Optional environment variable: `SITE_URL` set to your production custom domain. The default is `https://tear-wiki.pages.dev`.
-
-Cloudflare Pages deploys every push to `master`; pull requests can use preview deployments.
+Production is frozen through the branch migration. Do not reconnect Workers
+Builds, add a trigger or hook, create a Pages project, or publish a new
+version in G3. `SITE_URL` may still be set to `https://wiki.tearblade.com`
+for a later authorized build.
 
 ## Game-driven updates
 
-The wiki Action accepts an exact game commit through `repository_dispatch`, regenerates the synchronized engine snapshot, validates the build, and commits the resulting data to `master`. Cloudflare Pages then deploys that commit automatically.
-
-If a Cloudflare Pages project is already connected, no Cloudflare token or Wrangler configuration is needed for this flow.
+The legacy game-data workflow is disabled and fail-closed. G6 will replace it
+with a typed-manifest flow that validates an exact game SHA and enters the
+protected `main` branch through review. This document does not claim current
+source freshness or a production deployment from the repository.

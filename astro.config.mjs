@@ -25,7 +25,7 @@ export default defineConfig({
 			// To add a new version: npm run starlight-version <tag>
 			// (install @astrojs/starlight-versions when ready to cut v1.0)
 			editLink: {
-				baseUrl: 'https://github.com/shaku1z/tear-wiki/edit/master/',
+				baseUrl: 'https://github.com/shaku1z/tear-wiki/edit/main/',
 			},
 			lastUpdated: true,
 			pagination: true,
