@@ -10,23 +10,33 @@ Use `GAME_SOURCE=remote npm run sync:game` to pull the canonical GitHub source. 
 
 Both `npm run dev` and `npm run build` run the full sync command first. Do not bypass it.
 
-## Production synchronization
+## Production synchronization (disabled pending G6)
 
-The wiki receives `tear-game-updated` repository-dispatch events in [sync-game.yml](.github/workflows/sync-game.yml). The event payload must include the pushed game commit:
+The legacy [sync-game.yml](.github/workflows/sync-game.yml) workflow is
+currently disabled and fail-closed. Its source still declares scheduled,
+manual-dispatch, and `tear-game-updated` dispatch paths plus a direct
+`git push`, but none of those paths may publish during G3. The known-broken
+legacy JS-era synchronizer is not repaired or treated as evidence by this
+branch migration.
+
+The historical dispatch payload was:
 
 ```json
 { "event_type": "tear-game-updated", "client_payload": { "game_commit": "<full-sha>" } }
 ```
 
-The workflow fetches that exact source revision, validates/builds the wiki, and commits the generated snapshot. Cloudflare Pages deploys the corresponding `master` commit.
+This payload is retained as migration context only. G6 will replace the
+contract with an exact validated typed manifest, a reviewed update into
+protected `main`, and an explicit source-SHA record. No current production
+synchronization, wiki commit, or Cloudflare deployment is claimed here.
 
-The hourly schedule is only a recovery mechanism for a missed event; the dispatch event is the primary freshness path.
+## Deferred G6 replacement contract
 
-## Required main-repository hook
-
-The main game repository must send the dispatch after a successful push to its default branch when gameplay source files change. This wiki intentionally does not install that hook because the project handoff forbids changes outside `tear-wiki`.
-
-The game workflow needs a repository-scoped token with permission to dispatch to `shaku1z/tear-wiki`. It is stored there as `WIKI_DEPLOY_TOKEN`. Its trigger watches `js/**` and sends `github.sha` only after the game’s own checks pass.
+The game repository may eventually send an exact source SHA after its own
+successful canonical-branch checks. This wiki intentionally does not install
+or enable that hook during G3; the owning G6 change must reconcile the
+`tear-game-deployed`/`tear-game-updated` event mismatch and replace the
+retired `js/**` source contract.
 
 ## Editing rules
 
