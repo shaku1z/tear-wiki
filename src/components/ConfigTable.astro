@@ -1,7 +1,7 @@
 ---
 import gameManifest from '../data/game-manifest.json';
 
-const { title = 'LIVE CONFIGURATION', rows = [] } = Astro.props;
+const { title = 'CAPTURED CONFIGURATION', rows = [] } = Astro.props;
 const read = (path) => path.split('.').reduce((value, key) => value?.[key], gameManifest.config);
 const format = (value, row) => {
   if (value == null) return '—';

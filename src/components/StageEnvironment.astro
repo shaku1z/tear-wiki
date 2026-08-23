@@ -6,7 +6,7 @@ const stage = typeof id === 'number' ? STAGES[id] : STAGES.find((entry) => entry
 ---
 
 {stage ? <section class="stage-terminal" style={`--stage-accent:${stage.accent};--stage-bg:${stage.bg}`}>
-  <header><div><span>STAGE DOSSIER / LIVE POOL</span><h2>{stage.name}</h2><p>{stage.blurb}</p></div><code>{gameManifest.source.commit.slice(0, 7)}</code></header>
+  <header><div><span>STAGE DOSSIER / CAPTURED POOL</span><h2>{stage.name}</h2><p>{stage.blurb}</p></div><code>{gameManifest.source.commit.slice(0, 7)}</code></header>
   <div class="stage-grid"><div><h3>ENEMY DEPLOYMENT</h3><ul>{stage.pool.map(([type, weight, minWave]) => <li><b>{type}</b><span>WEIGHT {weight} / WAVE {minWave}</span></li>)}</ul></div><div class="stage-side"><blockquote>{stage.lore}</blockquote><div class="stage-meta"><span>BOSS <b>{stage.boss}</b></span><span>PLATFORM <i style={`background:${stage.plat}`}></i></span></div></div></div>
 </section> : <p>Stage not found: {id}</p>}
 

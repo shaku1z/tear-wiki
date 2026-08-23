@@ -1,18 +1,18 @@
 ---
 title: Changelog
-description: Current synchronized game snapshot and release-tracking protocol.
+description: Retained game snapshot and release-tracking boundary.
 ---
 
 import GameSourceStatus from '../../../components/GameSourceStatus.astro';
 
 <GameSourceStatus />
 
-## Live snapshot
+## Retained snapshot
 
-The wiki is built from an exact committed game revision. The source marker above is the revision represented by every generated dossier, configuration readout, palette swatch, upgrade listing, and Builder calculation on this deployment.
+The wiki records an exact committed game revision. The marker above is the revision represented by every generated dossier, configuration readout, palette swatch, upgrade listing, and Builder calculation in this retained snapshot. It is a provenance marker, not a live synchronization claim.
 
-## Release tracking
+## Release boundary
 
-When the game repository updates, the wiki synchronization workflow refreshes its generated data and Cloudflare Pages deploys the resulting wiki commit. That makes the source marker the authoritative answer to “which version does this page describe?”
+The legacy game-data listener remains disabled while G6 designs the typed game-reference contract. This page therefore does not claim that a game update automatically refreshes or deploys the wiki. The source marker answers only which retained game revision this wiki content describes.
 
 Narrative patch notes belong in the game’s release notes. This reference page deliberately avoids copying balance values, rosters, or version claims that could become stale.

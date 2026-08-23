@@ -23,4 +23,4 @@ description: Definitions for core Tear mechanics and configuration terms.
 - **Style** — the multiplier system built from varied combat actions.
 - **Affix** — an enemy modifier applied on top of its family or variant.
 
-Exact values are intentionally kept in [Mechanics](/mechanics/combat), [Modes](/modes/), and live entity dossiers so this glossary cannot drift.
+Exact values are intentionally kept in [Mechanics](/mechanics/combat), [Modes](/modes/), and captured entity dossiers so this glossary cannot drift.

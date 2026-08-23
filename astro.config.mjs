@@ -148,6 +148,8 @@ export default defineConfig({
 					label: '📖 Reference',
 					items: [
 						{ label: 'Stat Glossary', slug: 'reference/stat-glossary' },
+						{ label: 'Final Five Weapon Roster', slug: 'reference/weapon-roster' },
+						{ label: 'Terminology & Compatibility', slug: 'reference/terminology' },
 						{ label: 'Colour Palette', slug: 'reference/color-palette' },
 						{ label: 'Changelog', slug: 'reference/changelog' },
 					],

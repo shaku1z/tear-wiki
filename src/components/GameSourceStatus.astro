@@ -1,13 +1,20 @@
 ---
 import gameManifest from '../data/game-manifest.json';
+import terminology from '../data/wiki-terminology.json';
+
+const sourceCommit = gameManifest.source.commit;
+const snapshot = terminology.snapshot;
+if (sourceCommit !== snapshot.commit) {
+  throw new Error(`Retained wiki snapshot ${sourceCommit} does not match terminology receipt ${snapshot.commit}.`);
+}
 ---
 
 <aside class="game-source-status" aria-label="Game data source">
-  <span class="status-mark"></span><span>GAME DATA SYNCED</span><code>{gameManifest.source.commit.slice(0, 7)}</code><span class="status-date">COMMITTED SOURCE</span>
+  <span class="status-mark"></span><span>RETAINED GAME SNAPSHOT</span><code title={sourceCommit}>{sourceCommit}</code><span class="status-date">CAPTURED {snapshot.capturedAt.slice(0, 10)} UTC</span>
 </aside>
 
 <style>
   .game-source-status { align-items: center; border: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; flex-wrap: wrap; font-family: var(--sl-font-mono); font-size: .64rem; font-weight: 800; gap: .55rem; letter-spacing: .1em; margin: 1rem 0 1.5rem; padding: .6rem .75rem; text-transform: uppercase; }
-  .status-mark { background: var(--tear-cyan); height: .5rem; width: .5rem; } code { color: var(--tear-cyan); font: inherit; } .status-date { border-left: 1px solid var(--sl-color-hairline); margin-left: auto; padding-left: .6rem; }
+  .status-mark { background: var(--tear-cyan); height: .5rem; width: .5rem; } code { color: var(--tear-cyan); font: inherit; overflow-wrap: anywhere; } .status-date { border-left: 1px solid var(--sl-color-hairline); margin-left: auto; padding-left: .6rem; }
   @media (max-width: 520px) { .status-date { border-left: 0; margin-left: 0; padding-left: 0; width: 100%; } }
 </style>

@@ -5,9 +5,9 @@ const colors = Object.entries(gameManifest.config.colors ?? {});
 const label = (key) => key.replace(/([A-Z])/g, ' $1').replace(/^./, (character) => character.toUpperCase());
 ---
 
-<section class="palette-console" aria-label="Live game colour palette">
+<section class="palette-console" aria-label="Captured game colour palette">
   <header>
-    <span>LIVE PALETTE / CONFIG.COLORS</span>
+    <span>CAPTURED PALETTE / CONFIG.COLORS</span>
     <code>{gameManifest.source.commit.slice(0, 7)}</code>
   </header>
   <div class="palette-grid">

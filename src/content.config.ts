@@ -5,12 +5,14 @@ import { docsSchema } from '@astrojs/starlight/schema';
 // ---- Base docs schema (Starlight) ----
 const docs = defineCollection({
 	loader: docsLoader(),
-	schema: docsSchema({
-		extend: z.object({
-			// Optional game-version tag on every page (e.g. "v0.9.2")
-			gameVersion: z.string().optional(),
+		schema: docsSchema({
+			extend: z.object({
+				// Optional game-version tag on every page (e.g. "v0.9.2")
+				gameVersion: z.string().optional(),
+				// G4 terminology role keeps canonical copy separate from explicit compatibility references.
+				terminologyRole: z.enum(['canonical', 'compatibility-reference']).optional(),
+			}),
 		}),
-	}),
 });
 
 export const collections = { docs };

@@ -12,9 +12,9 @@ const filtered = category === 'stackable'
 const labels = { offense: 'OFFENSE', resilience: 'RESILIENCE', mobility: 'MOBILITY', throw: 'THROW', parry: 'PARRY', utility: 'UTILITY' };
 ---
 
-<section class="upgrade-catalogue" aria-label="Game-synchronized upgrades">
+<section class="upgrade-catalogue" aria-label="Game-snapshot upgrades">
   <div class="catalogue-signal">
-    <span>LIVE UPGRADE INDEX</span>
+    <span>CAPTURED UPGRADE INDEX</span>
     <span>{filtered.length} MODULES</span>
     <code>{gameManifest.source.commit.slice(0, 7)}</code>
   </div>

@@ -10,7 +10,7 @@ The health display shows current survival state and available shields. Taking da
 
 ## Style
 
-The Style Meter records varied combat actions and shows the current rank. Higher ranks strengthen the run, while inactivity and damage reduce momentum. See [Style Meter](/mechanics/style-meter) for live thresholds.
+The Style Meter records varied combat actions and shows the current rank. Higher ranks strengthen the run, while inactivity and damage reduce momentum. See [Style Meter](/mechanics/style-meter) for retained thresholds.
 
 ## Run state
 
@@ -18,7 +18,7 @@ The wave readout, enemy queue, coin balance, and score cluster show what remains
 
 ## Blade state
 
-The reticle shows blade aim and communicates whether the blade is held, thrown, embedded, or returning. See [The Blade](/mechanics/the-blade) for live spring and throw behavior.
+The reticle shows blade aim and communicates whether the blade is held, thrown, embedded, or returning. See [The Blade](/mechanics/the-blade) for spring and throw behavior from the retained snapshot.
 
 ## Contrast
 

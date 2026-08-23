@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "registryId": "g4-wiki-terminology-v1",
+  "status": "governance-only",
+  "scope": "Permanent public terminology for authored wiki copy; gameplay synchronization remains a separate G6 contract.",
+  "snapshot": {
+    "repository": "shaku1z/tear",
+    "commit": "d62c20eca2da067800f763abc5afdf4c7747fe76",
+    "capturedAt": "2026-07-18T05:40:18Z",
+    "freshness": "retained",
+    "refreshOwner": "G6 typed game-reference synchronization"
+  },
+  "publicTerms": [
+    {
+      "id": "tear-music",
+      "displayName": "TEAR Music",
+      "codeId": "tear-music",
+      "scope": "Whole music product and repository",
+      "deprecatedAliases": ["TearScore", "tear-score"],
+      "compatibility": "Legacy product, repository, package, and provenance identifiers remain readable where required; new authored public copy uses TEAR Music."
+    },
+    {
+      "id": "adaptive-soundtrack",
+      "displayName": "Adaptive Soundtrack",
+      "codeId": "adaptive-soundtrack",
+      "scope": "In-game adaptive playback engine",
+      "deprecatedAliases": ["TearScore runtime", "TearScore engine"],
+      "compatibility": "Legacy runtime and replay metadata identifiers remain readable for deterministic playback; new authored public copy uses Adaptive Soundtrack."
+    },
+    {
+      "id": "music",
+      "displayName": "Music",
+      "codeId": "music",
+      "scope": "Player-facing music area",
+      "deprecatedAliases": ["THE SIGNAL", "Signal"],
+      "deprecatedCopyAliases": ["THE SIGNAL"],
+      "compatibility": "Legacy catalog, settings, and bookmark identifiers remain readable; current player-facing labels use Music."
+    },
+    {
+      "id": "soundtrack-desk",
+      "displayName": "Soundtrack Desk",
+      "codeId": "soundtrack-desk",
+      "scope": "Audio authoring application",
+      "deprecatedAliases": ["Foundry Studio", "audio Foundry"],
+      "compatibility": "Legacy routes, hostnames, query parameters, launchers, and telemetry remain compatibility readers; current labels use Soundtrack Desk."
+    },
+    {
+      "id": "training-operations",
+      "displayName": "Training Operations",
+      "codeId": "training-operations",
+      "scope": "Agent training operations",
+      "deprecatedAliases": ["Foundry"],
+      "compatibility": "Legacy training records, route aliases, and persistence keys remain readable; current labels use Training Operations and stay distinct from Soundtrack Desk."
+    },
+    {
+      "id": "scenario-console",
+      "displayName": "Scenario Console",
+      "codeId": "scenario-console",
+      "scope": "State construction tool",
+      "deprecatedAliases": ["State Forge", "State Forge Studio"],
+      "compatibility": "Legacy scenario/replay codecs and TearBench evidence remain readable; current labels use Scenario Console."
+    },
+    {
+      "id": "replay-editor",
+      "displayName": "Replay Editor",
+      "codeId": "replay-editor",
+      "scope": "Replay editing tool",
+      "deprecatedAliases": ["Ghost Studio"],
+      "compatibility": "Legacy replay routes and edit-decision-list identifiers remain readable; current labels use Replay Editor."
+    },
+    {
+      "id": "replay-hub",
+      "displayName": "Replay Hub",
+      "codeId": "replay-hub",
+      "scope": "Replay exploration tool",
+      "deprecatedAliases": ["Ghost Lab"],
+      "compatibility": "Legacy replay routes and retained evidence remain readable; current labels use Replay Hub."
+    },
+    {
+      "id": "game-agent",
+      "displayName": "Game Agent",
+      "codeId": "game-agent",
+      "scope": "Automated game-playing agent",
+      "deprecatedAliases": ["TearBot"],
+      "compatibility": "Legacy evaluation artifacts and report namespaces remain readable; current labels use Game Agent."
+    },
+    {
+      "id": "training-archive",
+      "displayName": "Training Archive",
+      "codeId": "training-archive",
+      "scope": "Training artifact collection",
+      "deprecatedAliases": ["Academy"],
+      "compatibility": "Legacy training records and custody identifiers remain readable; current labels use Training Archive."
+    },
+    {
+      "id": "run-monitor",
+      "displayName": "Run Monitor",
+      "codeId": "run-monitor",
+      "scope": "Live agent observation tool",
+      "deprecatedAliases": ["Watch Agent"],
+      "compatibility": "Legacy event, route, and journal identifiers remain readable; current labels use Run Monitor."
+    },
+    {
+      "id": "tearbench",
+      "displayName": "TearBench",
+      "codeId": "TearBench",
+      "scope": "Verification system",
+      "deprecatedAliases": [],
+      "unchanged": true,
+      "compatibility": "TearBench remains unchanged, including its evidence routes and historical records."
+    }
+  ],
+  "activeRoster": {
+    "schemaVersion": "final-five-v1",
+    "source": "wiki-authored governance contract; future typed game export is G6",
+    "canonicalIds": ["sword", "hammer", "greatsword", "chainblade", "riftlock"],
+    "canonicalDisplayNames": ["Sword", "Hammer", "Greatsword", "Chainblade", "Riftlock"],
+    "retiredIds": ["spear", "ringblade"],
+    "migrationMap": {
+      "spear": "greatsword",
+      "ringblade": "riftlock"
+    },
+    "legacyUsePolicy": "Retired IDs may appear only in explicit history or migration material; they are not current selectable weapons."
+  },
+  "legacyPolicy": {
+    "publicCopy": "canonical-only",
+    "history": "Immutable historical records may retain their original terminology.",
+    "compatibility": "Compatibility readers, aliases, and migration maps may retain old identifiers when path-scoped, justified, and tested.",
+    "g6Boundary": "This registry does not synchronize or regenerate gameplay data. G6 owns the typed game-reference replacement."
+  }
+}
