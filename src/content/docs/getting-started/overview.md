@@ -6,11 +6,11 @@ description: Tear’s core loop, modes, and design philosophy.
 
 ## Core Loop
 
-Fight a wave, earn resources, adapt the build, then confront each stage’s boss. The live stage roster and run pacing are available in [Stages](/stages/) and [Modes](/modes/).
+Fight a wave, earn resources, adapt the build, then confront each stage’s boss. The captured stage roster and run pacing are available in [Stages](/stages/) and [Modes](/modes/).
 
 ## Style
 
-Hits, throws, launches, slams, parries, and deflects feed the Style Meter. High style rewards varied execution; getting hit resets momentum. See [Style Meter](/mechanics/style-meter) for synchronized thresholds.
+Hits, throws, launches, slams, parries, and deflects feed the Style Meter. High style rewards varied execution; getting hit resets momentum. See [Style Meter](/mechanics/style-meter) for thresholds from the retained snapshot.
 
 ## Philosophy
 

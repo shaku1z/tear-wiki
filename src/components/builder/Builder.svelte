@@ -103,12 +103,12 @@
 <section class="ability-lab" aria-label="TEAR Ability Lab">
   <header class="lab-header">
     <div class="lab-title">
-      <span class="eyebrow">THEORYCRAFT ENGINE / LIVE CONFIGURATION</span>
+      <span class="eyebrow">THEORYCRAFT ENGINE / RETAINED CONFIGURATION</span>
       <h1>ABILITY LAB</h1>
     </div>
     <div class="header-signal" aria-label="Game source information">
       <span class="signal-dot"></span>
-      <span>ENGINE SYNCED</span>
+      <span>ENGINE SNAPSHOT</span>
       <code>{gameManifest.source.commit.slice(0, 7)}</code>
     </div>
     <div class="lab-actions">
@@ -144,7 +144,7 @@
       {:else}
         <div class="empty-rack">
           <span>NO SIGNAL</span>
-          <p>Select an ability module to begin a live engine simulation.</p>
+          <p>Select an ability module to begin a retained-engine simulation.</p>
         </div>
       {/if}
     </aside>

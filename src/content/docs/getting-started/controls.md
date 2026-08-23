@@ -17,7 +17,7 @@ description: Keyboard, mouse, and touch controls for Tear.
 | S | Crouch or drop through one-way platforms |
 | Shift / double-tap | Dash |
 
-The blade uses spring physics: aim establishes tension, and a committed release turns that tension into a swing. See [The Blade](/mechanics/the-blade), [Dash](/mechanics/dash), and [Combat](/mechanics/combat) for live mechanical parameters.
+The blade uses spring physics: aim establishes tension, and a committed release turns that tension into a swing. See [The Blade](/mechanics/the-blade), [Dash](/mechanics/dash), and [Combat](/mechanics/combat) for mechanical parameters from the retained snapshot.
 
 ## Touch
 

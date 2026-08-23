@@ -1,0 +1,45 @@
+---
+import registry from '../data/wiki-terminology.json';
+
+const roster = registry.activeRoster;
+const retired = Object.entries(roster.migrationMap);
+---
+
+<section class="final-five-roster" aria-label="Final Five weapon roster">
+  <header>
+    <span>ACTIVE ROSTER / {roster.schemaVersion.toUpperCase()}</span>
+    <code>CANONICAL WRITE SET</code>
+  </header>
+  <ol>
+    {roster.canonicalDisplayNames.map((name, index) => <li><b>{String(index + 1).padStart(2, '0')}</b><span>{name}</span><code>{roster.canonicalIds[index]}</code></li>)}
+  </ol>
+  <div class="migration-note">
+    <strong>History and migration only</strong>
+    <p>{roster.legacyUsePolicy}</p>
+    <table>
+      <thead><tr><th>Retired input</th><th>Compatibility destination</th></tr></thead>
+      <tbody>{retired.map(([legacy, current]) => <tr><td><code>{legacy}</code></td><td><code>{current}</code></td></tr>)}</tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .final-five-roster { border: 1px solid var(--sl-color-hairline); margin: 1.5rem 0; }
+  header { align-items: center; border-bottom: 1px solid var(--sl-color-hairline); display: flex; gap: .75rem; justify-content: space-between; padding: .8rem 1rem; }
+  header span, header code, li b, li code, .migration-note strong, th { font: 700 .65rem/1.2 var(--sl-font-mono); letter-spacing: .1em; text-transform: uppercase; }
+  header span { color: var(--tear-cyan); }
+  header code { color: var(--sl-color-gray-3); }
+  ol { list-style: none; margin: 0; padding: 0; }
+  li { align-items: baseline; border-bottom: 1px solid var(--sl-color-hairline); display: grid; gap: .8rem; grid-template-columns: 2rem 1fr auto; padding: .9rem 1rem; }
+  li b { color: var(--sl-color-gray-3); }
+  li span { color: var(--sl-color-white); font-size: 1.1rem; font-weight: 700; }
+  li code { color: var(--tear-cyan); }
+  .migration-note { background: color-mix(in srgb, var(--sl-color-gray-6) 22%, transparent); padding: 1rem; }
+  .migration-note strong { color: var(--sl-color-gray-3); display: block; }
+  .migration-note p { color: var(--sl-color-gray-3); margin: .45rem 0 .8rem; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid var(--sl-color-hairline); padding: .45rem .6rem; text-align: left; }
+  th { color: var(--sl-color-gray-3); }
+  td code { color: var(--sl-color-gray-2); }
+  @media (max-width: 520px) { li { grid-template-columns: 1.7rem 1fr; } li code { grid-column: 2; } }
+</style>

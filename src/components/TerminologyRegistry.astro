@@ -1,0 +1,51 @@
+---
+import registry from '../data/wiki-terminology.json';
+
+const terms = registry.publicTerms;
+---
+
+<section class="terminology-registry" aria-label="Permanent public terminology">
+  <header>
+    <span>PUBLIC TERMINOLOGY / {registry.registryId.toUpperCase()}</span>
+    <code>SCHEMA {registry.schemaVersion}</code>
+  </header>
+  <p class="registry-note">Current authored copy uses the permanent display names below. Legacy names are listed only as compatibility readers or historical references.</p>
+  <div class="registry-table-wrap">
+    <table>
+      <thead>
+        <tr><th>Scope</th><th>Permanent public name</th><th>Legacy compatibility aliases</th></tr>
+      </thead>
+      <tbody>
+        {terms.map((term) => (
+          <tr>
+            <td>{term.scope}</td>
+            <th scope="row">{term.displayName}</th>
+            <td>
+              {term.unchanged ? <span class="unchanged">UNCHANGED</span> : term.deprecatedAliases.length ? <span class="aliases">{term.deprecatedAliases.map((alias) => <code>{alias}</code>)}</span> : <span class="unchanged">NONE</span>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <footer>{registry.legacyPolicy.compatibility}</footer>
+</section>
+
+<style>
+  .terminology-registry { border: 1px solid var(--sl-color-hairline); margin: 1.5rem 0; }
+  header { align-items: center; border-bottom: 1px solid var(--sl-color-hairline); display: flex; gap: .75rem; justify-content: space-between; padding: .8rem 1rem; }
+  header span, header code, footer { font: 700 .65rem/1.4 var(--sl-font-mono); letter-spacing: .1em; text-transform: uppercase; }
+  header span { color: var(--tear-cyan); }
+  header code { color: var(--sl-color-gray-3); }
+  .registry-note, footer { color: var(--sl-color-gray-3); margin: 0; padding: .85rem 1rem; }
+  .registry-table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; margin: 0; min-width: 680px; width: 100%; }
+  th, td { border-bottom: 1px solid var(--sl-color-hairline); padding: .7rem 1rem; text-align: left; vertical-align: top; }
+  thead th { color: var(--sl-color-gray-3); font: 700 .62rem/1.2 var(--sl-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+  tbody th { color: var(--sl-color-white); white-space: nowrap; }
+  tbody td { color: var(--sl-color-gray-2); }
+  .aliases { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .aliases code { border: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); padding: .15rem .35rem; }
+  .unchanged { color: var(--tear-cyan); font: 700 .65rem/1 var(--sl-font-mono); letter-spacing: .08em; }
+  tr:last-child th, tr:last-child td { border-bottom: 0; }
+</style>

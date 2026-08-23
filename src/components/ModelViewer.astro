@@ -33,8 +33,8 @@ const modelConfig = gameManifest.config?.[configKey] || gameManifest.config?.bos
         <p>{isBoss ? 'BOSS RECORD' : 'ENEMY FAMILY'} / {profile.role.toUpperCase()}</p>
         <h2>{displayName}</h2>
       </div>
-      <div class="archive-provenance" title="Generated from the live game repository">
-        <span>LIVE MODEL</span><code>{gameManifest.source.commit.slice(0, 7)}</code>
+      <div class="archive-provenance" title="Generated from the retained game snapshot">
+        <span>CAPTURED MODEL</span><code>{gameManifest.source.commit.slice(0, 7)}</code>
       </div>
     </header>
 
@@ -43,13 +43,13 @@ const modelConfig = gameManifest.config?.[configKey] || gameManifest.config?.bos
       <div class="arena-measurements" aria-hidden="true"><span>00</span><span>01</span><span>02</span><span>03</span></div>
       <div class="arena-ground" aria-hidden="true"></div>
       <div class="model-fallback" role="status"><img src={`/generated/models/${model}.svg`} alt="" /><span>RECONSTRUCTING</span><b>{displayName}</b></div>
-      <canvas aria-label={`Live game reconstruction of ${displayName}`}></canvas>
+      <canvas aria-label={`Animated preview reconstruction of ${displayName}`}></canvas>
       <div class="model-error" hidden><b>RECONSTRUCTION FAILED</b><span>The tactical record remains available below.</span></div>
       <div class="stage-readout" aria-live="polite">
         <span class="model-state">EXHIBIT / RUNNING</span>
         <span>{profile.range.toUpperCase()} RANGE</span>
       </div>
-      <p class="interaction-hint">EXHIBIT PLAYS THE LIVE BEHAVIOR · TRAINING TRACKS YOUR POINTER · ANALYSIS REVEALS COMBAT GEOMETRY</p>
+      <p class="interaction-hint">EXHIBIT PREVIEWS CAPTURED BEHAVIOR · TRAINING TRACKS YOUR POINTER · ANALYSIS REVEALS COMBAT GEOMETRY</p>
       <div class="corner-mark corner-a" aria-hidden="true"></div>
       <div class="corner-mark corner-b" aria-hidden="true"></div>
     </div>

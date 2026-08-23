@@ -20,4 +20,4 @@ for (const model of models) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="${model} archive silhouette"><rect width="320" height="180" fill="#0a0b0e"/><g opacity=".14" stroke="${color}"><path d="M0 45h320M0 90h320M0 135h320M80 0v180M160 0v180M240 0v180"/></g><ellipse cx="160" cy="143" rx="${bodyW * .8}" ry="8" fill="${color}" opacity=".15"/><rect x="${x}" y="${y}" width="${bodyW}" height="${bodyH}" fill="${color}" opacity=".88"/><rect x="${160 + bodyW * .12}" y="${y + bodyH * .3}" width="7" height="7" fill="#f7fbff"/><path d="M24 24h30M24 24v30M296 156h-30M296 156v-30" fill="none" stroke="${color}"/><text x="24" y="164" fill="#858a92" font-family="monospace" font-size="9" letter-spacing="2">${model.toUpperCase()}</text></svg>`;
   fs.writeFileSync(path.join(output, `${model}.svg`), svg);
 }
-console.log(`Generated ${models.length} synchronized model fallbacks.`);
+console.log(`Generated ${models.length} retained-snapshot model fallbacks.`);

@@ -5,8 +5,8 @@ const tiered = gameManifest.upgrades.filter((upgrade) => upgrade.progression ===
 const categories = [...new Set(tiered.map((upgrade) => upgrade.cat))];
 ---
 
-<section class="tier-system" aria-label="Live ability tier system">
-  <header><span>ABILITY EVOLUTION / LIVE RULESET</span><code>{gameManifest.source.commit.slice(0, 7)}</code></header>
+<section class="tier-system" aria-label="Captured ability tier system">
+  <header><span>ABILITY EVOLUTION / CAPTURED RULESET</span><code>{gameManifest.source.commit.slice(0, 7)}</code></header>
   <div class="tier-flow" aria-label="Tier progression route">
     <div><b>T1</b><span>DRAFT PICKUP</span><p>Acquire the core ability during a run.</p></div>
     <i aria-hidden="true">→</i>
