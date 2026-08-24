@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -40,6 +41,13 @@ async function artifactDirectory(directory, manifest = bytes.manifestBytes, rece
 test('accepts the checked-in current artifact', () => {
   const result = validateGameReferenceArtifact(valid());
   assert.equal(result.manifestSha256, '7b8b3f5fec5862f3649470ab3e04170e096065c823b9349140bf9d688740311f');
+});
+
+test('keeps byte-hashed snapshots out of Windows text conversion', () => {
+  const attributes = execFileSync('git', ['check-attr', 'text', '--', 'src/data/game-reference.v1.json', 'src/data/game-reference.v1.receipt.json'], { encoding: 'utf8' });
+  assert.match(attributes, /game-reference\.v1\.json: text: unset/);
+  assert.match(attributes, /game-reference\.v1\.receipt\.json: text: unset/);
+  assert.equal(createHash('sha256').update(bytes.manifestBytes).digest('hex'), '7b8b3f5fec5862f3649470ab3e04170e096065c823b9349140bf9d688740311f');
 });
 
 test('accepts a future explicit run when receipt and argument agree', () => {

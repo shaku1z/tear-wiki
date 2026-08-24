@@ -8,9 +8,10 @@
     "verify:tiers": "node scripts/verify-tier-system.mjs",
     "verify:viewer": "node scripts/verify-model-viewer.mjs",
     "verify:terminology": "node scripts/verify-terminology.mjs",
-    "test:game-reference": "node --test scripts/game-reference-contract.test.mjs",
+    "test:game-reference": "node --test scripts/game-reference-contract.test.mjs scripts/fetch-game-reference-artifact.test.mjs",
     "verify:game-reference": "node scripts/store-game-reference.mjs",
     "sync:game-reference": "node scripts/store-game-reference.mjs --write",
+    "fetch:game-reference": "node scripts/fetch-game-reference-artifact.mjs",
     "check:snapshot": "npm run test:game-reference && npm run verify:terminology && npm run verify:game && npm run verify:tiers && npm run verify:viewer && npm run astro -- build",
     "dev": "npm run sync:game && astro dev",
     "start": "npm run sync:game && astro dev",
@@ -25,6 +26,7 @@
     "@astrojs/svelte": "^9.0.1",
     "astro": "^7.0.2",
     "sharp": "^0.34.5",
-    "svelte": "^5.56.4"
+    "svelte": "^5.56.4",
+    "yauzl": "3.4.0"
   }
 }
