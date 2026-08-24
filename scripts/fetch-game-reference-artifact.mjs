@@ -6,6 +6,8 @@ import { storeGameReference } from './store-game-reference.mjs';
 const openZip = promisify(yauzl.fromBuffer);
 const REPOSITORY = 'shaku1z/tear';
 const WORKFLOW = 'Validate';
+const WORKFLOW_ID = 322540049;
+const WORKFLOW_PATH = '.github/workflows/ci.yml';
 const MAX_FILE_BYTES = 1024 * 1024;
 const MAX_ZIP_BYTES = 4 * 1024 * 1024;
 const FILES = new Set(['game-reference.v1.json', 'game-reference.v1.receipt.json']);
@@ -99,7 +101,7 @@ export async function fetchGameReferenceArtifact({ sha, runId, token = process.e
   if (typeof fetchImpl !== 'function') fail('fetch implementation is required');
   const api = `https://api.github.com/repos/${REPOSITORY}`;
   const run = await responseJson(await fetchImpl(`${api}/actions/runs/${runId}`, { headers: headers(token) }), 'workflow run');
-  if (!sameId(run.id, runId) || run.name !== WORKFLOW || (run.workflow_name != null && run.workflow_name !== WORKFLOW) || run.status !== 'completed' || run.conclusion !== 'success' || run.event !== 'push' || run.head_branch !== 'main' || run.head_sha !== sha || run.repository?.full_name !== REPOSITORY || run.head_repository?.full_name !== REPOSITORY) fail('workflow run provenance does not match');
+  if (!sameId(run.id, runId) || run.name !== WORKFLOW || run.workflow_id !== WORKFLOW_ID || run.path !== WORKFLOW_PATH || (run.workflow_name != null && run.workflow_name !== WORKFLOW) || run.status !== 'completed' || run.conclusion !== 'success' || run.event !== 'push' || run.head_branch !== 'main' || run.head_sha !== sha || run.repository?.full_name !== REPOSITORY || run.head_repository?.full_name !== REPOSITORY) fail('workflow run provenance does not match');
   const payload = await responseJson(await fetchImpl(`${api}/actions/runs/${runId}/artifacts?per_page=100`, { headers: headers(token) }), 'artifact list');
   if (!Array.isArray(payload.artifacts)) fail('artifact list is malformed');
   const name = `tear-game-reference-v1-${sha}`;

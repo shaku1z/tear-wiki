@@ -44,7 +44,7 @@ test('checks exact run provenance and strips token on the storage redirect', asy
     calls.push({ url, options });
     if (url.includes('/artifacts?')) return response({ json: { artifacts: [{ id: 12, name: `tear-game-reference-v1-${SHA}`, expired: false, workflow_run: { id: Number(RUN), head_branch: 'main', head_sha: SHA } }] } });
     if (url.includes('/artifacts/12/zip')) return response({ status: 302, location: 'https://example.blob.core.windows.net/artifact?signature=redacted' });
-    if (url.includes('/runs/')) return response({ json: { id: Number(RUN), name: 'Validate', workflow_name: 'Validate', status: 'completed', conclusion: 'success', event: 'push', head_branch: 'main', head_sha: SHA, repository: { full_name: 'shaku1z/tear' }, head_repository: { full_name: 'shaku1z/tear' } } });
+    if (url.includes('/runs/')) return response({ json: { id: Number(RUN), name: 'Validate', workflow_id: 322540049, path: '.github/workflows/ci.yml', workflow_name: 'Validate', status: 'completed', conclusion: 'success', event: 'push', head_branch: 'main', head_sha: SHA, repository: { full_name: 'shaku1z/tear' }, head_repository: { full_name: 'shaku1z/tear' } } });
     return response({ bytes: goodZip() });
   };
   const result = await fetchGameReferenceArtifact({ sha: SHA, runId: RUN, token: 'secret', fetchImpl });
@@ -54,12 +54,16 @@ test('checks exact run provenance and strips token on the storage redirect', asy
 });
 
 test('rejects provenance and unsafe download redirects', async () => {
-  const badRun = async () => response({ json: { id: Number(RUN), name: 'Validate', workflow_name: 'Validate', status: 'completed', conclusion: 'success', event: 'push', head_branch: 'main', head_sha: SHA, repository: { full_name: 'other/repo' }, head_repository: { full_name: 'shaku1z/tear' } } });
+  const badRun = async () => response({ json: { id: Number(RUN), name: 'Validate', workflow_id: 322540049, path: '.github/workflows/ci.yml', workflow_name: 'Validate', status: 'completed', conclusion: 'success', event: 'push', head_branch: 'main', head_sha: SHA, repository: { full_name: 'other/repo' }, head_repository: { full_name: 'shaku1z/tear' } } });
   await assert.rejects(() => fetchGameReferenceArtifact({ sha: SHA, runId: RUN, token: 'secret', fetchImpl: badRun }), /provenance/);
+  for (const mismatch of [{ workflow_id: 1 }, { path: '.github/workflows/untrusted.yml' }]) {
+    const sameNameWrongWorkflow = async () => response({ json: { id: Number(RUN), name: 'Validate', workflow_id: 322540049, path: '.github/workflows/ci.yml', workflow_name: null, status: 'completed', conclusion: 'success', event: 'push', head_branch: 'main', head_sha: SHA, repository: { full_name: 'shaku1z/tear' }, head_repository: { full_name: 'shaku1z/tear' }, ...mismatch } });
+    await assert.rejects(() => fetchGameReferenceArtifact({ sha: SHA, runId: RUN, token: 'secret', fetchImpl: sameNameWrongWorkflow }), /provenance/);
+  }
   let request = 0;
   const unsafeRedirect = async () => {
     request += 1;
-    if (request === 1) return response({ json: { id: Number(RUN), name: 'Validate', workflow_name: 'Validate', status: 'completed', conclusion: 'success', event: 'push', head_branch: 'main', head_sha: SHA, repository: { full_name: 'shaku1z/tear' }, head_repository: { full_name: 'shaku1z/tear' } } });
+    if (request === 1) return response({ json: { id: Number(RUN), name: 'Validate', workflow_id: 322540049, path: '.github/workflows/ci.yml', workflow_name: 'Validate', status: 'completed', conclusion: 'success', event: 'push', head_branch: 'main', head_sha: SHA, repository: { full_name: 'shaku1z/tear' }, head_repository: { full_name: 'shaku1z/tear' } } });
     if (request === 2) return response({ json: { artifacts: [{ id: 1, name: `tear-game-reference-v1-${SHA}`, expired: false, workflow_run: { id: Number(RUN), head_branch: 'main', head_sha: SHA } }] } });
     return response({ status: 302, location: 'https://attacker.invalid/archive.zip' });
   };
