@@ -1,26 +1,23 @@
 ---
-// Difficulty values are generated from the retained game snapshot.
-import gameManifest from '../data/game-manifest.json';
-
-const difficulties = gameManifest.config.difficulties || [];
+import { difficulties, source } from '../data/game-reference.mjs';
 const formatModifier = (value) => value === 1 ? '—' : `${value > 1 ? '+' : ''}${Math.round((value - 1) * 100)}%`;
 const tone = (value) => value === 1 ? '' : value > 1 ? 'positive' : 'negative';
 ---
 
 <div class="difficulty-console">
-  <div class="console-header"><span>DIFFICULTY PROTOCOLS</span><code>{gameManifest.source.commit.slice(0, 7)}</code></div>
+  <div class="console-header"><span>DIFFICULTY PROTOCOLS</span><code>{source.sha.slice(0, 7)}</code></div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Protocol</th><th>Enemy HP</th><th>Damage</th><th>Count</th><th>Coins</th><th>Score</th><th>Condition</th></tr></thead>
       <tbody>
         {difficulties.map((difficulty) => (
           <tr>
-            <td><b>{difficulty.label}</b><span>{difficulty.desc}</span></td>
-            <td class={tone(difficulty.mods.hp)}>{formatModifier(difficulty.mods.hp)}</td>
-            <td class={tone(difficulty.mods.dmg)}>{formatModifier(difficulty.mods.dmg)}</td>
-            <td class={tone(difficulty.mods.count)}>{formatModifier(difficulty.mods.count)}</td>
-            <td class={tone(difficulty.mods.coin)}>{formatModifier(difficulty.mods.coin)}</td>
-            <td class={tone(difficulty.mods.score)}>{formatModifier(difficulty.mods.score)}</td>
+            <td><b>{difficulty.label}</b><span>{difficulty.description}</span></td>
+            <td class={tone(difficulty.modifiers.enemyHealth)}>{formatModifier(difficulty.modifiers.enemyHealth)}</td>
+            <td class={tone(difficulty.modifiers.playerDamageTaken)}>{formatModifier(difficulty.modifiers.playerDamageTaken)}</td>
+            <td class={tone(difficulty.modifiers.enemyCount)}>{formatModifier(difficulty.modifiers.enemyCount)}</td>
+            <td class={tone(difficulty.modifiers.coinReward)}>{formatModifier(difficulty.modifiers.coinReward)}</td>
+            <td class={tone(difficulty.modifiers.scoreReward)}>{formatModifier(difficulty.modifiers.scoreReward)}</td>
             <td>{difficulty.oneHit ? 'ONE HIT' : '—'}</td>
           </tr>
         ))}

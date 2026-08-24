@@ -1,33 +1,38 @@
 ---
-import gameManifest from '../data/game-manifest.json';
+import { upgrades, source } from '../data/game-reference.mjs';
 import TierPath from './TierPath.astro';
 
 const { category } = Astro.props;
 const filtered = category === 'stackable'
-  ? gameManifest.upgrades.filter((upgrade) => !upgrade.unique && upgrade.tiers.length === 0)
+  ? upgrades.filter((upgrade) => upgrade.rule.kind === 'stackable')
   : category
-    ? gameManifest.upgrades.filter((upgrade) => upgrade.cat === category)
-    : gameManifest.upgrades;
+    ? upgrades.filter((upgrade) => upgrade.category === category)
+    : upgrades;
 
 const labels = { offense: 'OFFENSE', resilience: 'RESILIENCE', mobility: 'MOBILITY', throw: 'THROW', parry: 'PARRY', utility: 'UTILITY' };
+const withTierPath = (upgrade) => ({
+  ...upgrade,
+  maxTier: upgrade.tiers.length + 1,
+  tierLevels: [{ level: 1, desc: upgrade.description }, ...upgrade.tiers.map((tier, index) => ({ level: index + 2, desc: tier.description }))],
+});
 ---
 
 <section class="upgrade-catalogue" aria-label="Game-snapshot upgrades">
   <div class="catalogue-signal">
     <span>CAPTURED UPGRADE INDEX</span>
     <span>{filtered.length} MODULES</span>
-    <code>{gameManifest.source.commit.slice(0, 7)}</code>
+    <code>{source.sha.slice(0, 7)}</code>
   </div>
   <div class="upgrades-grid">
     {filtered.map((upgrade) => (
-      <div role="article" data-wiki-card class:list={['upgrade-module', `cat-${upgrade.cat}`, upgrade.rare && 'rare']}>
+      <div role="article" data-wiki-card class:list={['upgrade-module', `cat-${upgrade.category}`, upgrade.rare && 'rare']}>
         <header>
-          <span class="module-type">{upgrade.tiers.length ? 'SPECIAL' : upgrade.unique ? 'UNIQUE' : 'STACKS'}</span>
-          <span class="module-domain">{labels[upgrade.cat] || upgrade.cat}</span>
+          <span class="module-type">{upgrade.rule.kind.toUpperCase()}</span>
+          <span class="module-domain">{labels[upgrade.category] || upgrade.category}</span>
         </header>
         <h3>{upgrade.name}</h3>
-        <p>{upgrade.desc}</p>
-        {upgrade.progression === 'tiered' && <TierPath upgrade={upgrade} />}
+        <p>{upgrade.description}</p>
+        {upgrade.tiers.length > 0 && <TierPath upgrade={withTierPath(upgrade)} />}
       </div>
     ))}
   </div>

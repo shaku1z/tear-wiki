@@ -1,18 +1,17 @@
 ---
-import gameManifest from '../data/game-manifest.json';
-
-const tiered = gameManifest.upgrades.filter((upgrade) => upgrade.progression === 'tiered');
-const categories = [...new Set(tiered.map((upgrade) => upgrade.cat))];
+import { upgrades, source } from '../data/game-reference.mjs';
+const tiered = upgrades.filter((upgrade) => upgrade.rule.kind === 'tiered');
+const categories = [...new Set(tiered.map((upgrade) => upgrade.category))];
 ---
 
 <section class="tier-system" aria-label="Captured ability tier system">
-  <header><span>ABILITY EVOLUTION / CAPTURED RULESET</span><code>{gameManifest.source.commit.slice(0, 7)}</code></header>
+  <header><span>ABILITY EVOLUTION / PUBLISHED REFERENCE</span><code>{source.sha.slice(0, 7)}</code></header>
   <div class="tier-flow" aria-label="Tier progression route">
     <div><b>T1</b><span>DRAFT PICKUP</span><p>Acquire the core ability during a run.</p></div>
     <i aria-hidden="true">→</i>
-    <div><b>T2</b><span>BOSS EVOLUTION</span><p>Upgrade an owned special after a boss clear.</p></div>
+    <div><b>T2</b><span>PUBLISHED SECOND TIER</span><p>Where supplied, the reference describes a second tier.</p></div>
     <i aria-hidden="true">→</i>
-    <div><b>T3</b><span>APEX EVOLUTION</span><p>Complete the ability’s final evolution.</p></div>
+    <div><b>T3</b><span>PUBLISHED THIRD TIER</span><p>Where supplied, the reference describes a third tier.</p></div>
   </div>
   <footer><span>{tiered.length} EVOLVABLE ABILITIES</span><span>{categories.length} DOMAINS REPRESENTED</span><span>ALL PATHS: T1 → T3</span></footer>
 </section>
