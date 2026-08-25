@@ -1,9 +1,22 @@
 {
   "schemaVersion": 1,
   "registryId": "g4-wiki-terminology-v1",
-  "status": "governance-only",
-  "scope": "Permanent public terminology for authored wiki copy; gameplay synchronization remains a separate G6 contract.",
+  "status": "verified-reference",
+  "scope": "Permanent public terminology for authored wiki copy, bound to the validated current game-reference artifact.",
   "snapshot": {
+    "repository": "shaku1z/tear",
+    "sourceSha": "9ddd8f20a9c7d1830a2e043d9e558e259f738d02",
+    "validationRunId": "32785864315",
+    "manifestSha256": "7b8b3f5fec5862f3649470ab3e04170e096065c823b9349140bf9d688740311f",
+    "manifestSchemaVersion": 2,
+    "format": "game-reference.v1",
+    "terminologyVersion": "g4-terminology-v1",
+    "manifestFilename": "game-reference.v1.json",
+    "receiptFilename": "game-reference.v1.receipt.json",
+    "validationEvent": "push",
+    "validationRef": "refs/heads/main"
+  },
+  "historicalSnapshot": {
     "repository": "shaku1z/tear",
     "commit": "d62c20eca2da067800f763abc5afdf4c7747fe76",
     "capturedAt": "2026-07-18T05:40:18Z",
@@ -112,7 +125,7 @@
   ],
   "activeRoster": {
     "schemaVersion": "final-five-v1",
-    "source": "wiki-authored governance contract; future typed game export is G6",
+    "source": "validated game-reference artifact roster",
     "canonicalIds": ["sword", "hammer", "greatsword", "chainblade", "riftlock"],
     "canonicalDisplayNames": ["Sword", "Hammer", "Greatsword", "Chainblade", "Riftlock"],
     "retiredIds": ["spear", "ringblade"],
@@ -126,6 +139,6 @@
     "publicCopy": "canonical-only",
     "history": "Immutable historical records may retain their original terminology.",
     "compatibility": "Compatibility readers, aliases, and migration maps may retain old identifiers when path-scoped, justified, and tested.",
-    "g6Boundary": "This registry does not synchronize or regenerate gameplay data. G6 owns the typed game-reference replacement."
+    "g6Boundary": "This registry is bound to the validated game-reference artifact; the game repository remains the gameplay authority and historical compatibility remains explicit."
   }
 }

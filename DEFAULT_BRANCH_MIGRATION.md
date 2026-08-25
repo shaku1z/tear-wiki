@@ -48,10 +48,10 @@ remain frozen.
 
 ## Synchronization boundary
 
-`sync-game.yml` remains `disabled_manually` and fail-closed. Its legacy
-scheduled, dispatch, direct-push, and retired `js/**` contract is not repaired
-by this branch retirement. G6 owns the typed-manifest replacement, reviewed
-update path, exact source-SHA record, and event reconciliation.
+The former automatic synchronization workflow was `disabled_manually` and
+fail-closed during the earlier migration. G6 now removes that obsolete
+workflow and its JS-era data path; the protected-main release flow uses only
+the validated game-reference artifact and explicit canonical promotion.
 
 ## Cloudflare boundary
 

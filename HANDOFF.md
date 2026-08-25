@@ -7,7 +7,7 @@ The TEAR Wiki is not a standard, generic documentation site. It is designed to f
 
 **Key Directives:**
 - **STRICTLY FORBIDDEN:** You are strictly forbidden from altering the actual game's codebase. Your modifications must be 100% contained within this `tear-wiki` project folder. Do not attempt to fix or alter game engine logic upstream.
-- **Zero Hardcoding:** The wiki must never contain hardcoded game values (like base health, damage scalars, or upgrade properties). Modern reference views consume the validated, committed game-reference artifact; the retained JS-era snapshot is comparison material only.
+- **Zero Hardcoding:** The wiki must never contain hardcoded game values (like base health, damage scalars, or upgrade properties). Modern reference views consume the validated, committed game-reference artifact; the immutable G4 terminology receipt is historical provenance only.
 - **Deep Immersion:** The design language is strictly *Brutalist, High-Contrast, and Mechanical*. Avoid soft rounded corners, pastel gradients, or corporate aesthetics ("AI slop"). Use monospace typography for data and aggressive borders (e.g., `inset 0 0 0 1px`).
 
 ## 2. Architecture Stack
@@ -31,7 +31,8 @@ Future developers (Codex or otherwise) must adhere to these strict visual rules:
 4. **Layout:** Eradicate unnecessary vertical scrolling. Use compact CSS Grids (`grid-template-columns: repeat(auto-fit, minmax(X, 1fr))`) to condense information efficiently.
 
 ## 5. Ongoing Work & Next Steps
-- **Data Synchronization:** `scripts/sync-config.js` is the retained JS-era snapshot pipeline, not a current freshness guarantee. Production synchronization is disabled pending the typed G6 contract. If a future verified source adds engine files, update the `FILES` array in that separately authorized migration.
+- **Data Synchronization:** The checked-in `game-reference.v1.json` and receipt are the only current gameplay reference consumed by the wiki. Run `npm run verify:game-reference-artifact` for the bounded offline source/receipt gate. Explicit canonical promotion remains guarded by `sync-canonical-game-reference.mjs`; it requires an exact validated source SHA and run before any write.
+- **Historical provenance:** `G4_WIKI_TERMINOLOGY_RECEIPT.md` preserves the original G4 snapshot as immutable history. It is not a current gameplay source and must not be regenerated.
 - **Component Expansion:** Continue migrating static markdown pages to use dynamic Astro components (`BossProfile.astro`, `EnemyStats.astro`, `StageEnvironment.astro`).
 
 *End of Document.*
