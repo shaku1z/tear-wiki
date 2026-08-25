@@ -12,6 +12,7 @@ import {
   WIKI_REPOSITORY,
 } from './consume-game-reference-dispatch.mjs';
 import { assertReferencePromotionState, REFERENCE_PROMOTION_FILES } from './check-reference-promotion-state.mjs';
+import { assertSyncPrIdentity, assertSyncPrSnapshot } from './verify-sync-pr-reference.mjs';
 
 const SOURCE_SHA = '9ddd8f20a9c7d1830a2e043d9e558e259f738d02';
 const RUN_ID = '32785864315';
@@ -171,6 +172,9 @@ test('workflow is repository-dispatch-only, PR-only, and limited to the referenc
   assert.match(workflow, /run:\s*npm run consume:game-reference-dispatch/u);
   assert.equal((workflow.match(/npm run check:snapshot/g) ?? []).length, 1);
   assert.match(workflow, /gh workflow run validate\.yml --repo "\$GITHUB_REPOSITORY" --ref "\$branch"/u);
+  assert.match(workflow, /gh pr view "\$existing_pr_number" --repo "\$GITHUB_REPOSITORY" --json baseRefName,files,headRefName,headRefOid/u);
+  assert.match(workflow, /git fetch --no-tags origin "refs\/heads\/\$branch:refs\/remotes\/origin\/\$branch"/u);
+  assert.match(workflow, /node scripts\/verify-sync-pr-reference\.mjs/u);
   assert.match(validateWorkflow, /workflow_dispatch:/u);
   assert.match(workflow, /git push --set-upstream origin "\$branch"/u);
   assert.match(workflow, /gh pr create/u);
@@ -205,4 +209,15 @@ test('promotion state accepts exactly the intended modified files and rejects by
   assert.throws(() => assertReferencePromotionState({ statusText: `${statusText}?? unexpected.txt\n`, diffText }), /only unstaged|exactly/);
   assert.throws(() => assertReferencePromotionState({ statusText: statusText.replace(' M ', 'M  '), diffText }), /only unstaged/);
   assert.throws(() => assertReferencePromotionState({ statusText, diffText: `${diffText}src/extra.txt\n` }), /exactly/);
+});
+
+test('existing synchronization PR reuse requires exact branch, files, and current snapshot identity', async () => {
+  const branch = `codex/sync-game-reference-${SOURCE_SHA}`;
+  const pr = { baseRefName: 'main', headRefName: branch, headRefOid: 'b'.repeat(40), files: REFERENCE_PROMOTION_FILES.map((path) => ({ path })) };
+  assert.equal(assertSyncPrIdentity(pr, { expectedBranch: branch, expectedHeadOid: 'b'.repeat(40) }), 'b'.repeat(40));
+  const registry = await readFile(new URL('../src/data/wiki-terminology.json', import.meta.url));
+  assertSyncPrSnapshot({ manifestBytes: manifest, receiptBytes: receipt, registryBytes: registry, expectedSha: SOURCE_SHA, expectedRunId: RUN_ID });
+  assert.throws(() => assertSyncPrIdentity({ ...pr, files: [...pr.files, { path: 'src/extra.txt' }] }, { expectedBranch: branch, expectedHeadOid: 'b'.repeat(40) }), /exactly|unexpected/);
+  assert.throws(() => assertSyncPrIdentity({ ...pr, headRefName: 'codex/other' }, { expectedBranch: branch, expectedHeadOid: 'b'.repeat(40) }), /branch/);
+  assert.throws(() => assertSyncPrSnapshot({ manifestBytes: Buffer.from(manifest.toString('utf8').replace(SOURCE_SHA, 'a'.repeat(40))), receiptBytes: receipt, registryBytes: registry, expectedSha: SOURCE_SHA, expectedRunId: RUN_ID }), /receipt|source/);
 });
