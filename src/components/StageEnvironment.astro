@@ -1,15 +1,78 @@
 ---
-import { STAGES } from '../scripts/game-engine.js';
-import gameManifest from '../data/game-manifest.json';
-const { id } = Astro.props;
-const stage = typeof id === 'number' ? STAGES[id] : STAGES.find((entry) => entry.name.toLowerCase().includes(id.toLowerCase()));
+import { bosses, source, stages } from '../data/game-reference.mjs';
+
+const requestedId = Astro.props.id;
+const requested = String(requestedId ?? '').trim().toLowerCase();
+const stage = typeof requestedId === 'number'
+  ? stages[requestedId]
+  : stages.find((entry) => entry.id === requested || entry.name.toLowerCase() === requested);
+const boss = stage ? bosses.find((entry) => entry.id === stage.boss) : null;
+const chapter = stage?.narrative?.chapter;
+const theme = stage?.theme;
 ---
 
-{stage ? <section class="stage-terminal" style={`--stage-accent:${stage.accent};--stage-bg:${stage.bg}`}>
-  <header><div><span>STAGE DOSSIER / CAPTURED POOL</span><h2>{stage.name}</h2><p>{stage.blurb}</p></div><code>{gameManifest.source.commit.slice(0, 7)}</code></header>
-  <div class="stage-grid"><div><h3>ENEMY DEPLOYMENT</h3><ul>{stage.pool.map(([type, weight, minWave]) => <li><b>{type}</b><span>WEIGHT {weight} / WAVE {minWave}</span></li>)}</ul></div><div class="stage-side"><blockquote>{stage.lore}</blockquote><div class="stage-meta"><span>BOSS <b>{stage.boss}</b></span><span>PLATFORM <i style={`background:${stage.plat}`}></i></span></div></div></div>
-</section> : <p>Stage not found: {id}</p>}
+{stage ? <section class="stage-terminal" style={`--stage-accent:${theme.accent};--stage-bg:${theme.background};--stage-platform:${theme.platform};--stage-ink:${theme.dark ? '#f4f1ff' : '#111'}`}>
+  <header>
+    <div>
+      <span>STAGE DOSSIER / PUBLISHED REFERENCE</span>
+      <h2>{stage.name}</h2>
+      <p>{stage.blurb}</p>
+    </div>
+    <code title={source.sha}>SOURCE {source.sha.slice(0, 7)}</code>
+  </header>
+
+  <div class="stage-grid">
+    <div>
+      <h3>ENEMY DEPLOYMENT / {stage.pool.length} ENTRIES</h3>
+      <ul>
+        {stage.pool.map((entry) => <li>
+          <b>{entry.kind}</b>
+          <span>WEIGHT {entry.weight} / WAVE {entry.unlockWave}</span>
+        </li>)}
+      </ul>
+    </div>
+    <div class="stage-side">
+      <div class="stage-meta">
+        <span>BOSS <b>{boss?.name || stage.boss}</b><code>{stage.boss}</code></span>
+        <span>THEME <b>{theme.dark ? 'DARK' : 'LIGHT'}</b><i style={`background:${theme.platform}`}></i></span>
+      </div>
+      {chapter && <div class="narrative">
+        <span>{chapter.number} / {chapter.title}</span>
+        <p class="intro">{chapter.intro}</p>
+        {chapter.pages.map((page) => <div class="narrative-page"><b>{page.label}</b><p>{page.text}</p></div>)}
+        <blockquote>{chapter.bossOutro.label}: {chapter.bossOutro.text}</blockquote>
+      </div>}
+    </div>
+  </div>
+</section> : <p>Stage not found: {String(requestedId)}</p>}
 
 <style>
-.stage-terminal { border:1px solid var(--sl-color-hairline); border-top:4px solid var(--stage-accent); font-family:var(--sl-font-mono); margin:1.5rem 0; } header { background:var(--stage-bg); color:#111; display:flex; justify-content:space-between; padding:1rem; } header > *, .stage-grid > *, .stage-meta > * { margin:0; min-width:0; } header span,h3 { font-size:.64rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; } h2 { border:0; color:inherit; margin:.35rem 0; padding:0; } header p { margin:0; font-family:var(--sl-font); } code { font:inherit; font-size:.65rem; } .stage-grid { display:grid; grid-template-columns:1fr 1fr; } .stage-grid>div { margin:0; min-width:0; padding:1rem; } .stage-grid>div+div { border-left:1px solid var(--sl-color-hairline); } h3 { color:var(--sl-color-gray-3); margin:0 0 .6rem; } ul { list-style:none; margin:0; padding:0; } li { border-top:1px solid var(--sl-color-hairline); display:flex; justify-content:space-between; padding:.55rem 0; text-transform:uppercase; } li span { color:var(--sl-color-gray-3); font-size:.65rem; } blockquote { border-left:3px solid var(--stage-accent); color:var(--sl-color-gray-2); font-family:var(--sl-font); margin:0; padding-left:.75rem; } .stage-meta { display:flex; gap:1rem; margin-top:1rem; } .stage-meta span { color:var(--sl-color-gray-3); font-size:.65rem; } .stage-meta b { color:var(--sl-color-white); display:block; margin-top:.3rem; } i { border:1px solid var(--sl-color-hairline); display:block; height:1rem; margin-top:.3rem; width:2rem; } @media(max-width:600px){.stage-grid{grid-template-columns:1fr}.stage-grid>div+div{border-left:0;border-top:1px solid var(--sl-color-hairline)}}
+  .stage-terminal { border: 1px solid var(--sl-color-hairline); border-top: 4px solid var(--stage-accent); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
+  header { align-items: start; background: var(--stage-bg); color: var(--stage-ink); display: flex; justify-content: space-between; padding: 1rem; }
+  header > *, .stage-grid > *, .stage-meta > * { margin: 0; min-width: 0; }
+  header span, h3 { font-size: .64rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  h2 { border: 0; color: inherit; margin: .35rem 0; padding: 0; }
+  header p { font-family: var(--sl-font); margin: 0; }
+  code { color: var(--stage-accent); font: inherit; font-size: .65rem; }
+  .stage-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .stage-grid > div { margin: 0; min-width: 0; padding: 1rem; }
+  .stage-grid > div + div { border-left: 1px solid var(--sl-color-hairline); }
+  h3 { color: var(--sl-color-gray-3); margin: 0 0 .6rem; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { border-top: 1px solid var(--sl-color-hairline); display: flex; gap: .75rem; justify-content: space-between; padding: .55rem 0; text-transform: uppercase; }
+  li b { color: var(--sl-color-white); }
+  li span { color: var(--sl-color-gray-3); font-size: .65rem; text-align: right; }
+  .stage-meta { display: flex; gap: 1rem; margin-bottom: 1rem; }
+  .stage-meta span { color: var(--sl-color-gray-3); font-size: .65rem; }
+  .stage-meta b { color: var(--sl-color-white); display: block; margin-top: .3rem; }
+  .stage-meta code { color: var(--sl-color-gray-3); display: block; font-size: .58rem; margin-top: .2rem; }
+  .stage-meta i { border: 1px solid var(--sl-color-hairline); display: block; height: 1rem; margin-top: .3rem; width: 2rem; }
+  .narrative { border-left: 3px solid var(--stage-accent); color: var(--sl-color-gray-2); font-family: var(--sl-font); padding-left: .75rem; }
+  .narrative > span { color: var(--stage-accent); font-family: var(--sl-font-mono); font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .narrative p { line-height: 1.45; margin: .5rem 0 0; }
+  .narrative .intro { color: var(--sl-color-white); font-family: var(--sl-font-mono); font-size: .8rem; font-weight: 800; letter-spacing: .08em; }
+  .narrative-page { border-top: 1px solid var(--sl-color-hairline); margin-top: .8rem; padding-top: .65rem; }
+  .narrative-page b { color: var(--sl-color-gray-3); font-family: var(--sl-font-mono); font-size: .62rem; letter-spacing: .08em; }
+  blockquote { border-top: 1px dashed var(--sl-color-hairline); color: var(--sl-color-gray-3); font-size: .75rem; margin: 1rem 0 0; padding: .75rem 0 0; }
+  @media(max-width:600px) { .stage-grid { grid-template-columns: 1fr; } .stage-grid > div + div { border-left: 0; border-top: 1px solid var(--sl-color-hairline); } header { display: block; } header code { display: block; margin-top: .75rem; } }
 </style>

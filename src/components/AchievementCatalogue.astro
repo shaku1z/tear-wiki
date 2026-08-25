@@ -1,8 +1,69 @@
 ---
-import gameManifest from '../data/game-manifest.json';
-const achievements = gameManifest.achievements;
-const rarity = achievements.RARITY;
-const categories = achievements.CATS;
+import { achievements, source } from '../data/game-reference.mjs';
+
+const visibleAchievements = achievements.filter((achievement) => !achievement.hidden);
+const categoryIds = [...new Set(visibleAchievements.map((achievement) => achievement.category))];
+const rarityIds = [...new Set(visibleAchievements.map((achievement) => achievement.rarity))];
+const label = (value) => value.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+const countBy = (key, value) => visibleAchievements.filter((achievement) => achievement[key] === value).length;
+const ruleText = (achievement) => {
+  const { rule } = achievement;
+  if (rule.kind === 'stat-threshold') return `${label(rule.stat)} / ${rule.goal} TARGET`;
+  if (rule.kind === 'category-complete') return `COMPLETE ${label(rule.category)}`;
+  if (rule.kind === 'all-achievements') return 'COMPLETE ALL ACHIEVEMENTS';
+  if (rule.kind === 'all-shop-items') return 'COMPLETE ALL SHOP ITEMS';
+  if (rule.kind === 'manual') return 'MANUAL CRITERION';
+  return label(rule.kind);
+};
 ---
-<section class="achievement-catalogue"><header><span>ACHIEVEMENT ARCHIVE</span><code>{gameManifest.source.commit.slice(0, 7)}</code></header><div class="rarity">{Object.entries(rarity).map(([id, item]) => <span style={`--rarity:${item.color}`}>{item.name} <b>{item.shards} SHARDS</b></span>)}</div>{Object.entries(categories).map(([id, cat]) => <div class="category" style={`--category:${cat.color}`}><h2>{cat.name}</h2><div class="cards">{achievements.list.filter((item) => item.cat === id).map((item) => <article><span style={`color:${rarity[item.rarity].color}`}>{rarity[item.rarity].name}</span><h3>{item.name}</h3><p>{item.desc}</p><b>{item.master ? 'MASTER' : `${item.goal} TARGET`} / {rarity[item.rarity].shards} SHARDS</b></article>)}</div></div>)}</section>
-<style>.achievement-catalogue{border:1px solid var(--sl-color-hairline);font-family:var(--sl-font-mono);margin:1.5rem 0}header{background:var(--sl-color-gray-6);border-bottom:1px solid var(--sl-color-hairline);color:var(--sl-color-gray-3);display:flex;font-size:.65rem;font-weight:800;justify-content:space-between;letter-spacing:.1em;padding:.65rem .75rem;text-transform:uppercase}code{color:var(--tear-cyan);font:inherit}.rarity{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--sl-color-hairline)}.rarity span{border-right:1px solid var(--sl-color-hairline);color:var(--rarity);font-size:.65rem;padding:.55rem .7rem}.rarity b{color:var(--sl-color-gray-3);margin-left:.35rem}.category{border-bottom:1px solid var(--sl-color-hairline);padding:1rem}.category:last-child{border-bottom:0}.category h2{border-left:4px solid var(--category);border-bottom:0;font-size:.9rem;margin:0 0 .7rem;padding:.15rem 0 .15rem .55rem}.cards{align-items:stretch;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.5rem}.cards article{border:1px solid var(--sl-color-hairline);margin:0;padding:.7rem}.cards span,.cards>b{font-size:.6rem;font-weight:800;letter-spacing:.06em}.cards h3{border:0;font-size:.8rem;margin:.4rem 0;padding:0}.cards p{color:var(--sl-color-gray-3);font-family:var(--sl-font);font-size:.73rem;line-height:1.4;margin:0 0 .65rem}.cards>b{color:var(--sl-color-gray-2)}</style>
+
+<section class="achievement-catalogue" aria-label="Achievement catalogue">
+  <header>
+    <span>ACHIEVEMENT ARCHIVE / {achievements.length} TOTAL / {visibleAchievements.length} PUBLISHED</span>
+    <code title={source.sha}>SOURCE {source.sha.slice(0, 7)}</code>
+  </header>
+
+  <div class="catalogue-summary">
+    <span>SCHEMA: CATEGORY · DESCRIPTION · HIDDEN · ID · MANUAL · MASTER · NAME · RARITY · RULE</span>
+    <span>{rarityIds.map((rarity) => `${label(rarity)} ${countBy('rarity', rarity)}`).join(' / ')}</span>
+  </div>
+
+  {categoryIds.map((category) => <div class="category" data-category={category}>
+    <h2>{label(category)} <small>{countBy('category', category)} RECORDS</small></h2>
+    <div class="cards">
+      {visibleAchievements.filter((achievement) => achievement.category === category).map((achievement) => <article>
+        <div class="card-meta">
+          <span class={`rarity rarity-${achievement.rarity}`}>{label(achievement.rarity)}</span>
+          <code>{achievement.id}</code>
+        </div>
+        <h3>{achievement.name}</h3>
+        <p>{achievement.description}</p>
+        <div class="card-rule">
+          <b>{ruleText(achievement)}</b>
+          <span>{achievement.manual ? 'MANUAL' : 'TRACKED'}{achievement.master ? ' / MASTER' : ''}</span>
+        </div>
+      </article>)}
+    </div>
+  </div>)}
+</section>
+
+<style>
+  .achievement-catalogue { border: 1px solid var(--sl-color-hairline); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
+  header { align-items: center; background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; font-size: .65rem; font-weight: 800; justify-content: space-between; letter-spacing: .1em; padding: .65rem .75rem; text-transform: uppercase; }
+  code { color: var(--tear-cyan); font: inherit; overflow-wrap: anywhere; }
+  .catalogue-summary { border-bottom: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; flex-wrap: wrap; font-size: .62rem; gap: .5rem 1rem; justify-content: space-between; padding: .65rem .75rem; }
+  .category { border-bottom: 1px solid var(--sl-color-hairline); padding: 1rem; }
+  .category:last-child { border-bottom: 0; }
+  .category h2 { border-left: 4px solid var(--tear-cyan); border-bottom: 0; font-size: .9rem; margin: 0 0 .7rem; padding: .15rem 0 .15rem .55rem; }
+  .category h2 small { color: var(--sl-color-gray-3); font-size: .6rem; font-weight: 700; margin-left: .5rem; }
+  .cards { align-items: stretch; display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  .cards article { border: 1px solid var(--sl-color-hairline); display: flex; flex-direction: column; margin: 0; min-width: 0; padding: .7rem; }
+  .card-meta { align-items: baseline; display: flex; gap: .5rem; justify-content: space-between; }
+  .card-meta code { color: var(--sl-color-gray-3); font-size: .58rem; }
+  .rarity { color: var(--tear-cyan); font-size: .6rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .cards h3 { border: 0; font-size: .8rem; margin: .45rem 0 .35rem; padding: 0; }
+  .cards p { color: var(--sl-color-gray-3); flex: 1; font-family: var(--sl-font); font-size: .73rem; line-height: 1.4; margin: 0 0 .65rem; }
+  .card-rule { border-top: 1px dashed var(--sl-color-hairline); color: var(--sl-color-gray-2); display: grid; font-size: .58rem; gap: .25rem; padding-top: .55rem; text-transform: uppercase; }
+  .card-rule b { color: var(--sl-color-white); font-size: .62rem; }
+  .card-rule span { color: var(--sl-color-gray-3); }
+</style>

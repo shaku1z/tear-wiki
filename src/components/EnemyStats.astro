@@ -1,55 +1,67 @@
 ---
-import { CONFIG, VARIANTS } from '../scripts/game-engine.js';
-import gameManifest from '../data/game-manifest.json';
+import { enemies, source } from '../data/game-reference.mjs';
 
-const { variant } = Astro.props;
-let foundVariant = null;
-let baseEnemyType = null;
-
-for (const [type, list] of Object.entries(VARIANTS)) {
-  const match = list.find((entry) => entry.id === variant);
-  if (match) {
-    foundVariant = match;
-    baseEnemyType = type;
-    break;
-  }
-}
-
-if (!foundVariant && CONFIG[variant]) baseEnemyType = variant;
-if (variant === 'charger') baseEnemyType = 'enemy';
-const baseConfig = CONFIG[baseEnemyType] || {};
-const stats = { hp: baseConfig.hp || 0, maxHp: baseConfig.hp || 0, speedMult: 1, speed: baseConfig.speed || 0, contactDmg: baseConfig.contactDmg || 0 };
-if (foundVariant?.apply) foundVariant.apply(stats);
-
-const label = foundVariant?.name || (variant.charAt(0).toUpperCase() + variant.slice(1));
-const accent = CONFIG.colors[baseEnemyType] || CONFIG.colors.enemyShot;
-const metrics = [
-  ['BASE HP', Math.round(stats.maxHp)],
-  ['MOVE SPEED', Math.round(stats.speed * stats.speedMult)],
-  ['CONTACT DMG', Math.round(stats.contactDmg)],
-  ['WEIGHT', baseConfig.weight ?? '—'],
-];
+const requested = String(Astro.props.variant ?? '').trim().toLowerCase();
+const supportRoleIds = new Set(['priest', 'mender', 'herald', 'anchor']);
+const families = enemies.families;
+const directFamily = families.find((family) => family.id === requested);
+const variantMatch = families.flatMap((family) => family.variants.map((variant) => ({ family, variant }))).find(({ variant }) => variant.id === requested);
+const supportRoles = requested === 'support' ? families.filter((family) => supportRoleIds.has(family.id)) : [];
+const selectedFamilies = directFamily ? [directFamily] : variantMatch ? [variantMatch.family] : supportRoles;
+const selectedVariant = variantMatch?.variant;
+const title = directFamily?.id || selectedVariant?.name || (requested === 'support' ? 'Support Roles' : requested || 'Unknown Enemy');
+const label = (value) => value.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 ---
 
-<section class="enemy-terminal" style={`--entity-accent: ${accent}`} aria-label={`${label} statistics`}>
+<section class="enemy-terminal" aria-label={`${title} published enemy reference`}>
   <header>
-    <div><span>ENTITY READOUT / {baseEnemyType || 'UNKNOWN'}</span><h3>{label}</h3></div>
-    <code>{gameManifest.source.commit.slice(0, 7)}</code>
+    <div>
+      <span>ENTITY REFERENCE / STRUCTURAL CATALOGUE</span>
+      <h3>{label(title)}</h3>
+    </div>
+    <code title={source.sha}>SOURCE {source.sha.slice(0, 7)}</code>
   </header>
-  <div class="metric-grid">
-    {metrics.map(([name, value]) => <div class="metric"><span>{name}</span><strong>{value}</strong></div>)}
-  </div>
-  {foundVariant && <p class="variant-note">VARIANT MODULE ACTIVE — source modifiers are applied to the base entity before display.</p>}
+
+  {selectedFamilies.length > 0 ? <div class="family-list">
+    {requested === 'support' && <p class="support-note">SUPPORT is a wiki grouping, not a published enemy-family ID. The reference contains these four support-role families:</p>}
+    {selectedFamilies.map((family) => <div class="family-record">
+      <div class="family-heading"><b>{family.id}</b><span>CANONICAL FAMILY ID</span></div>
+      {family.variants.length > 0 ? <ul>
+        {family.variants.map((variant) => <li class:list={{ selected: variant.id === selectedVariant?.id }}>
+          <code>{variant.id}</code>
+          <span>{variant.name}</span>
+          <b>WEIGHT {variant.weight}</b>
+          <small>{variant.minWave == null ? 'BASE' : `WAVE ${variant.minWave}`}</small>
+        </li>)}
+      </ul> : <p class="no-variants">No variant records are published for this family.</p>}
+    </div>)}
+  </div> : <p class="not-published">No canonical family or variant record is published for <code>{requested || 'this request'}</code>.</p>}
+
+  <aside class="contract-boundary">
+    <b>PUBLISHED CONTRACT BOUNDARY</b>
+    <span>HP, movement speed, and contact damage are not included in the game-reference artifact. This readout intentionally reports structural family/variant IDs, weights, unlock waves, and source provenance only.</span>
+  </aside>
 </section>
 
 <style>
-  .enemy-terminal { border: 1px solid var(--sl-color-hairline); border-left: 4px solid var(--entity-accent); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
+  .enemy-terminal { border: 1px solid var(--sl-color-hairline); border-left: 4px solid var(--tear-red); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
   header { align-items: start; background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); display: flex; justify-content: space-between; padding: .8rem .9rem; }
   header span { color: var(--sl-color-gray-3); display: block; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-  h3 { border: 0; font-size: 1.15rem; letter-spacing: .08em; margin: .4rem 0 0; padding: 0; } code { color: var(--entity-accent); font: inherit; font-size: .65rem; }
-  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
-  .metric { border-right: 1px solid var(--sl-color-hairline); padding: .75rem .85rem; } .metric:last-child { border-right: 0; }
-  .metric span { color: var(--sl-color-gray-3); display: block; font-size: .6rem; font-weight: 800; letter-spacing: .08em; } .metric strong { color: var(--sl-color-white); display: block; font-size: 1.15rem; margin-top: .35rem; }
-  .variant-note { border-top: 1px dashed var(--sl-color-hairline); color: var(--sl-color-gray-3); font-family: var(--sl-font); font-size: .75rem; margin: 0; padding: .65rem .85rem; }
-  @media (max-width: 560px) { .metric-grid { grid-template-columns: 1fr 1fr; } .metric:nth-child(2) { border-right: 0; } .metric:nth-child(-n+2) { border-bottom: 1px solid var(--sl-color-hairline); } }
+  h3 { border: 0; font-size: 1.15rem; letter-spacing: .08em; margin: .4rem 0 0; padding: 0; }
+  code { color: var(--tear-cyan); font: inherit; font-size: .65rem; overflow-wrap: anywhere; }
+  .family-list { display: grid; gap: .75rem; padding: .9rem; }
+  .support-note, .not-published { color: var(--sl-color-gray-3); font-family: var(--sl-font); font-size: .78rem; line-height: 1.45; margin: 0; }
+  .family-record { border: 1px solid var(--sl-color-hairline); min-width: 0; }
+  .family-heading { align-items: baseline; background: var(--sl-color-gray-6); display: flex; gap: .6rem; justify-content: space-between; padding: .55rem .65rem; }
+  .family-heading b { color: var(--sl-color-white); }
+  .family-heading span { color: var(--sl-color-gray-3); font-size: .58rem; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { align-items: baseline; border-top: 1px solid var(--sl-color-hairline); display: grid; gap: .45rem; grid-template-columns: minmax(90px, 1fr) minmax(100px, 1.4fr) auto auto; padding: .55rem .65rem; }
+  li.selected { border-left: 3px solid var(--tear-cyan); padding-left: calc(.65rem - 3px); }
+  li span, li small { color: var(--sl-color-gray-3); font-size: .62rem; }
+  li b { color: var(--sl-color-gray-2); font-size: .62rem; white-space: nowrap; }
+  .no-variants { color: var(--sl-color-gray-3); font-family: var(--sl-font); font-size: .75rem; margin: 0; padding: .7rem; }
+  .contract-boundary { border-top: 1px dashed var(--sl-color-hairline); color: var(--sl-color-gray-3); display: grid; font-family: var(--sl-font); font-size: .74rem; gap: .3rem; line-height: 1.45; padding: .7rem .9rem; }
+  .contract-boundary b { color: var(--tear-cyan); font-family: var(--sl-font-mono); font-size: .62rem; letter-spacing: .08em; }
+  @media (max-width: 560px) { li { grid-template-columns: 1fr 1fr; } li span { grid-column: 2; grid-row: 1; text-align: right; } li b { grid-column: 1; } li small { grid-column: 2; grid-row: 2; text-align: right; } }
 </style>

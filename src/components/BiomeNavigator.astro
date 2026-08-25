@@ -2,51 +2,23 @@
 // BiomeNavigator.astro
 // Five interactive panels — one per stage — each with a live canvas
 // mini-backdrop ported from backdrop.js. Click to enter that stage's wiki section.
+import { stages } from '../data/game-reference.mjs';
+
+const artKey = (stage) => stage.id === 'crimson-fields' ? 'crimson' : stage.id;
+const stageSlug = (stage) => stage.name.toLowerCase().replace(/\s+/g, '-');
 ---
 
 <section class="biome-nav" aria-label="Navigate by stage">
   <p class="biome-nav-label">// STAGES</p>
   <div class="biome-nav-grid">
-    <a href="/stages/the-grounds"       class="biome-panel" data-biome="grounds"
-       style="--panel-bg:#f5f4f0;--panel-ink:#111111;--panel-accent:#e23b3b">
+    {stages.map((stage) => <a href={`/stages/${stageSlug(stage)}`} class="biome-panel" data-stage={stage.id} data-biome={artKey(stage)}
+      style={`--panel-bg:${stage.theme.background};--panel-ink:${stage.theme.platform};--panel-accent:${stage.theme.accent}`}>
       <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
       <div class="biome-panel-content">
-        <span class="biome-panel-name">The Grounds</span>
-        <span class="biome-panel-blurb">Where order is kept.</span>
+        <span class="biome-panel-name">{stage.name}</span>
+        <span class="biome-panel-blurb">{stage.blurb}</span>
       </div>
-    </a>
-    <a href="/stages/the-undercroft"    class="biome-panel" data-biome="undercroft"
-       style="--panel-bg:#dbe0e6;--panel-ink:#2a2f37;--panel-accent:#15c2c2">
-      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
-      <div class="biome-panel-content">
-        <span class="biome-panel-name">The Undercroft</span>
-        <span class="biome-panel-blurb">Gray industry, deep below.</span>
-      </div>
-    </a>
-    <a href="/stages/the-crimson-fields" class="biome-panel" data-biome="crimson"
-       style="--panel-bg:#f7e3e3;--panel-ink:#5a1320;--panel-accent:#e23b3b">
-      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
-      <div class="biome-panel-content">
-        <span class="biome-panel-name">The Crimson Fields</span>
-        <span class="biome-panel-blurb">Red and gold, and old rage.</span>
-      </div>
-    </a>
-    <a href="/stages/the-voidspire"     class="biome-panel" data-biome="voidspire"
-       style="--panel-bg:#e7e3f3;--panel-ink:#382c54;--panel-accent:#8b3bd6">
-      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
-      <div class="biome-panel-content">
-        <span class="biome-panel-name">The Voidspire</span>
-        <span class="biome-panel-blurb">Where the rules thin out.</span>
-      </div>
-    </a>
-    <a href="/stages/the-tear"          class="biome-panel" data-biome="tear"
-       style="--panel-bg:#0e0b1a;--panel-ink:#c9c4e0;--panel-accent:#13c4d6">
-      <canvas class="biome-panel-canvas" aria-hidden="true"></canvas>
-      <div class="biome-panel-content">
-        <span class="biome-panel-name">The Tear</span>
-        <span class="biome-panel-blurb">Everything, all at once.</span>
-      </div>
-    </a>
+    </a>)}
   </div>
 </section>
 
