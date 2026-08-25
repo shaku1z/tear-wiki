@@ -5,9 +5,9 @@
   "scope": "Permanent public terminology for authored wiki copy, bound to the validated current game-reference artifact.",
   "snapshot": {
     "repository": "shaku1z/tear",
-    "sourceSha": "9ddd8f20a9c7d1830a2e043d9e558e259f738d02",
-    "validationRunId": "32785864315",
-    "manifestSha256": "7b8b3f5fec5862f3649470ab3e04170e096065c823b9349140bf9d688740311f",
+    "sourceSha": "71df06260b9ee2b41f729048dce3f910130ea234",
+    "validationRunId": "32802505041",
+    "manifestSha256": "afc4eb0e7b051c76eb583be852b00a80f4c2b7632744e1a7f4199faffbba7254",
     "manifestSchemaVersion": 2,
     "format": "game-reference.v1",
     "terminologyVersion": "g4-terminology-v1",
@@ -29,7 +29,10 @@
       "displayName": "TEAR Music",
       "codeId": "tear-music",
       "scope": "Whole music product and repository",
-      "deprecatedAliases": ["TearScore", "tear-score"],
+      "deprecatedAliases": [
+        "TearScore",
+        "tear-score"
+      ],
       "compatibility": "Legacy product, repository, package, and provenance identifiers remain readable where required; new authored public copy uses TEAR Music."
     },
     {
@@ -37,7 +40,10 @@
       "displayName": "Adaptive Soundtrack",
       "codeId": "adaptive-soundtrack",
       "scope": "In-game adaptive playback engine",
-      "deprecatedAliases": ["TearScore runtime", "TearScore engine"],
+      "deprecatedAliases": [
+        "TearScore runtime",
+        "TearScore engine"
+      ],
       "compatibility": "Legacy runtime and replay metadata identifiers remain readable for deterministic playback; new authored public copy uses Adaptive Soundtrack."
     },
     {
@@ -45,8 +51,13 @@
       "displayName": "Music",
       "codeId": "music",
       "scope": "Player-facing music area",
-      "deprecatedAliases": ["THE SIGNAL", "Signal"],
-      "deprecatedCopyAliases": ["THE SIGNAL"],
+      "deprecatedAliases": [
+        "THE SIGNAL",
+        "Signal"
+      ],
+      "deprecatedCopyAliases": [
+        "THE SIGNAL"
+      ],
       "compatibility": "Legacy catalog, settings, and bookmark identifiers remain readable; current player-facing labels use Music."
     },
     {
@@ -54,7 +65,10 @@
       "displayName": "Soundtrack Desk",
       "codeId": "soundtrack-desk",
       "scope": "Audio authoring application",
-      "deprecatedAliases": ["Foundry Studio", "audio Foundry"],
+      "deprecatedAliases": [
+        "Foundry Studio",
+        "audio Foundry"
+      ],
       "compatibility": "Legacy routes, hostnames, query parameters, launchers, and telemetry remain compatibility readers; current labels use Soundtrack Desk."
     },
     {
@@ -62,7 +76,9 @@
       "displayName": "Training Operations",
       "codeId": "training-operations",
       "scope": "Agent training operations",
-      "deprecatedAliases": ["Foundry"],
+      "deprecatedAliases": [
+        "Foundry"
+      ],
       "compatibility": "Legacy training records, route aliases, and persistence keys remain readable; current labels use Training Operations and stay distinct from Soundtrack Desk."
     },
     {
@@ -70,7 +86,10 @@
       "displayName": "Scenario Console",
       "codeId": "scenario-console",
       "scope": "State construction tool",
-      "deprecatedAliases": ["State Forge", "State Forge Studio"],
+      "deprecatedAliases": [
+        "State Forge",
+        "State Forge Studio"
+      ],
       "compatibility": "Legacy scenario/replay codecs and TearBench evidence remain readable; current labels use Scenario Console."
     },
     {
@@ -78,7 +97,9 @@
       "displayName": "Replay Editor",
       "codeId": "replay-editor",
       "scope": "Replay editing tool",
-      "deprecatedAliases": ["Ghost Studio"],
+      "deprecatedAliases": [
+        "Ghost Studio"
+      ],
       "compatibility": "Legacy replay routes and edit-decision-list identifiers remain readable; current labels use Replay Editor."
     },
     {
@@ -86,7 +107,9 @@
       "displayName": "Replay Hub",
       "codeId": "replay-hub",
       "scope": "Replay exploration tool",
-      "deprecatedAliases": ["Ghost Lab"],
+      "deprecatedAliases": [
+        "Ghost Lab"
+      ],
       "compatibility": "Legacy replay routes and retained evidence remain readable; current labels use Replay Hub."
     },
     {
@@ -94,7 +117,9 @@
       "displayName": "Game Agent",
       "codeId": "game-agent",
       "scope": "Automated game-playing agent",
-      "deprecatedAliases": ["TearBot"],
+      "deprecatedAliases": [
+        "TearBot"
+      ],
       "compatibility": "Legacy evaluation artifacts and report namespaces remain readable; current labels use Game Agent."
     },
     {
@@ -102,7 +127,9 @@
       "displayName": "Training Archive",
       "codeId": "training-archive",
       "scope": "Training artifact collection",
-      "deprecatedAliases": ["Academy"],
+      "deprecatedAliases": [
+        "Academy"
+      ],
       "compatibility": "Legacy training records and custody identifiers remain readable; current labels use Training Archive."
     },
     {
@@ -110,7 +137,9 @@
       "displayName": "Run Monitor",
       "codeId": "run-monitor",
       "scope": "Live agent observation tool",
-      "deprecatedAliases": ["Watch Agent"],
+      "deprecatedAliases": [
+        "Watch Agent"
+      ],
       "compatibility": "Legacy event, route, and journal identifiers remain readable; current labels use Run Monitor."
     },
     {
@@ -126,9 +155,24 @@
   "activeRoster": {
     "schemaVersion": "final-five-v1",
     "source": "validated game-reference artifact roster",
-    "canonicalIds": ["sword", "hammer", "greatsword", "chainblade", "riftlock"],
-    "canonicalDisplayNames": ["Sword", "Hammer", "Greatsword", "Chainblade", "Riftlock"],
-    "retiredIds": ["spear", "ringblade"],
+    "canonicalIds": [
+      "sword",
+      "hammer",
+      "greatsword",
+      "chainblade",
+      "riftlock"
+    ],
+    "canonicalDisplayNames": [
+      "Sword",
+      "Hammer",
+      "Greatsword",
+      "Chainblade",
+      "Riftlock"
+    ],
+    "retiredIds": [
+      "spear",
+      "ringblade"
+    ],
     "migrationMap": {
       "spear": "greatsword",
       "ringblade": "riftlock"
