@@ -1,427 +1,133 @@
 ---
-import gameManifest from '../data/game-manifest.json';
-import { BOSS_MODELS, getModelProfile } from '../scripts/model-viewer-data.js';
+import { bosses, enemies, source } from '../data/game-reference.mjs';
+import { resolveModelReference } from '../data/model-exhibit.mjs';
 
 export interface Props {
-  model: 'charger' | 'ranged' | 'flyer' | 'bomber' | 'armored' | 'support' | 'chimera' | 'wraith' | 'aldric' | 'iron-colossus' | 'the-echo' | 'the-source' | 'warden';
+  model: string;
   variant?: string;
 }
-const { model, variant } = Astro.props;
-const profile = getModelProfile(model);
-const isBoss = BOSS_MODELS.has(model);
-const accentKey = model === 'iron-colossus' ? 'boss' : model === 'the-echo' ? 'boss' : model === 'the-source' ? 'boss' : model === 'aldric' || model === 'warden' ? 'boss' : model === 'support' ? 'priest' : model;
-const accent = gameManifest.config.colors?.[accentKey] || gameManifest.config.colors?.enemyShot || '#13c4d6';
-const displayName = model.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
-const variants = gameManifest.variants?.[model] || [];
-const configKey = model === 'charger' ? 'enemy' : model.replace('iron-', '').replace('the-', '');
-const modelConfig = gameManifest.config?.[configKey] || gameManifest.config?.boss || {};
+
+const { model, variant = '' } = Astro.props;
+const reference = resolveModelReference(model);
+const family = reference.kind === 'enemy' ? enemies.families.find((entry) => entry.id === reference.canonicalId) : null;
+const boss = reference.kind === 'boss' ? bosses.find((entry) => entry.id === reference.canonicalId) : null;
+const canonicalRecord = family || boss;
+const variants = family?.variants || [];
+const selectedVariant = variants.find((entry) => entry.id === variant) || null;
+const invalidVariant = Boolean(variant) && !selectedVariant;
+const displayName = boss?.name || family?.id?.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) || reference.label || model || 'Unknown record';
+const recordLabel = boss ? 'CANONICAL BOSS RECORD' : family ? 'CANONICAL ENEMY FAMILY' : reference.kind === 'legacy-label' ? 'LEGACY LABEL / NO CANONICAL FAMILY' : 'UNSUPPORTED RECORD';
+const assetPath = reference.assetId ? `/generated/models/${reference.assetId}.svg` : null;
+const assetLabel = assetPath ? 'ARCHIVAL SVG / NOT RUNTIME SIMULATION' : 'NO ARCHIVAL ART / METADATA ONLY';
+const phaseMarks = boss?.phaseMarks || [];
 ---
 
-<tear-model-viewer
-  data-model={model}
-  data-variant={variant || ''}
-  data-motif={profile.motif}
-  class="tear-model-viewer"
-  style={`--viewer-accent:${accent}`}
-  tabindex="0"
-  aria-label={`${displayName} combat archive`}
->
-  <section class="archive-shell">
-    <header class="archive-heading">
-      <div class="archive-index" aria-hidden="true"><i></i><span>TACTICAL ARCHIVE</span></div>
-      <div class="archive-identity">
-        <p>{isBoss ? 'BOSS RECORD' : 'ENEMY FAMILY'} / {profile.role.toUpperCase()}</p>
-        <h2>{displayName}</h2>
-      </div>
-      <div class="archive-provenance" title="Generated from the retained game snapshot">
-        <span>CAPTURED MODEL</span><code>{gameManifest.source.commit.slice(0, 7)}</code>
-      </div>
-    </header>
-
-    <div class="model-stage">
-      <div class="arena-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="arena-measurements" aria-hidden="true"><span>00</span><span>01</span><span>02</span><span>03</span></div>
-      <div class="arena-ground" aria-hidden="true"></div>
-      <div class="model-fallback" role="status"><img src={`/generated/models/${model}.svg`} alt="" /><span>RECONSTRUCTING</span><b>{displayName}</b></div>
-      <canvas aria-label={`Animated preview reconstruction of ${displayName}`}></canvas>
-      <div class="model-error" hidden><b>RECONSTRUCTION FAILED</b><span>The tactical record remains available below.</span></div>
-      <div class="stage-readout" aria-live="polite">
-        <span class="model-state">EXHIBIT / RUNNING</span>
-        <span>{profile.range.toUpperCase()} RANGE</span>
-      </div>
-      <p class="interaction-hint">EXHIBIT PREVIEWS CAPTURED BEHAVIOR · TRAINING TRACKS YOUR POINTER · ANALYSIS REVEALS COMBAT GEOMETRY</p>
-      <div class="corner-mark corner-a" aria-hidden="true"></div>
-      <div class="corner-mark corner-b" aria-hidden="true"></div>
+<section class="model-exhibit" data-model-exhibit data-model={model} data-canonical-id={reference.canonicalId || ''}>
+  <header class="exhibit-header">
+    <div class="exhibit-index" aria-hidden="true"><i></i><span>REFERENCE EXHIBIT</span></div>
+    <div class="exhibit-identity">
+      <p>{recordLabel}</p>
+      <h2>{displayName}</h2>
     </div>
+    <div class="exhibit-provenance" title="Validated committed game-reference artifact">
+      <span>REFERENCE SOURCE</span><code>{source.sha.slice(0, 7)}</code>
+    </div>
+  </header>
 
-    <div class="study-panel">
-      <div class="variant-bank">
-        <span class="study-label">RECONSTRUCTION</span>
-        <div class="variant-options" role="group" aria-label="Enemy variant">
-          <button type="button" class="variant-btn active" data-variant="" aria-pressed="true">BASE</button>
-          {variants.map((item) => <button type="button" class="variant-btn" data-variant={item.id} aria-pressed="false">{item.name}</button>)}
-        </div>
-      </div>
-      <div class="tactical-readout" aria-label="Live tactical telemetry">
-        <span><small>HP</small><b data-telemetry="hp">{modelConfig.hp || 0}</b></span>
-        <span><small>MOTION</small><b data-telemetry="speed">0</b></span>
-        <span><small>AI STATE</small><b data-telemetry="state">IDLE</b></span>
-      </div>
-      <div class="behavior-timeline" aria-label="Behavior timeline">
-        <span class="study-label">BEHAVIOR CYCLE</span>
-        <div>
-          <i data-behavior="telegraph"><b>TELEGRAPH</b><small>READ</small></i>
-          <i data-behavior="commit"><b>COMMIT</b><small>MOVE</small></i>
-          <i data-behavior="active"><b>ACTIVE</b><small>RESPOND</small></i>
-          <i data-behavior="recovery"><b>RECOVERY</b><small>PUNISH</small></i>
-        </div>
-      </div>
-      <div class="analysis-layers" role="group" aria-label="Analysis layers">
-        <span class="study-label">ANALYSIS LAYERS</span>
-        <button type="button" data-layer="hitbox" aria-pressed="true">HITBOX</button>
-        <button type="button" data-layer="velocity" aria-pressed="true">VELOCITY</button>
-        <button type="button" data-layer="projectiles" aria-pressed="true">PROJECTILES</button>
-        <button type="button" data-layer="target" aria-pressed="true">TARGET</button>
-      </div>
-      {variants.length > 1 && (
-        <div class="comparison-dock" hidden>
-          <header><span>COMPARISON RECORD</span><button type="button" class="comparison-close" aria-label="Close comparison">CLOSE</button></header>
-          <div class="comparison-stage"><canvas aria-label={`Comparison reconstruction of ${displayName}`}></canvas></div>
-          <label>COMPARE AGAINST
-            <select class="comparison-select">
-              {variants.map((item) => <option value={item.id}>{item.name}</option>)}
+  <div class="exhibit-stage" aria-label={`${displayName} reference exhibit`}>
+    {assetPath ? (
+      <img class="archival-silhouette" src={assetPath} alt={`Archival silhouette of ${displayName}`} />
+    ) : (
+      <div class="no-art" role="status"><strong>NO ARCHIVAL SILHOUETTE</strong><span>This record has no retained artwork.</span></div>
+    )}
+    <div class="stage-grid" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="stage-label"><span>{assetLabel}</span><b>{reference.canonicalId || 'NO CANONICAL ID'}</b></div>
+  </div>
+
+  <div class="exhibit-grid">
+    <section class="record-panel" aria-label="Canonical record">
+      <span class="panel-label">PUBLISHED CONTRACT</span>
+      {canonicalRecord ? (
+        <dl class="record-list">
+          <div><dt>RECORD ID</dt><dd>{canonicalRecord.id}</dd></div>
+          {boss ? <div><dt>STAGE ID</dt><dd>{boss.stageId}</dd></div> : <div><dt>VARIANT ENTRIES</dt><dd>{variants.length}</dd></div>}
+          {boss && <div><dt>PHASE MARKS / HP FRACTION</dt><dd>{phaseMarks.map((mark) => `${Math.round(mark * 100)}%`).join(' · ')}</dd></div>}
+        </dl>
+      ) : (
+        <p class="boundary-copy">No canonical family or boss record is published for this viewer prop. The label is retained only so older documentation resolves honestly.</p>
+      )}
+    </section>
+
+    <section class="variant-panel" aria-label="Published variant records">
+      <span class="panel-label">VARIANT RECORDS</span>
+      {variants.length ? (
+        <>
+          <label class="variant-select-label" for={`variant-${model}`}>SELECT PUBLISHED VARIANT
+            <select id={`variant-${model}`} data-variant-select>
+              <option value="">BASE FAMILY ENTRY</option>
+              {variants.map((entry) => <option value={entry.id} selected={entry.id === variant}>{entry.name}</option>)}
             </select>
           </label>
-        </div>
+          <div class="variant-records">
+            <p data-variant-record="" hidden={Boolean(selectedVariant)}>Base family entry; no variant-specific record selected.</p>
+            {variants.map((entry) => (
+              <p data-variant-record={entry.id} hidden={entry.id !== variant}>
+                <strong>{entry.name}</strong><span>ID {entry.id}</span><span>WEIGHT {entry.weight}</span><span>{entry.minWave == null ? 'BASE POOL' : `UNLOCK WAVE ${entry.minWave}`}</span>
+              </p>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p class="boundary-copy">No variant entries are published for this record.</p>
       )}
-    </div>
+      {invalidVariant && <p class="variant-warning" role="status">Requested variant <code>{variant}</code> is not in the published contract; showing the canonical record boundary.</p>}
+    </section>
+  </div>
 
-    <footer class="command-rail">
-      <div class="control-group mode-controls" role="group" aria-label="Viewer mode">
-        <span class="control-label">MODE</span>
-        <button class="ctrl-btn active" type="button" data-mode="exhibit" aria-pressed="true">EXHIBIT</button>
-        <button class="ctrl-btn" type="button" data-mode="training">TRAIN</button>
-        <button class="ctrl-btn" type="button" data-mode="analysis">ANALYZE</button>
-      </div>
-      <button class="play-btn rail-action" type="button" aria-pressed="false" aria-label="Pause model">PAUSE</button>
-      <div class="control-group time-controls" role="group" aria-label="Playback speed">
-        <span class="control-label">SPEED</span>
-        <button class="ctrl-btn" type="button" data-time="0.25">¼</button>
-        <button class="ctrl-btn" type="button" data-time="0.5">½</button>
-        <button class="ctrl-btn active" type="button" data-time="1" aria-pressed="true">1×</button>
-      </div>
-      {isBoss && (
-        <div class="control-group phase-controls" role="group" aria-label="Boss phase">
-          <span class="control-label">PHASE</span>
-          <button class="ctrl-btn active" type="button" data-phase="auto" aria-pressed="true">AUTO</button>
-          <button class="ctrl-btn" type="button" data-phase="1">I</button>
-          <button class="ctrl-btn" type="button" data-phase="2">II</button>
-          <button class="ctrl-btn" type="button" data-phase="3">III</button>
-        </div>
-      )}
-      <label class="zoom-control"><span>FRAME</span><input type="range" class="zoom-slider" min="0" max="1" step="0.01" value="0.3125" aria-label="Model framing" /></label>
-      <button class="reset-btn rail-action" type="button">RESET</button>
-      {variants.length > 1 && <button class="compare-btn rail-action" type="button" aria-expanded="false">COMPARE</button>}
-    </footer>
-  </section>
-</tear-model-viewer>
+  <footer class="exhibit-footer">
+    <span>STATIC REFERENCE ONLY</span>
+    <span>NO TOTAL/CURRENT HP · HITBOX · AI · PROJECTILE OR RUNTIME SIMULATION DATA PUBLISHED</span>
+  </footer>
+</section>
 
 <script>
-  import { initModelViewer } from '../scripts/model-renderer.js';
-
-  class TearModelViewer extends HTMLElement {
-    cleanup = null;
-    connectedCallback() {
-      if (this.dataset.connected === 'true') return;
-      this.dataset.connected = 'true';
-      const canvas = this.querySelector('canvas');
-      const modelName = this.dataset.model;
-      const state = { timeScale: 1, phase: 'auto', debug: false, camScale: 1, playing: true, mode: 'exhibit', analysis: { hitbox: true, velocity: true, projectiles: true, target: true } };
-      this.viewerState = state;
-      const status = this.querySelector('.model-state');
-      const announce = () => {
-        if (status) status.textContent = `${state.mode.toUpperCase()} / ${state.playing ? 'RUNNING' : 'PAUSED'}`;
-      };
-      const setMode = (mode) => {
-        state.mode = mode;
-        state.debug = mode === 'analysis';
-        this.dataset.mode = mode;
-        this.selectButton('.mode-controls .ctrl-btn', this.querySelector(`[data-mode="${mode}"]`));
-        announce();
-      };
-      this.querySelectorAll('.mode-controls .ctrl-btn').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
-      const playButton = this.querySelector('.play-btn');
-      const togglePlayback = () => {
-        state.playing = !state.playing;
-        playButton.textContent = state.playing ? 'PAUSE' : 'PLAY';
-        playButton.setAttribute('aria-label', state.playing ? 'Pause model' : 'Play model');
-        playButton.setAttribute('aria-pressed', String(!state.playing));
-        announce();
-      };
-      playButton?.addEventListener('click', togglePlayback);
-
-      if (canvas && modelName) {
-        try {
-          canvas.addEventListener('modelready', () => this.classList.add('is-ready'), { once: true });
-          this.cleanup = initModelViewer(canvas, modelName, this.dataset.variant, state);
-        } catch (error) {
-          this.classList.add('has-error');
-          this.dataset.error = error instanceof Error ? error.message : String(error);
-          this.querySelector('.model-error')?.removeAttribute('hidden');
-          console.error(`Unable to initialize ${modelName} model viewer`, error);
-        }
+  document.querySelectorAll('[data-model-exhibit]').forEach((root) => {
+    const select = root.querySelector('[data-variant-select]');
+    const records = [...root.querySelectorAll('[data-variant-record]')];
+    if (!select || !records.length) return;
+    const applyVariant = (id, updateUrl = true) => {
+      if (![...select.options].some((option) => option.value === id)) id = '';
+      select.value = id;
+      records.forEach((record) => { record.hidden = record.dataset.variantRecord !== id; });
+      if (updateUrl) {
+        const url = new URL(location.href);
+        id ? url.searchParams.set('variant', id) : url.searchParams.delete('variant');
+        history.replaceState({}, '', url);
       }
-
-      const activateVariant = (nextVariant, updateUrl = true) => {
-        this.cleanup?.setVariant(nextVariant);
-        this.dataset.variant = nextVariant;
-        this.selectButton('.variant-btn', this.querySelector(`[data-variant="${nextVariant}"]`));
-        if (updateUrl) {
-          const url = new URL(location.href);
-          nextVariant ? url.searchParams.set('variant', nextVariant) : url.searchParams.delete('variant');
-          history.replaceState({}, '', url);
-        }
-      };
-      this.querySelectorAll('.variant-btn').forEach((button) => button.addEventListener('click', () => activateVariant(button.dataset.variant)));
-      const requestedVariant = new URL(location.href).searchParams.get('variant') || this.dataset.variant;
-      if (requestedVariant && this.querySelector(`[data-variant="${requestedVariant}"]`)) activateVariant(requestedVariant, false);
-      canvas?.addEventListener('modeltelemetry', (event) => {
-        const telemetry = event.detail;
-        const phase = /wind|telegraph|aim|charge/i.test(telemetry.state) ? 'telegraph'
-          : /lunge|swoop|fire|shoot|slam|stomp|attack|burst|cast/i.test(telemetry.state) ? 'active'
-          : /stun|recover|cool/i.test(telemetry.state) ? 'recovery' : 'commit';
-        this.querySelectorAll('[data-behavior]').forEach((item) => item.classList.toggle('current', item.dataset.behavior === phase));
-        const currentPhase = this.querySelector(`[data-behavior="${phase}"] small`);
-        if (currentPhase) currentPhase.textContent = `${telemetry.stateDuration.toFixed(1)}S LIVE`;
-        for (const key of ['hp', 'speed', 'state']) {
-          const output = this.querySelector(`[data-telemetry="${key}"]`);
-          if (output) output.textContent = key === 'speed' ? `${telemetry[key]} PX/S` : String(telemetry[key]).toUpperCase();
-        }
-      });
-
-      this.querySelectorAll('.time-controls .ctrl-btn').forEach((button) => button.addEventListener('click', () => {
-        this.selectButton('.time-controls .ctrl-btn', button);
-        state.timeScale = Number(button.dataset.time);
-      }));
-      this.querySelectorAll('.phase-controls .ctrl-btn').forEach((button) => button.addEventListener('click', () => {
-        this.selectButton('.phase-controls .ctrl-btn', button);
-        state.phase = button.dataset.phase;
-      }));
-      this.querySelector('.reset-btn')?.addEventListener('click', () => this.cleanup?.reset());
-      canvas?.addEventListener('dblclick', () => this.cleanup?.reset());
-      canvas?.addEventListener('wheel', (event) => {
-        if (!event.ctrlKey && state.mode === 'exhibit') return;
-        event.preventDefault();
-        state.camScale = Math.max(.75, Math.min(1.55, state.camScale - Math.sign(event.deltaY) * .08));
-        const slider = this.querySelector('.zoom-slider');
-        if (slider) slider.value = String((state.camScale - .75) / .8);
-      }, { passive: false });
-      this.querySelectorAll('[data-layer]').forEach((button) => button.addEventListener('click', () => {
-        const layer = button.dataset.layer;
-        state.analysis[layer] = !state.analysis[layer];
-        button.setAttribute('aria-pressed', String(state.analysis[layer]));
-      }));
-      const comparisonDock = this.querySelector('.comparison-dock');
-      const comparisonCanvas = comparisonDock?.querySelector('canvas');
-      const comparisonSelect = this.querySelector('.comparison-select');
-      let comparisonRuntime = null;
-      const closeComparison = () => {
-        comparisonRuntime?.destroy();
-        comparisonRuntime = null;
-        comparisonDock?.setAttribute('hidden', '');
-        this.querySelector('.compare-btn')?.setAttribute('aria-expanded', 'false');
-      };
-      const openComparison = () => {
-        if (!comparisonCanvas || !comparisonSelect) return;
-        comparisonDock.removeAttribute('hidden');
-        this.querySelector('.compare-btn')?.setAttribute('aria-expanded', 'true');
-        comparisonRuntime?.destroy();
-        comparisonRuntime = initModelViewer(comparisonCanvas, modelName, comparisonSelect.value, state);
-      };
-      this.querySelector('.compare-btn')?.addEventListener('click', openComparison);
-      this.querySelector('.comparison-close')?.addEventListener('click', closeComparison);
-      comparisonSelect?.addEventListener('change', () => {
-        if (comparisonRuntime) { comparisonRuntime.setVariant(comparisonSelect.value); }
-        const url = new URL(location.href); url.searchParams.set('compare', comparisonSelect.value); history.replaceState({}, '', url);
-      });
-      const requestedComparison = new URL(location.href).searchParams.get('compare');
-      if (requestedComparison && comparisonSelect?.querySelector(`option[value="${requestedComparison}"]`)) {
-        comparisonSelect.value = requestedComparison;
-        openComparison();
-      }
-      this.querySelector('.zoom-slider')?.addEventListener('input', (event) => {
-        state.camScale = 0.75 + Number(event.currentTarget.value) * 0.8;
-      });
-      this.addEventListener('keydown', (event) => {
-        if (event.target instanceof HTMLInputElement) return;
-        const actions = {
-          ' ': () => togglePlayback(),
-          r: () => this.cleanup?.reset(),
-          a: () => setMode('analysis'),
-          t: () => setMode('training'),
-          e: () => setMode('exhibit'),
-          '1': () => this.querySelector('[data-phase="1"]')?.click(),
-          '2': () => this.querySelector('[data-phase="2"]')?.click(),
-          '3': () => this.querySelector('[data-phase="3"]')?.click(),
-        };
-        const action = actions[event.key.toLowerCase()];
-        if (action) { event.preventDefault(); action(); }
-      });
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        state.playing = false;
-        playButton.textContent = 'PLAY';
-        playButton.setAttribute('aria-label', 'Play model');
-        announce();
-      }
-    }
-    selectButton(selector, selected) {
-      this.querySelectorAll(selector).forEach((button) => {
-        const active = button === selected;
-        button.classList.toggle('active', active);
-        button.setAttribute('aria-pressed', String(active));
-      });
-    }
-    disconnectedCallback() {
-      this.cleanup?.destroy();
-      this.querySelector('.comparison-close')?.click();
-      this.cleanup = null;
-      delete this.dataset.connected;
-    }
-  }
-  if (!customElements.get('tear-model-viewer')) customElements.define('tear-model-viewer', TearModelViewer);
+    };
+    select.addEventListener('change', () => applyVariant(select.value));
+    const requested = new URL(location.href).searchParams.get('variant');
+    if (requested && [...select.options].some((option) => option.value === requested)) applyVariant(requested, false);
+  });
 </script>
 
 <style>
-  .tear-model-viewer {
-    --viewer-surface: #0a0b0e;
-    --viewer-surface-raised: #111318;
-    --viewer-ink: #f5f7f8;
-    --viewer-muted: #858a92;
-    --viewer-line: rgba(245, 247, 248, .16);
-    --viewer-grid: rgba(245, 247, 248, .055);
-    --viewer-glow: color-mix(in srgb, var(--viewer-accent) 20%, transparent);
-    --viewer-shadow: rgba(0, 0, 0, .48);
-    display: block;
-    margin: 2.5rem 0 3rem;
-    color: var(--viewer-ink);
-    outline: none;
-  }
-  .tear-model-viewer:focus-visible .archive-shell { outline: 2px solid var(--viewer-accent); outline-offset: 4px; }
-  .archive-shell { border: 1px solid var(--viewer-line); background: var(--viewer-surface); box-shadow: 0 24px 60px var(--viewer-shadow); clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px)); }
-  .archive-heading { min-height: 96px; display: grid; grid-template-columns: minmax(120px, .7fr) 1.4fr auto; align-items: stretch; border-bottom: 1px solid var(--viewer-line); }
-  .archive-index, .archive-provenance { padding: 1rem 1.25rem; display: flex; align-items: center; gap: .65rem; font: 700 .62rem/1 var(--sl-font-mono); letter-spacing: .15em; color: var(--viewer-muted); }
-  .archive-index { border-right: 1px solid var(--viewer-line); }
-  .archive-index i { width: 24px; height: 2px; background: var(--viewer-accent); box-shadow: 8px 0 16px var(--viewer-accent); }
-  .archive-identity { padding: 1rem 1.4rem; align-self: center; }
-  .archive-identity p { margin: 0 0 .35rem; color: var(--viewer-accent); font: 700 .64rem/1 var(--sl-font-mono); letter-spacing: .17em; }
-  .archive-identity h2 { margin: 0; color: var(--viewer-ink); font: 800 clamp(1.3rem, 3vw, 2rem)/1 var(--sl-font-mono); letter-spacing: .08em; text-transform: uppercase; }
-  .archive-provenance { justify-content: flex-end; border-left: 1px solid var(--viewer-line); flex-wrap: wrap; max-width: 170px; }
-  .archive-provenance span::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: .5rem; background: #1faf5a; box-shadow: 0 0 10px #1faf5a; }
-  .archive-provenance code { color: var(--viewer-ink); background: none; padding: 0; }
-  .model-stage { position: relative; height: clamp(330px, 52vw, 520px); overflow: hidden; background: radial-gradient(circle at 50% 46%, var(--viewer-glow), transparent 36%), var(--viewer-surface); isolation: isolate; }
-  .model-stage canvas { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; display: block; filter: drop-shadow(0 16px 13px var(--viewer-shadow)); }
-  [data-mode='training'] .model-stage canvas, [data-mode='analysis'] .model-stage canvas { touch-action: none; cursor: crosshair; }
-  .arena-atmosphere { position: absolute; inset: 0; z-index: 1; background-image: linear-gradient(var(--viewer-grid) 1px, transparent 1px), linear-gradient(90deg, var(--viewer-grid) 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 75%, transparent); }
-  .arena-atmosphere i { position: absolute; background: var(--viewer-accent); opacity: .16; }
-  .arena-atmosphere i:nth-child(1) { width: 1px; height: 48%; left: 22%; top: 26%; }
-  .arena-atmosphere i:nth-child(2) { height: 1px; width: 42%; left: 44%; top: 31%; }
-  .arena-atmosphere i:nth-child(3) { width: 9rem; height: 9rem; border: 1px solid var(--viewer-accent); background: transparent; border-radius: 50%; left: calc(50% - 4.5rem); top: calc(50% - 4.5rem); opacity: .09; }
-  [data-motif='blast'] .arena-atmosphere i:nth-child(3), [data-motif='sight'] .arena-atmosphere i:nth-child(3) { opacity: .22; }
-  [data-motif='rush'] .arena-atmosphere { transform: skewX(-7deg); }
-  .arena-measurements { position: absolute; z-index: 2; inset: 1rem auto 1rem 1rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--viewer-muted); opacity: .45; font: 600 .55rem/1 var(--sl-font-mono); }
-  .arena-ground { position: absolute; z-index: 2; left: 8%; right: 8%; bottom: 18%; height: 1px; background: linear-gradient(90deg, transparent, var(--viewer-line) 15%, var(--viewer-accent) 50%, var(--viewer-line) 85%, transparent); box-shadow: 0 18px 40px var(--viewer-glow); }
-  .stage-readout { position: absolute; z-index: 7; inset: auto 1.25rem 1rem; display: flex; justify-content: space-between; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .14em; pointer-events: none; }
-  .interaction-hint { position: absolute; z-index: 7; top: 1rem; left: 50%; transform: translateX(-50%); width: min(80%, 620px); margin: 0; color: var(--viewer-muted); text-align: center; font: 600 .52rem/1.5 var(--sl-font-mono); letter-spacing: .1em; opacity: 0; transition: opacity .2s ease; pointer-events: none; }
-  .tear-model-viewer:focus-within .interaction-hint, .tear-model-viewer:hover .interaction-hint { opacity: .8; }
-  .model-state { color: var(--viewer-accent); }
-  .corner-mark { position: absolute; z-index: 7; width: 22px; height: 22px; pointer-events: none; }
-  .corner-a { top: 14px; left: 14px; border-top: 1px solid var(--viewer-accent); border-left: 1px solid var(--viewer-accent); }
-  .corner-b { right: 14px; bottom: 14px; border-right: 1px solid var(--viewer-accent); border-bottom: 1px solid var(--viewer-accent); }
-  .model-fallback, .model-error { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; gap: .45rem; text-align: center; font-family: var(--sl-font-mono); letter-spacing: .16em; color: var(--viewer-muted); }
-  .model-fallback img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .34; }
-  .model-fallback::before { content: ''; position: relative; z-index: 1; width: 1px; height: 90px; margin: auto; background: linear-gradient(transparent, var(--viewer-accent), transparent); animation: reconstruct 1.1s ease-in-out infinite; }
-  .model-fallback span, .model-fallback b { position: relative; z-index: 1; }
-  .model-fallback b { color: var(--viewer-ink); font-size: 1.35rem; }
-  .is-ready .model-fallback { opacity: 0; pointer-events: none; transition: opacity .25s ease; }
-  .model-error { z-index: 10; background: var(--viewer-surface); color: var(--viewer-ink); }
-  .model-error[hidden] { display: none; }
-  .study-panel { display: grid; grid-template-columns: 1.3fr .9fr; border-top: 1px solid var(--viewer-line); background: var(--viewer-surface); }
-  .variant-bank, .behavior-timeline { padding: .9rem 1rem; }
-  .variant-bank { border-right: 1px solid var(--viewer-line); }
-  .study-label { display: block; margin-bottom: .65rem; color: var(--viewer-muted); font: 700 .56rem/1 var(--sl-font-mono); letter-spacing: .14em; }
-  .variant-options { display: flex; gap: .35rem; overflow-x: auto; padding-bottom: .2rem; }
-  .variant-btn { min-height: 34px; padding: 0 .7rem; border: 1px solid var(--viewer-line); border-radius: 0; background: transparent; color: var(--viewer-muted); white-space: nowrap; font: 700 .6rem/1 var(--sl-font-mono); letter-spacing: .07em; cursor: pointer; }
-  .variant-btn:hover, .variant-btn:focus-visible { color: var(--viewer-ink); border-color: var(--viewer-accent); }
-  .variant-btn.active { color: var(--viewer-surface); border-color: var(--viewer-accent); background: var(--viewer-accent); }
-  .tactical-readout { display: grid; grid-template-columns: .6fr .9fr 1.25fr; grid-column: 2; grid-row: 1; }
-  .tactical-readout span { min-width: 0; padding: .9rem .75rem; border-right: 1px solid var(--viewer-line); }
-  .tactical-readout span:last-child { border: 0; }
-  .tactical-readout small, .tactical-readout b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--sl-font-mono); }
-  .tactical-readout small { color: var(--viewer-muted); font-size: .52rem; letter-spacing: .12em; }
-  .tactical-readout b { margin-top: .5rem; color: var(--viewer-ink); font-size: .7rem; }
-  .behavior-timeline { grid-column: 1 / -1; border-top: 1px solid var(--viewer-line); }
-  .behavior-timeline > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
-  .behavior-timeline i { position: relative; min-height: 40px; padding: .55rem .65rem; background: var(--viewer-surface-raised); color: var(--viewer-muted); font-style: normal; transition: background .12s ease, color .12s ease; }
-  .behavior-timeline i::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 2px; background: var(--viewer-line); }
-  .behavior-timeline i.current { color: var(--viewer-ink); background: var(--viewer-glow); }
-  .behavior-timeline i.current::before { background: var(--viewer-accent); box-shadow: 0 0 12px var(--viewer-accent); }
-  .behavior-timeline b, .behavior-timeline small { display: block; font-family: var(--sl-font-mono); }
-  .behavior-timeline b { font-size: .61rem; letter-spacing: .08em; }
-  .behavior-timeline small { margin-top: .3rem; color: var(--viewer-muted); font-size: .48rem; letter-spacing: .1em; }
-  .analysis-layers { display: none; grid-column: 1 / -1; align-items: center; gap: .35rem; padding: .7rem 1rem; border-top: 1px solid var(--viewer-line); }
-  [data-mode='analysis'] .analysis-layers { display: flex; }
-  .analysis-layers .study-label { margin: 0 auto 0 0; }
-  .analysis-layers button { min-height: 34px; padding: 0 .65rem; border: 1px solid var(--viewer-line); background: transparent; color: var(--viewer-muted); font: 700 .55rem/1 var(--sl-font-mono); }
-  .analysis-layers button[aria-pressed='true'] { color: var(--viewer-surface); border-color: var(--viewer-accent); background: var(--viewer-accent); }
-  .comparison-dock { grid-column: 1 / -1; border-top: 1px solid var(--viewer-line); }
-  .comparison-dock[hidden] { display: none; }
-  .comparison-dock header { display: flex; justify-content: space-between; align-items: center; padding: .55rem .8rem; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .13em; }
-  .comparison-close { border: 0; background: none; color: var(--viewer-accent); font: inherit; cursor: pointer; }
-  .comparison-stage { position: relative; height: 280px; background: radial-gradient(circle, var(--viewer-glow), transparent 48%), var(--viewer-surface-raised); }
-  .comparison-stage canvas { width: 100%; height: 100%; display: block; }
-  .comparison-dock label { display: flex; align-items: center; gap: .7rem; padding: .65rem .8rem; color: var(--viewer-muted); font: 700 .55rem/1 var(--sl-font-mono); letter-spacing: .1em; }
-  .comparison-select { flex: 1; min-height: 36px; border: 1px solid var(--viewer-line); border-radius: 0; background: var(--viewer-surface); color: var(--viewer-ink); font-family: var(--sl-font-mono); }
-  .command-rail { min-height: 62px; padding: .65rem .8rem; display: flex; align-items: stretch; gap: .5rem; border-top: 1px solid var(--viewer-line); background: var(--viewer-surface-raised); overflow-x: auto; }
-  .control-group, .zoom-control { display: flex; align-items: center; gap: .2rem; padding-right: .5rem; border-right: 1px solid var(--viewer-line); white-space: nowrap; }
-  .control-label, .zoom-control span { padding: 0 .55rem; color: var(--viewer-muted); font: 700 .58rem/1 var(--sl-font-mono); letter-spacing: .14em; }
-  .ctrl-btn, .rail-action { min-width: 40px; min-height: 44px; border: 1px solid transparent; border-radius: 0; background: transparent; color: var(--viewer-muted); font: 700 .68rem/1 var(--sl-font-mono); letter-spacing: .08em; cursor: pointer; }
-  .mode-controls .ctrl-btn { padding-inline: .7rem; }
-  .ctrl-btn:hover, .rail-action:hover { color: var(--viewer-ink); border-color: var(--viewer-line); }
-  .ctrl-btn:focus-visible, .rail-action:focus-visible, .zoom-slider:focus-visible { outline: 2px solid var(--viewer-accent); outline-offset: -2px; }
-  .ctrl-btn.active, .rail-action.active { color: var(--viewer-surface); background: var(--viewer-accent); border-color: var(--viewer-accent); }
-  .zoom-control { flex: 1; min-width: 150px; }
-  .zoom-slider { width: 100%; min-width: 80px; accent-color: var(--viewer-accent); cursor: ew-resize; }
-  .rail-action { padding: 0 .9rem; min-width: max-content; }
-  @keyframes reconstruct { 0%, 100% { transform: scaleY(.35); opacity: .35; } 50% { transform: scaleY(1); opacity: 1; } }
-
-  :global([data-theme='light']) .tear-model-viewer {
-    --viewer-surface: #f3f5f7;
-    --viewer-surface-raised: #e8ecef;
-    --viewer-ink: #111419;
-    --viewer-muted: #636a73;
-    --viewer-line: rgba(17, 20, 25, .2);
-    --viewer-grid: rgba(17, 20, 25, .07);
-    --viewer-glow: color-mix(in srgb, var(--viewer-accent) 13%, transparent);
-    --viewer-shadow: rgba(30, 42, 55, .18);
-  }
-  @media (max-width: 640px) {
-    .archive-heading { grid-template-columns: 1fr auto; min-height: 82px; }
-    .archive-index { display: none; }
-    .archive-identity { padding: .9rem 1rem; }
-    .archive-provenance { max-width: 120px; padding: .75rem; }
-    .archive-provenance span { display: none; }
-    .model-stage { height: clamp(300px, 82vw, 410px); }
-    .stage-readout { inset-inline: .8rem; }
-    .command-rail { scroll-snap-type: x proximity; }
-    .control-group, .zoom-control, .rail-action { scroll-snap-align: start; }
-    .study-panel { grid-template-columns: 1fr; }
-    .variant-bank { border-right: 0; }
-    .tactical-readout { grid-column: 1; grid-row: auto; border-top: 1px solid var(--viewer-line); }
-    .behavior-timeline > div { grid-template-columns: 1fr 1fr; }
-    .analysis-layers { align-items: stretch; flex-wrap: wrap; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .model-fallback::before { animation: none; }
-    .is-ready .model-fallback { transition: none; }
-  }
+  .model-exhibit { --exhibit-surface: #0a0b0e; --exhibit-raised: #111318; --exhibit-ink: #f5f7f8; --exhibit-muted: #858a92; --exhibit-line: rgba(245,247,248,.16); --exhibit-accent: #13c4d6; background: var(--exhibit-surface); box-shadow: 0 24px 60px rgba(0,0,0,.48); color: var(--exhibit-ink); display: block; margin: 2.5rem 0 3rem; outline: none; }
+  .model-exhibit:focus-within { outline: 2px solid var(--exhibit-accent); outline-offset: 4px; }
+  .exhibit-header { align-items: stretch; border: 1px solid var(--exhibit-line); display: grid; grid-template-columns: minmax(120px,.7fr) 1.4fr auto; min-height: 96px; }
+  .exhibit-index, .exhibit-provenance { align-items: center; color: var(--exhibit-muted); display: flex; font: 700 .62rem/1 var(--sl-font-mono); gap: .65rem; letter-spacing: .15em; padding: 1rem 1.25rem; }
+  .exhibit-index { border-right: 1px solid var(--exhibit-line); } .exhibit-index i { background: var(--exhibit-accent); box-shadow: 8px 0 16px var(--exhibit-accent); height: 2px; width: 24px; }
+  .exhibit-identity { align-self: center; padding: 1rem 1.4rem; } .exhibit-identity p { color: var(--exhibit-accent); font: 700 .64rem/1 var(--sl-font-mono); letter-spacing: .17em; margin: 0 0 .35rem; } .exhibit-identity h2 { color: var(--exhibit-ink); font: 800 clamp(1.3rem,3vw,2rem)/1 var(--sl-font-mono); letter-spacing: .08em; margin: 0; text-transform: uppercase; }
+  .exhibit-provenance { border-left: 1px solid var(--exhibit-line); flex-wrap: wrap; justify-content: flex-end; max-width: 170px; } .exhibit-provenance span::before { background: #1faf5a; box-shadow: 0 0 10px #1faf5a; content: ''; display: inline-block; height: 6px; margin-right: .5rem; width: 6px; } .exhibit-provenance code { background: none; color: var(--exhibit-ink); padding: 0; }
+  .exhibit-stage { align-items: center; background: radial-gradient(circle at 50% 46%, rgba(19,196,214,.17), transparent 38%), var(--exhibit-surface); border-inline: 1px solid var(--exhibit-line); display: grid; min-height: clamp(260px,42vw,440px); overflow: hidden; place-items: center; position: relative; }
+  .archival-silhouette { height: 100%; max-height: 440px; object-fit: cover; opacity: .76; position: absolute; width: 100%; } .no-art { color: var(--exhibit-muted); display: grid; gap: .55rem; letter-spacing: .12em; place-items: center; position: relative; text-align: center; text-transform: uppercase; z-index: 2; } .no-art strong { color: var(--exhibit-ink); font: 800 1rem/1.2 var(--sl-font-mono); } .no-art span { font: .72rem/1.4 var(--sl-font-mono); }
+  .stage-grid { background-image: linear-gradient(rgba(245,247,248,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(245,247,248,.06) 1px,transparent 1px); background-size: 36px 36px; inset: 0; mask-image: linear-gradient(to bottom,transparent,#000 20%,#000 75%,transparent); position: absolute; } .stage-grid i { background: var(--exhibit-accent); opacity: .18; position: absolute; } .stage-grid i:nth-child(1) { height: 48%; left: 22%; top: 26%; width: 1px; } .stage-grid i:nth-child(2) { height: 1px; left: 44%; top: 31%; width: 42%; } .stage-grid i:nth-child(3) { border: 1px solid var(--exhibit-accent); border-radius: 50%; height: 9rem; left: calc(50% - 4.5rem); opacity: .1; top: calc(50% - 4.5rem); width: 9rem; }
+  .stage-label { align-items: flex-end; bottom: 1rem; display: flex; flex-direction: column; font: 700 .6rem/1.3 var(--sl-font-mono); gap: .3rem; letter-spacing: .1em; position: absolute; right: 1rem; text-align: right; z-index: 2; } .stage-label span { color: var(--exhibit-muted); } .stage-label b { color: var(--exhibit-accent); }
+  .exhibit-grid { border-inline: 1px solid var(--exhibit-line); display: grid; gap: 1px; grid-template-columns: 1fr 1fr; } .record-panel, .variant-panel { background: var(--exhibit-raised); min-width: 0; padding: 1.1rem 1.25rem; } .variant-panel { border-left: 1px solid var(--exhibit-line); } .panel-label { color: var(--exhibit-muted); display: block; font: 700 .6rem/1 var(--sl-font-mono); letter-spacing: .14em; margin-bottom: .9rem; }
+  .record-list { margin: 0; } .record-list div { border-bottom: 1px dashed var(--exhibit-line); display: flex; gap: 1rem; justify-content: space-between; padding: .6rem 0; } .record-list div:last-child { border-bottom: 0; } dt { color: var(--exhibit-muted); font: 700 .58rem/1.3 var(--sl-font-mono); letter-spacing: .08em; } dd { color: var(--exhibit-ink); font: 700 .68rem/1.3 var(--sl-font-mono); margin: 0; text-align: right; }
+  .variant-select-label { color: var(--exhibit-muted); display: grid; font: 700 .58rem/1.3 var(--sl-font-mono); gap: .45rem; letter-spacing: .08em; } select { background: var(--exhibit-surface); border: 1px solid var(--exhibit-line); border-radius: 0; color: var(--exhibit-ink); font: 700 .7rem/1.3 var(--sl-font-mono); padding: .6rem; } select:focus-visible { border-color: var(--exhibit-accent); outline: 2px solid var(--exhibit-accent); outline-offset: 2px; }
+  .variant-records { margin-top: .75rem; } .variant-records p { border-left: 2px solid var(--exhibit-accent); display: flex; flex-wrap: wrap; gap: .45rem .75rem; margin: 0; padding: .55rem .65rem; } .variant-records p[hidden] { display: none; } .variant-records strong { flex-basis: 100%; color: var(--exhibit-ink); font: 800 .78rem/1.2 var(--sl-font-mono); text-transform: uppercase; } .variant-records span { color: var(--exhibit-muted); font: .62rem/1.3 var(--sl-font-mono); } .variant-warning { color: #ef8a17; font: .68rem/1.4 var(--sl-font); margin: .7rem 0 0; } .variant-warning code { color: inherit; }
+  .boundary-copy { color: var(--exhibit-muted); font: .76rem/1.5 var(--sl-font); margin: 0; }
+  .exhibit-footer { align-items: center; border: 1px solid var(--exhibit-line); border-top: 0; color: var(--exhibit-muted); display: flex; flex-wrap: wrap; font: 700 .58rem/1.3 var(--sl-font-mono); gap: .75rem 1.2rem; justify-content: space-between; letter-spacing: .08em; padding: .75rem 1.25rem; } .exhibit-footer span:first-child { color: var(--exhibit-accent); }
+  @media (max-width: 760px) { .exhibit-header { grid-template-columns: 1fr; } .exhibit-index { border-bottom: 1px solid var(--exhibit-line); border-right: 0; } .exhibit-provenance { border-left: 0; border-top: 1px solid var(--exhibit-line); justify-content: flex-start; max-width: none; } .exhibit-grid { grid-template-columns: 1fr; } .variant-panel { border-left: 0; border-top: 1px solid var(--exhibit-line); } .exhibit-footer { align-items: flex-start; flex-direction: column; } }
 </style>
