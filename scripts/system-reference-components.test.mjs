@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
+import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const artifact = JSON.parse(await readFile(new URL('../src/data/game-reference.v1.json', import.meta.url), 'utf8'));
 const componentRoot = new URL('../src/components/', import.meta.url);
+const docsRoot = fileURLToPath(new URL('../src/content/docs/', import.meta.url));
 
 const componentNames = [
   'ConfigValue.astro',
@@ -18,6 +21,16 @@ const componentNames = [
 
 async function component(name) {
   return readFile(new URL(name, componentRoot), 'utf8');
+}
+
+async function mdxFiles(directory) {
+  const files = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await mdxFiles(path));
+    else if (entry.isFile() && entry.name.endsWith('.mdx')) files.push(path);
+  }
+  return files;
 }
 
 test('system reference components use only the validated server artifact', async () => {
@@ -81,5 +94,32 @@ test('affected host pages no longer claim legacy configuration snapshots are cur
   for (const relative of pages) {
     const source = await readFile(new URL(relative, import.meta.url), 'utf8');
     assert.doesNotMatch(source, /CONFIG\.colors|retained game configuration|retained game snapshot|captured hit-loss|captured from the game snapshot/i, relative);
+  }
+});
+
+test('every ConfigTable host states the public-reference boundary', async () => {
+  const files = await mdxFiles(docsRoot);
+  const hosts = [];
+  for (const file of files) {
+    const source = await readFile(file, 'utf8');
+    if (source.includes("import ConfigTable")) {
+      assert.match(source, /<ConfigTable/, relative(docsRoot, file));
+      hosts.push({ file, source });
+    }
+  }
+
+  const relativeHosts = hosts.map(({ file }) => relative(docsRoot, file).replaceAll('\\', '/')).sort();
+  assert.deepEqual(relativeHosts, [
+    'mechanics/combat.mdx',
+    'mechanics/dash.mdx',
+    'mechanics/parry-and-deflect.mdx',
+    'mechanics/slams-and-launches.mdx',
+    'mechanics/style-meter.mdx',
+    'mechanics/the-blade.mdx'
+  ]);
+
+  for (const { file, source } of hosts) {
+    assert.match(source, /not included in the validated public reference/i, relative(docsRoot, file));
+    assert.doesNotMatch(source, /captured|retained game configuration|retained game snapshot|from the game source/i, relative(docsRoot, file));
   }
 });

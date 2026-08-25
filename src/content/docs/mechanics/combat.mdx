@@ -1,6 +1,6 @@
 ---
 title: Combat & Damage
-description: Damage, hit detection, commitment, and thrown-blade calculations from the retained game configuration.
+description: Damage, hit detection, commitment, and thrown-blade concepts; unpublished tuning is marked below.
 ---
 
 import ConfigTable from '../../../components/ConfigTable.astro';
@@ -10,7 +10,7 @@ Combat is velocity, positioning, and style. The engine evaluates the blade at th
 
 ## Melee Damage
 
-`damage = (tipSpeed − minHitSpeed) × damageScale × angleModifier × commitModifier × styleMod`
+Committed cuts combine blade velocity, cut angle, commitment, and style. The exact runtime damage formula and constants are not included in the validated public reference.
 
 <ConfigTable title="MELEE DAMAGE PARAMETERS" rows={[
   { label: 'Maximum tip velocity', path: 'blade.maxSpeed', unit: 'px/s' },
