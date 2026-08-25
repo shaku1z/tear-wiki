@@ -1,18 +1,17 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { readCurrentReferenceFixture } from './current-reference-fixture.mjs';
 import { validateGameReferenceArtifact } from './game-reference-contract.mjs';
 import { verifyArtifactDirectory } from './store-game-reference.mjs';
 
-const manifestPath = new URL('../src/data/game-reference.v1.json', import.meta.url);
-const receiptPath = new URL('../src/data/game-reference.v1.receipt.json', import.meta.url);
-const SHA = '9ddd8f20a9c7d1830a2e043d9e558e259f738d02';
-const RUN = '32785864315';
-const bytes = { manifestBytes: await readFile(manifestPath), receiptBytes: await readFile(receiptPath) };
+const current = await readCurrentReferenceFixture();
+const { sourceSha: SHA, runId: RUN, manifestSha256 } = current;
+const bytes = { manifestBytes: current.manifestBytes, receiptBytes: current.receiptBytes };
 
 function receiptFor(manifestBytes, mutate = (value) => value) {
   const receipt = JSON.parse(bytes.receiptBytes); mutate(receipt);
@@ -40,14 +39,14 @@ async function artifactDirectory(directory, manifest = bytes.manifestBytes, rece
 
 test('accepts the checked-in current artifact', () => {
   const result = validateGameReferenceArtifact(valid());
-  assert.equal(result.manifestSha256, '7b8b3f5fec5862f3649470ab3e04170e096065c823b9349140bf9d688740311f');
+  assert.equal(result.manifestSha256, manifestSha256);
 });
 
 test('keeps byte-hashed snapshots out of Windows text conversion', () => {
   const attributes = execFileSync('git', ['check-attr', 'text', '--', 'src/data/game-reference.v1.json', 'src/data/game-reference.v1.receipt.json'], { encoding: 'utf8' });
   assert.match(attributes, /game-reference\.v1\.json: text: unset/);
   assert.match(attributes, /game-reference\.v1\.receipt\.json: text: unset/);
-  assert.equal(createHash('sha256').update(bytes.manifestBytes).digest('hex'), '7b8b3f5fec5862f3649470ab3e04170e096065c823b9349140bf9d688740311f');
+  assert.equal(createHash('sha256').update(bytes.manifestBytes).digest('hex'), manifestSha256);
 });
 
 test('accepts a future explicit run when receipt and argument agree', () => {
