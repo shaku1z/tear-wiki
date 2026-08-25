@@ -12,7 +12,6 @@
     "verify:game-reference": "node scripts/sync-canonical-game-reference.mjs",
     "sync:game-reference": "node scripts/sync-canonical-game-reference.mjs --write",
     "verify:game-reference-artifact": "node scripts/store-game-reference.mjs",
-    "sync:game-reference-artifact": "node scripts/store-game-reference.mjs --write",
     "sync:canonical-game-reference": "node scripts/sync-canonical-game-reference.mjs",
     "fetch:game-reference": "node scripts/fetch-game-reference-artifact.mjs",
     "check:snapshot": "npm run test:game-reference && npm run verify:terminology && npm run verify:game && npm run verify:tiers && npm run verify:viewer && npm run astro -- build",

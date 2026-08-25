@@ -119,15 +119,15 @@ export async function fetchVerifyAndStore(options) {
 }
 
 function parseArgs(args) {
-  const values = new Map(); let write = false;
+  const values = new Map();
   for (let index = 0; index < args.length; index += 1) {
     const flag = args[index];
-    if (flag === '--write') { if (write) fail('duplicate --write'); write = true; continue; }
+    if (flag === '--write') fail('--write is not accepted by this CLI; use the canonical sync wrapper');
     if (!['--sha', '--run-id'].includes(flag) || values.has(flag) || index + 1 === args.length || args[index + 1].startsWith('--')) fail(`invalid CLI argument ${flag}`);
     values.set(flag, args[++index]);
   }
   if (!values.has('--sha') || !values.has('--run-id')) fail('both --sha and --run-id are required');
-  return { sha: values.get('--sha'), runId: values.get('--run-id'), write };
+  return { sha: values.get('--sha'), runId: values.get('--run-id') };
 }
 if (process.argv[1]?.endsWith('fetch-game-reference-artifact.mjs')) {
   fetchVerifyAndStore(parseArgs(process.argv.slice(2))).then((result) => console.log(`game-reference fetched: ${result.manifest.source.sha.slice(0, 12)} (${result.manifestSha256.slice(0, 12)})`)).catch((error) => { console.error(error.message); process.exitCode = 1; });

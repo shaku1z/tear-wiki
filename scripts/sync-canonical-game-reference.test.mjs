@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { lstat, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { lstat, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import test from 'node:test';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -36,6 +36,26 @@ test('requires exact SHA and run arguments', () => {
   assert.throws(() => parseArgs(['--sha', 'A'.repeat(40), '--run-id', '1']), /lowercase SHA/);
   assert.throws(() => parseArgs(['--sha', 'a'.repeat(40), '--run-id', '01']), /positive integer/);
   assert.deepEqual(parseArgs(['--sha', 'a'.repeat(40), '--run-id', '1', '--write']), { sha: 'a'.repeat(40), runId: '1', write: true });
+});
+
+test('rejects every direct low-level write bypass and leaves the snapshot untouched', async () => {
+  const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  assert.equal(packageJson.scripts['sync:game-reference-artifact'], undefined);
+  assert.match(packageJson.scripts['sync:game-reference'], /sync-canonical-game-reference\.mjs --write/);
+  const manifestPath = new URL('../src/data/game-reference.v1.json', import.meta.url);
+  const receiptPath = new URL('../src/data/game-reference.v1.receipt.json', import.meta.url);
+  const before = [await readFile(manifestPath), await readFile(receiptPath)];
+  const commands = [
+    ['scripts/fetch-game-reference-artifact.mjs', '--sha', 'a'.repeat(40), '--run-id', '1', '--write'],
+    ['scripts/store-game-reference.mjs', '--artifact-dir', 'missing', '--sha', 'a'.repeat(40), '--run-id', '1', '--write'],
+  ];
+  for (const [script, ...args] of commands) {
+    const result = spawnSync(process.execPath, [script, ...args], { cwd: process.cwd(), encoding: 'utf8' });
+    assert.notEqual(result.status, 0, `${script} unexpectedly succeeded`);
+    assert.match(`${result.stdout}\n${result.stderr}`, /--write is not accepted by this CLI/);
+  }
+  assert.deepEqual(await readFile(manifestPath), before[0]);
+  assert.deepEqual(await readFile(receiptPath), before[1]);
 });
 
 test('accepts an exact clean canonical custody record', async () => {

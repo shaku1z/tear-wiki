@@ -117,24 +117,22 @@ export async function verifyArtifactDirectory({ artifactDir, sha, runId }) {
 
 function parseArgs(args) {
   const values = new Map();
-  let write = false;
   for (let index = 0; index < args.length; index += 1) {
     const flag = args[index];
-    if (flag === '--write') { if (write) fail('duplicate --write'); write = true; continue; }
+    if (flag === '--write') fail('--write is not accepted by this CLI; use the canonical sync wrapper');
     if (!['--artifact-dir', '--sha', '--run-id'].includes(flag) || values.has(flag) || index + 1 === args.length || args[index + 1].startsWith('--')) fail(`invalid CLI argument ${flag}`);
     values.set(flag, args[index + 1]); index += 1;
   }
   for (const flag of ['--artifact-dir', '--sha', '--run-id']) if (!values.has(flag)) fail(`missing ${flag}`);
   if (!/^[0-9a-f]{40}$/.test(values.get('--sha'))) fail('--sha must be a 40-character lowercase SHA');
   if (!/^[1-9][0-9]*$/.test(values.get('--run-id'))) fail('--run-id must be a canonical positive integer string');
-  return { artifactDir: values.get('--artifact-dir'), sha: values.get('--sha'), runId: values.get('--run-id'), write };
+  return { artifactDir: values.get('--artifact-dir'), sha: values.get('--sha'), runId: values.get('--run-id') };
 }
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const { manifestBytes, receiptBytes, result } = await verifyArtifactDirectory(options);
-  if (options.write) await storeGameReference({ manifestBytes, receiptBytes });
-  console.log(`game-reference verified: ${result.manifest.source.sha.slice(0, 12)} (${result.manifestSha256.slice(0, 12)})${options.write ? '; stored' : ''}`);
+  const { result } = await verifyArtifactDirectory(options);
+  console.log(`game-reference verified: ${result.manifest.source.sha.slice(0, 12)} (${result.manifestSha256.slice(0, 12)})`);
 }
 
 if (process.argv[1] && samePath(resolve(process.argv[1]), fileURLToPath(import.meta.url))) {

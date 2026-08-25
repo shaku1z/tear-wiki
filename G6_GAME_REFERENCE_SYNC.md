@@ -8,11 +8,11 @@ The low-level offline command accepts an artifact directory; API ZIP download re
 
 `npm run check:snapshot` includes the game-reference contract tests alongside the retained legacy wiki verifiers and Astro build. It is a bounded validation checkpoint; it does not authorize a workflow, deployment, promotion, or release.
 
-The canonical aliases are `npm run verify:game-reference -- --sha <sha> --run-id <run>` and `npm run sync:game-reference -- --sha <sha> --run-id <run>`; both use the custody guard, with the latter enabling the transactional write (its built-in `--write` must not be repeated). The lower-level `npm run verify:game-reference-artifact -- --artifact-dir <dir> --sha <sha> --run-id <run>` and `npm run sync:game-reference-artifact -- ...` aliases are retained only for already-fetched artifact diagnostics and do not prove custody of `../Tear`.
+The canonical aliases are `npm run verify:game-reference -- --sha <sha> --run-id <run>` and `npm run sync:game-reference -- --sha <sha> --run-id <run>`; both use the custody guard, with the latter enabling the transactional write (its built-in `--write` must not be repeated). The lower-level `npm run verify:game-reference-artifact -- --artifact-dir <dir> --sha <sha> --run-id <run>` and `npm run fetch:game-reference -- --sha <sha> --run-id <run>` commands are verify-only diagnostics. Their direct CLIs reject `--write`; only the canonical wrapper may invoke the exported programmatic store after custody and artifact validation.
 
 For the approved canonical-source flow, run `npm run sync:canonical-game-reference -- --sha <40-character-sha> --run-id <successful-Validate-run> [--write]`. The wrapper first checks the fixed `../Tear` checkout: real non-aliased path, exact Git top-level, strict `origin` repository, branch `main`, clean porcelain including untracked files, `HEAD == --sha`, and `refs/remotes/origin/main == --sha`. It performs no remote ref lookup or fetch, and it invokes no GitHub/token transport until those checks pass. The `--write` form then delegates to the existing verified transport and transactional store.
 
-For the underlying transport, set `GAME_REFERENCE_GITHUB_TOKEN` (or
+For the underlying verify-only transport, set `GAME_REFERENCE_GITHUB_TOKEN` (or
 `GITHUB_TOKEN`) as needed. It requires the canonical `shaku1z/tear`
 successful `Validate` push run on `main`, specifically workflow ID `322540049`
 at `.github/workflows/ci.yml`, an exact unexpired artifact name, and an
