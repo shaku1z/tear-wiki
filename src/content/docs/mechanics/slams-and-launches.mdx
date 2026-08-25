@@ -1,12 +1,14 @@
 ---
 title: Slams & Launches
-description: Captured launch, aerial damage, and slam thresholds from the game configuration.
+description: Launch, aerial damage, and slam mechanics; unpublished tuning is marked below.
 ---
 
 import ConfigTable from '../../../components/ConfigTable.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
 Launches establish aerial control; slams cash it out. The same physics system that rewards a rising cut also rewards a decisive downward finish.
+
+The current numeric launch and slam thresholds are not included in the validated public reference; the tables mark each legacy path accordingly.
 
 <ConfigTable title="LAUNCH PARAMETERS" rows={[
   { label: 'Launch vertical speed requirement', path: 'blade.launchMinUpSpeed', unit: 'px/s' },

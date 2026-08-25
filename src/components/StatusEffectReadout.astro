@@ -1,15 +1,9 @@
 ---
-import gameManifest from '../data/game-manifest.json';
-const status = gameManifest.config.status;
-const effects = [
-  ['BLEED', [['DPS', status.bleedDps], ['DURATION', `${status.bleedDur}s`], ['MAX STACKS', status.bleedMax]]],
-  ['BURN', [['DPS', status.burnDps], ['DURATION', `${status.burnDur}s`]]],
-  ['MARK', [['DAMAGE TAKEN', `${status.markMult}×`], ['DURATION', `${status.markDur}s`]]],
-];
+import { source } from '../data/game-reference.mjs';
 ---
 
-<section class="status-readout"><header><span>STATUS EFFECT PARAMETERS</span><code>{gameManifest.source.commit.slice(0, 7)}</code></header><div class="effects">{effects.map(([name, values]) => <article><h3>{name}</h3>{values.map(([label, value]) => <p><span>{label}</span><b>{value}</b></p>)}</article>)}</div></section>
+<section class="status-readout" aria-label="Status effect publication status"><header><span>STATUS EFFECTS / REFERENCE STATUS</span><code>{source.sha.slice(0, 7)}</code></header><div class="boundary-panel"><strong>NOT PUBLISHED IN PUBLIC REFERENCE</strong><p>Status-effect identities and current numeric values are not included in the validated game-reference artifact. No legacy damage, duration, stack, or mark multipliers are presented as current.</p></div></section>
 
 <style>
-  .status-readout { border: 1px solid var(--sl-color-hairline); font-family: var(--sl-font-mono); margin: 1.5rem 0; } header { background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; font-size: .65rem; font-weight: 800; justify-content: space-between; letter-spacing: .1em; padding: .65rem .75rem; text-transform: uppercase; } code { color: var(--tear-cyan); font: inherit; } .effects { align-items: stretch; display: grid; grid-template-columns: repeat(3, 1fr); } article { border-right: 1px solid var(--sl-color-hairline); margin: 0; padding: .8rem; } article:last-child { border-right: 0; } h3 { border: 0; color: var(--sl-color-white); font-size: .85rem; letter-spacing: .08em; margin: 0 0 .65rem; padding: 0; } p { border-top: 1px solid var(--sl-color-hairline); display: flex; font-size: .68rem; justify-content: space-between; margin: 0; padding: .45rem 0; } p span { color: var(--sl-color-gray-3); } p b { color: var(--tear-cyan); } @media (max-width: 560px) { .effects { grid-template-columns: 1fr; } article { border-bottom: 1px solid var(--sl-color-hairline); border-right: 0; } article:last-child { border-bottom: 0; } }
+  .status-readout { border: 1px solid var(--sl-color-hairline); font-family: var(--sl-font-mono); margin: 1.5rem 0; } header { background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; font-size: .65rem; font-weight: 800; justify-content: space-between; letter-spacing: .1em; padding: .65rem .75rem; text-transform: uppercase; } code { color: var(--tear-cyan); font: inherit; } .boundary-panel { padding: 1rem; } .boundary-panel strong { color: var(--sl-color-white); display: block; font-size: .75rem; letter-spacing: .06em; } .boundary-panel p { color: var(--sl-color-gray-3); font-family: var(--sl-font); font-size: .8rem; line-height: 1.5; margin: .55rem 0 0; max-width: 52rem; }
 </style>

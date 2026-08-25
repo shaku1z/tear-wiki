@@ -1,11 +1,11 @@
 ---
 title: The Blade
-description: Captured blade, spring-physics, and throw parameters.
+description: Blade spring physics, throw behavior, and public-reference boundaries.
 ---
 
 import ConfigTable from '../../../components/ConfigTable.astro';
 
-The blade is a simulated spring system, not a cursor-bound weapon. Its tension, damping, reach, and release speed are all game-owned parameters.
+The blade is a simulated spring system, not a cursor-bound weapon. Its tension, damping, reach, and release speed are runtime behaviors; the current numeric constants are not included in the validated public reference.
 
 <ConfigTable title="BLADE PHYSICAL PARAMETERS" rows={[
   { label: 'Blade length', path: 'blade.length', unit: 'px' },

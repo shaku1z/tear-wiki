@@ -1,12 +1,14 @@
 ---
 title: Parry & Deflect
-description: Captured requirements and rewards for melee parries and projectile deflection.
+description: Melee parry and projectile-deflection mechanics; unpublished tuning is marked below.
 ---
 
 import ConfigTable from '../../../components/ConfigTable.astro';
 import ModelViewer from '../../../components/ModelViewer.astro';
 
 Defense in Tear is active. A correctly timed, sufficiently fast blade can disrupt melee pressure or turn an enemy projectile back into the arena.
+
+The current numeric parry and deflect thresholds are not included in the validated public reference; the table marks each legacy path accordingly.
 
 <ConfigTable title="PARRY + DEFLECT PARAMETERS" rows={[
   { label: 'Minimum deflect speed', path: 'blade.deflectMinSpeed', unit: 'px/s' },

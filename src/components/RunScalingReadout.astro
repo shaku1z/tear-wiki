@@ -1,8 +1,14 @@
 ---
-import gameManifest from '../data/game-manifest.json';
-const run = gameManifest.config.run;
-const rows = [['HP per wave', run.hpScalePerWave, 'percent'], ['Damage per stage', run.stageDmgStep, 'percent'], ['Damage per wave', run.inStageDmg, 'percent'], ['HP per stage', run.stageHpStep, 'percent'], ['Enemy count per wave', run.countPerWave, 'number'], ['Stage count increase', run.stageCountStep, 'number'], ['Concurrent cap', run.maxConcurrentCap, 'number'], ['Wave-clear healing', run.healEachWave, 'number']];
-const fmt = (value, type) => type === 'percent' ? `${Math.round(value * 100)}%` : value;
+import { difficulties, source } from '../data/game-reference.mjs';
+
+const modifierRows = [
+  ['ENEMY HEALTH', 'enemyHealth'],
+  ['PLAYER DAMAGE TAKEN', 'playerDamageTaken'],
+  ['ENEMY COUNT', 'enemyCount'],
+  ['COIN REWARD', 'coinReward'],
+  ['SCORE REWARD', 'scoreReward']
+];
+const formatMultiplier = (value) => `${value}×`;
 ---
-<section class="run-readout"><header><span>RUN PACING / CAPTURED CONFIGURATION</span><code>{gameManifest.source.commit.slice(0, 7)}</code></header><div>{rows.map(([label, value, type]) => <p><span>{label}</span><b>{fmt(value, type)}</b></p>)}</div></section>
-<style>.run-readout{border:1px solid var(--sl-color-hairline);font-family:var(--sl-font-mono);margin:1.5rem 0}header{background:var(--sl-color-gray-6);border-bottom:1px solid var(--sl-color-hairline);color:var(--sl-color-gray-3);display:flex;font-size:.65rem;font-weight:800;justify-content:space-between;letter-spacing:.1em;padding:.65rem .75rem;text-transform:uppercase}code{color:var(--tear-cyan);font:inherit}.run-readout>div{display:grid;grid-template-columns:1fr 1fr}.run-readout p{border-bottom:1px solid var(--sl-color-hairline);display:flex;justify-content:space-between;margin:0;padding:.6rem .75rem}.run-readout p:nth-child(odd){border-right:1px solid var(--sl-color-hairline)}.run-readout span{color:var(--sl-color-gray-3);font-size:.7rem;text-transform:uppercase}.run-readout b{color:var(--sl-color-white)}@media(max-width:540px){.run-readout>div{grid-template-columns:1fr}.run-readout p:nth-child(odd){border-right:0}}</style>
+<section class="run-readout" aria-label="Published difficulty modifiers"><header><span>DIFFICULTY MODIFIERS / PUBLISHED REFERENCE</span><code>{source.sha.slice(0, 7)}</code></header><div class="difficulty-grid">{difficulties.map((difficulty) => <article><h3>{difficulty.label}</h3><p class="description">{difficulty.description}</p><small>{difficulty.oneHit ? 'ONE-HIT RULE' : 'STANDARD HEALTH RULE'}</small><dl>{modifierRows.map(([label, key]) => <div><dt>{label}</dt><dd>{formatMultiplier(difficulty.modifiers[key])}</dd></div>)}</dl></article>)}</div></section>
+<style>.run-readout{border:1px solid var(--sl-color-hairline);font-family:var(--sl-font-mono);margin:1.5rem 0}header{background:var(--sl-color-gray-6);border-bottom:1px solid var(--sl-color-hairline);color:var(--sl-color-gray-3);display:flex;font-size:.65rem;font-weight:800;justify-content:space-between;letter-spacing:.1em;padding:.65rem .75rem;text-transform:uppercase}code{color:var(--tear-cyan);font:inherit}.difficulty-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.difficulty-grid article{border-bottom:1px solid var(--sl-color-hairline);border-right:1px solid var(--sl-color-hairline);margin:0;padding:.8rem}.difficulty-grid h3{color:var(--sl-color-white);font-size:.86rem;letter-spacing:.06em;margin:0}.description{color:var(--sl-color-gray-3);font-family:var(--sl-font);font-size:.75rem;line-height:1.4;margin:.4rem 0}.difficulty-grid small{color:var(--tear-cyan);display:block;font-size:.58rem;font-weight:800;letter-spacing:.06em;margin:.55rem 0}.difficulty-grid dl{margin:0}.difficulty-grid dl>div{border-top:1px solid var(--sl-color-hairline);display:flex;justify-content:space-between;padding:.38rem 0}.difficulty-grid dt{color:var(--sl-color-gray-3);font-size:.62rem}.difficulty-grid dd{color:var(--sl-color-white);font-size:.68rem;font-weight:800;margin:0}@media(max-width:540px){.difficulty-grid{grid-template-columns:1fr}.difficulty-grid article{border-right:0}}</style>
