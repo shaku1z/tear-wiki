@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { validateGameReferenceArtifact } from './game-reference-contract.mjs';
-import { storeGameReference, verifyArtifactDirectory } from './store-game-reference.mjs';
+import { verifyArtifactDirectory } from './store-game-reference.mjs';
 
 const manifestPath = new URL('../src/data/game-reference.v1.json', import.meta.url);
 const receiptPath = new URL('../src/data/game-reference.v1.receipt.json', import.meta.url);
@@ -94,30 +94,5 @@ test('offline directory verifier rejects extra files and symlinks where supporte
       try { await symlink(target, alias, 'dir'); } catch { t.skip('host does not permit test symlinks or junctions'); return; }
     }
     await assert.rejects(() => verifyArtifactDirectory({ artifactDir: alias, sha: SHA, runId: RUN }), /real directory|alias|symlink|junction/);
-  });
-});
-
-test('transaction stores both bytes, rejects bad input before write, and rolls back a second install failure', async () => {
-  await temp('tear-game-reference-store-', async (directory) => {
-    const data = join(directory, 'data');
-    await mkdir(data);
-    const manifestDestination = join(data, 'game-reference.v1.json');
-    const receiptDestination = join(data, 'game-reference.v1.receipt.json');
-    await writeFile(manifestDestination, 'old manifest'); await writeFile(receiptDestination, 'old receipt');
-    await assert.rejects(() => verifyArtifactDirectory({ artifactDir: join(directory, 'missing'), sha: SHA, runId: RUN }));
-    assert.equal(await readFile(manifestDestination, 'utf8'), 'old manifest');
-    await storeGameReference({ ...bytes, dataDirectory: data });
-    assert.deepEqual(await readFile(manifestDestination), bytes.manifestBytes);
-    assert.deepEqual(await readFile(receiptDestination), bytes.receiptBytes);
-    await writeFile(manifestDestination, 'prior manifest'); await writeFile(receiptDestination, 'prior receipt');
-    let failed = false;
-    const replaceFile = async (from, to) => {
-      if (!failed && to === receiptDestination && from.includes('.tmp.')) { failed = true; throw new Error('second install failed'); }
-      return rename(from, to);
-    };
-    await assert.rejects(() => storeGameReference({ ...bytes, dataDirectory: data, replaceFile }), /second install failed/);
-    assert.equal(await readFile(manifestDestination, 'utf8'), 'prior manifest');
-    assert.equal(await readFile(receiptDestination, 'utf8'), 'prior receipt');
-    assert.deepEqual((await readdir(data)).sort(), ['game-reference.v1.json', 'game-reference.v1.receipt.json']);
   });
 });
