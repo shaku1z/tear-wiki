@@ -1,7 +1,6 @@
 import yauzl from 'yauzl';
 import { promisify } from 'node:util';
 import { validateGameReferenceArtifact } from './game-reference-contract.mjs';
-import { storeGameReference } from './store-game-reference.mjs';
 
 const openZip = promisify(yauzl.fromBuffer);
 const REPOSITORY = 'shaku1z/tear';
@@ -114,7 +113,7 @@ export async function fetchGameReferenceArtifact({ sha, runId, token = process.e
 export async function fetchVerifyAndStore(options) {
   const bytes = await fetchGameReferenceArtifact(options);
   const result = validateGameReferenceArtifact({ ...bytes, expectedSha: options.sha, expectedRunId: options.runId });
-  if (options.write) await storeGameReference(bytes);
+  if (options.write) fail('--write is not accepted by this transport; use the guarded canonical sync wrapper');
   return result;
 }
 
