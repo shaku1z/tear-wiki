@@ -1,11 +1,12 @@
 <script>
   import { onMount } from 'svelte';
-  import { SPECIALS, UNIQUES, STACKABLES } from '../../data/abilities.js';
-  import gameManifest from '../../data/game-manifest.json';
   import { loadout } from '../../stores/loadout.js';
-  import StatPanel from './StatPanel.svelte';
+  import PlannerSummary from './PlannerSummary.svelte';
   import TierDeltaPanel from './TierDeltaPanel.svelte';
-  import { encodeLoadout, decodeLoadout } from '../../lib/urlEncoder.js';
+  import { decodeLoadout, encodeLoadout, MAX_UNPUBLISHED_STACK_COUNT } from '../../lib/urlEncoder.js';
+
+  export let upgrades = [];
+  export let source = { sha: '' };
 
   let searchQuery = '';
   let activeDomain = 'All';
@@ -13,12 +14,24 @@
   let copied = false;
   let focusedTierId = '';
 
-  const domains = ['All', 'Offense', 'Resilience', 'Mobility', 'Throw', 'Parry', 'Utility'];
-  const ALL_ABILITIES = [
-    ...SPECIALS.map((u) => ({ ...u, type: 'special' })),
-    ...UNIQUES.map((u) => ({ ...u, type: 'unique' })),
-    ...STACKABLES.map((u) => ({ ...u, type: 'stackable' })),
-  ];
+  function normalizeUpgrade(upgrade) {
+    const type = upgrade.kind || upgrade.rule?.kind;
+    const tierLevels = type === 'tiered'
+      ? [{ level: 1, desc: upgrade.description, source: 'published' }, ...(upgrade.tiers || []).map((tier, index) => ({ level: index + 2, desc: tier.description, source: 'published' }))]
+      : [];
+    return {
+      ...upgrade,
+      type,
+      cat: upgrade.category,
+      desc: upgrade.description,
+      maxTier: type === 'tiered' ? tierLevels.length : 0,
+      tierLevels,
+    };
+  }
+
+  $: ALL_ABILITIES = upgrades.map(normalizeUpgrade);
+  $: domains = ['All', 'Offense', 'Resilience', 'Mobility', 'Throw', 'Parry', 'Utility']
+    .filter((domain) => domain === 'All' || ALL_ABILITIES.some((ability) => ability.cat === domain.toLowerCase()));
 
   $: visibleAbilities = ALL_ABILITIES.filter((ability) => {
     const matchesDomain = activeDomain === 'All' || ability.cat.toLowerCase() === activeDomain.toLowerCase();
@@ -29,13 +42,13 @@
     + $loadout.uniques.length
     + Object.values($loadout.stackables).reduce((total, count) => total + count, 0);
   $: selectedEntries = ALL_ABILITIES.flatMap((ability) => {
-    if (ability.type === 'special' && ($loadout.specials[ability.id] || 0) > 0) return [{ ability, quantity: $loadout.specials[ability.id], label: `T${$loadout.specials[ability.id]}` }];
+    if (ability.type === 'tiered' && ($loadout.specials[ability.id] || 0) > 0) return [{ ability, quantity: $loadout.specials[ability.id], label: `T${$loadout.specials[ability.id]}` }];
     if (ability.type === 'unique' && $loadout.uniques.includes(ability.id)) return [{ ability, quantity: 1, label: 'OWNED' }];
     if (ability.type === 'stackable' && ($loadout.stackables[ability.id] || 0) > 0) return [{ ability, quantity: $loadout.stackables[ability.id], label: `×${$loadout.stackables[ability.id]}` }];
     return [];
   });
   $: activeCount = selectedEntries.length;
-  $: activeTieredAbilities = ALL_ABILITIES.filter((ability) => ability.type === 'special' && ($loadout.specials[ability.id] || 0) > 0);
+  $: activeTieredAbilities = ALL_ABILITIES.filter((ability) => ability.type === 'tiered' && ($loadout.specials[ability.id] || 0) > 0);
   $: focusedTieredAbility = activeTieredAbilities.find((ability) => ability.id === focusedTierId) || activeTieredAbilities[0] || null;
 
   function selectedTier(ability, currentLoadout) {
@@ -51,7 +64,7 @@
   }
 
   function isSelected(ability, currentLoadout) {
-    return (ability.type === 'special' && (currentLoadout.specials[ability.id] || 0) > 0)
+    return (ability.type === 'tiered' && (currentLoadout.specials[ability.id] || 0) > 0)
       || (ability.type === 'unique' && currentLoadout.uniques.includes(ability.id))
       || (ability.type === 'stackable' && (currentLoadout.stackables[ability.id] || 0) > 0);
   }
@@ -69,9 +82,11 @@
   }
 
   function adjustStackable(id, delta) {
+    const ability = ALL_ABILITIES.find((entry) => entry.id === id);
+    const maximum = ability?.maxStacks ?? MAX_UNPUBLISHED_STACK_COUNT;
     loadout.update((current) => ({
       ...current,
-      stackables: { ...current.stackables, [id]: Math.max(0, (current.stackables[id] || 0) + delta) },
+      stackables: { ...current.stackables, [id]: Math.min(maximum, Math.max(0, (current.stackables[id] || 0) + delta)) },
     }));
   }
 
@@ -84,18 +99,23 @@
   }
 
   async function shareBuild() {
-    const encoded = encodeLoadout($loadout);
+    if (typeof window === 'undefined' || typeof navigator === 'undefined' || !navigator.clipboard?.writeText) return;
+    const encoded = encodeLoadout($loadout, ALL_ABILITIES);
     if (!encoded) return;
     const url = new URL(window.location.href);
     url.searchParams.set('b', encoded);
-    await navigator.clipboard.writeText(url.toString());
-    copied = true;
-    setTimeout(() => copied = false, 1800);
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      copied = true;
+      setTimeout(() => copied = false, 1800);
+    } catch {
+      copied = false;
+    }
   }
 
   onMount(() => {
     const encoded = new URLSearchParams(window.location.search).get('b');
-    const decoded = encoded && decodeLoadout(encoded);
+    const decoded = encoded && decodeLoadout(encoded, ALL_ABILITIES);
     if (decoded) loadout.set(decoded);
   });
 </script>
@@ -103,13 +123,13 @@
 <section class="ability-lab" aria-label="TEAR Ability Lab">
   <header class="lab-header">
     <div class="lab-title">
-      <span class="eyebrow">THEORYCRAFT ENGINE / RETAINED CONFIGURATION</span>
+      <span class="eyebrow">REFERENCE CATALOG / PUBLISHED RULES</span>
       <h1>ABILITY LAB</h1>
     </div>
     <div class="header-signal" aria-label="Game source information">
       <span class="signal-dot"></span>
-      <span>ENGINE SNAPSHOT</span>
-      <code>{gameManifest.source.commit.slice(0, 7)}</code>
+      <span>VALIDATED ARTIFACT</span>
+      <code>{source.sha?.slice(0, 7) || 'UNKNOWN'}</code>
     </div>
     <div class="lab-actions">
       <button class="action-btn" on:click={clearLoadout}>RESET</button>
@@ -120,8 +140,8 @@
   <div class="signal-strip" aria-label="Current build status">
     <span><b>{selectedCount}</b> PICKS</span>
     <span><b>{activeCount}</b> ABILITIES</span>
-    <span>SOURCE: COMMITTED REVISION</span>
-    <span class="strip-last">SIMULATION: EXACT APPLY PIPELINE</span>
+    <span>SOURCE: VALIDATED GAME REFERENCE</span>
+    <span class="strip-last">NO COMBAT SIMULATION</span>
   </div>
 
   <div class="lab-grid">
@@ -137,14 +157,14 @@
             <li class="loadout-item cat-{entry.ability.cat}">
               <span class="rack-name">{entry.ability.name}</span>
               <span class="rack-tier">{entry.label}</span>
-              <button aria-label={`Remove ${entry.ability.name}`} class="remove-btn" on:click={() => entry.ability.type === 'special' ? setSpecialTier(entry.ability.id, 0) : entry.ability.type === 'unique' ? toggleUnique(entry.ability.id) : adjustStackable(entry.ability.id, -entry.quantity)}>×</button>
+              <button aria-label={`Remove ${entry.ability.name}`} class="remove-btn" on:click={() => entry.ability.type === 'tiered' ? setSpecialTier(entry.ability.id, 0) : entry.ability.type === 'unique' ? toggleUnique(entry.ability.id) : adjustStackable(entry.ability.id, -entry.quantity)}>×</button>
             </li>
           {/each}
         </ul>
       {:else}
         <div class="empty-rack">
           <span>NO SIGNAL</span>
-          <p>Select an ability module to begin a retained-engine simulation.</p>
+          <p>Select a published upgrade to begin a bounded loadout.</p>
         </div>
       {/if}
     </aside>
@@ -174,28 +194,28 @@
           {#each visibleAbilities as ability}
             <div role="article" data-wiki-card class:selected={isSelected(ability, $loadout)} class="ability-module cat-{ability.cat}">
               <div class="module-head">
-                <span class="module-class">{ability.type === 'special' ? 'SPECIAL' : ability.type === 'unique' ? 'UNIQUE' : 'STACKS'}</span>
+                <span class="module-class">{ability.type === 'tiered' ? 'TIERED' : ability.type === 'unique' ? 'UNIQUE' : 'STACKS'}</span>
                 <span class="module-domain">{ability.cat}</span>
               </div>
-              {#if ability.type === 'special'}
+              {#if ability.type === 'tiered'}
                 <div class="tier-identity"><span>T1 → T{ability.maxTier}</span><span>EVOLVABLE</span></div>
               {/if}
               <h3>{ability.name}</h3>
-              <p>{ability.type === 'special' && selectedTier(ability, $loadout) > 0 ? selectedTierLevel(ability, $loadout)?.desc : ability.desc}</p>
+              <p>{ability.type === 'tiered' && selectedTier(ability, $loadout) > 0 ? selectedTierLevel(ability, $loadout)?.desc : ability.desc}</p>
 
-              {#if ability.type === 'special'}
+              {#if ability.type === 'tiered'}
                 <div class="evolution-state" aria-live="polite">
                   {#if selectedTier(ability, $loadout) > 0}
-                    <span>SIMULATING T{selectedTier(ability, $loadout)} / {selectedTier(ability, $loadout) === 1 ? 'DRAFT PICKUP' : 'BOSS EVOLUTION'}</span>
-                    {#if nextTierLevel(ability, $loadout)}<b>NEXT: T{nextTierLevel(ability, $loadout).level} / BOSS</b>{/if}
+                    <span>SELECTED T{selectedTier(ability, $loadout)} / PUBLISHED TIER</span>
+                    {#if nextTierLevel(ability, $loadout)}<b>NEXT: T{nextTierLevel(ability, $loadout).level} / PUBLISHED</b>{/if}
                   {:else}
-                    <span>SELECT A TIER TO SIMULATE</span><b>T1 / DRAFT PICKUP</b>
+                    <span>SELECT A TIER</span><b>T1 / PUBLISHED</b>
                   {/if}
                 </div>
                 <div class="tier-rail" aria-label={`${ability.name} tier selector`}>
                   <button class="clear-tier" class:active={selectedTier(ability, $loadout) === 0} on:click={() => setSpecialTier(ability.id, 0)}>CLEAR</button>
                   {#each ability.tierLevels as tier}
-                    <button class:active={selectedTier(ability, $loadout) === tier.level} on:click={() => setSpecialTier(ability.id, tier.level)} aria-label={`${ability.name} Tier ${tier.level}: ${tier.source === 'draft' ? 'draft pickup' : 'boss evolution'}`}>T{tier.level}</button>
+                    <button class:active={selectedTier(ability, $loadout) === tier.level} on:click={() => setSpecialTier(ability.id, tier.level)} aria-label={`${ability.name} Tier ${tier.level}: published description`}>T{tier.level}</button>
                   {/each}
                 </div>
               {:else if ability.type === 'unique'}
@@ -203,9 +223,9 @@
                   {isSelected(ability, $loadout) ? 'INSTALLED' : 'INSTALL MODULE'}
                 </button>
               {:else}
-                <div class="stack-control" aria-label={`${ability.name} stack count`}>
+                <div class="stack-control" aria-label={`${ability.name} stack count; ${ability.maxStacks == null ? `planner safety limit ${MAX_UNPUBLISHED_STACK_COUNT}, no published game stack limit` : `published maximum ${ability.maxStacks}`}`}>
                   <button aria-label={`Remove ${ability.name} stack`} on:click={() => adjustStackable(ability.id, -1)}>−</button>
-                  <span>{$loadout.stackables[ability.id] || 0}<small> STACKS</small></span>
+                  <span>{$loadout.stackables[ability.id] || 0}<small> STACKS</small><small>{ability.maxStacks == null ? `PLANNER LIMIT ${MAX_UNPUBLISHED_STACK_COUNT} / NO PUBLISHED CAP` : `PUBLISHED MAX ${ability.maxStacks}`}</small></span>
                   <button aria-label={`Add ${ability.name} stack`} on:click={() => adjustStackable(ability.id, 1)}>+</button>
                 </div>
               {/if}
@@ -217,11 +237,11 @@
       {/if}
     </main>
 
-    <aside class:open={drawerOpen} class="telemetry-bay" aria-label="Combat telemetry">
+    <aside class:open={drawerOpen} class="telemetry-bay" aria-label="Planner reference">
       <button class="telemetry-toggle" on:click={() => drawerOpen = !drawerOpen} aria-expanded={drawerOpen}>
-        <span>03 / COMBAT TELEMETRY</span><span>{drawerOpen ? 'CLOSE' : 'OPEN'}</span>
+        <span>03 / PLANNER REFERENCE</span><span>{drawerOpen ? 'CLOSE' : 'OPEN'}</span>
       </button>
-      <div class="telemetry-scroll"><TierDeltaPanel ability={focusedTieredAbility} tier={focusedTieredAbility ? selectedTier(focusedTieredAbility, $loadout) : 0} /><StatPanel /></div>
+      <div class="telemetry-scroll"><TierDeltaPanel ability={focusedTieredAbility} tier={focusedTieredAbility ? selectedTier(focusedTieredAbility, $loadout) : 0} /><PlannerSummary selectedEntries={selectedEntries} catalogCount={ALL_ABILITIES.length} /></div>
     </aside>
   </div>
 </section>

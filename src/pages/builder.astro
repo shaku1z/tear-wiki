@@ -1,7 +1,23 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import Builder from '../components/builder/Builder.svelte';
+import { source, upgrades } from '../data/game-reference.mjs';
+
+// Keep the server-only adapter on the Astro side. Svelte receives only the
+// JSON-safe fields needed to render and validate planner selections.
+const plannerUpgrades = upgrades.map(({ id, name, category, description, rare, unique, maxStacks, rule, tiers }) => ({
+  id,
+  name,
+  category,
+  description,
+  rare,
+  unique,
+  maxStacks,
+  kind: rule.kind,
+  tiers: tiers.map(({ description: tierDescription }) => ({ description: tierDescription })),
+}));
+const plannerSource = { sha: source.sha, sha256: source.sha256, runId: source.runId };
 ---
 <StarlightPage frontmatter={{ title: 'TEAR Builder', template: 'splash' }}>
-  <Builder client:load />
+  <Builder client:load upgrades={plannerUpgrades} source={plannerSource} />
 </StarlightPage>
