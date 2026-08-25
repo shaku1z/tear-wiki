@@ -9,17 +9,17 @@
 {#if ability && current}
   <section class="tier-delta" aria-label={`${ability.name} Tier ${tier} comparison`}>
     <header>
-      <span>TIER DELTA / LIVE EVOLUTION</span>
+      <span>TIER PATH / PUBLISHED TEXT</span>
       <b>{ability.name.toUpperCase()} · T{tier}</b>
     </header>
     <div class="delta-route">
-      <span>{previous ? `T${previous.level}` : 'OFF'}</span><i>→</i><strong>T{current.level}</strong><em>{current.source === 'draft' ? 'DRAFT PICKUP' : 'BOSS EVOLUTION'}</em>
+      <span>{previous ? `T${previous.level}` : 'OFF'}</span><i>→</i><strong>T{current.level}</strong><em>REFERENCE ENTRY</em>
     </div>
     <div class="delta-copy">
-      <div><small>{previous ? `T${previous.level} EFFECT` : 'UNSELECTED'}</small><p>{previous?.desc || 'No module is installed before Tier 1.'}</p></div>
-      <div class="current"><small>T{current.level} EFFECT</small><p>{current.desc}</p></div>
+      <div><small>{previous ? `T${previous.level} DESCRIPTION` : 'UNSELECTED'}</small><p>{previous?.desc || 'No module is selected before Tier 1.'}</p></div>
+      <div class="current"><small>T{current.level} DESCRIPTION</small><p>{current.desc}</p></div>
     </div>
-    <footer>SIMULATOR APPLIES T1 → T{current.level} IN ORDER</footer>
+    <footer>PLANNER SHOWS THE PUBLISHED T1 → T{current.level} PATH</footer>
   </section>
 {/if}
 

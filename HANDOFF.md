@@ -7,7 +7,7 @@ The TEAR Wiki is not a standard, generic documentation site. It is designed to f
 
 **Key Directives:**
 - **STRICTLY FORBIDDEN:** You are strictly forbidden from altering the actual game's codebase. Your modifications must be 100% contained within this `tear-wiki` project folder. Do not attempt to fix or alter game engine logic upstream.
-- **Zero Hardcoding:** The wiki must never contain hardcoded game values (like base health, damage scalars, or upgrade properties). When a verified source is available, data is dynamically extracted from `src/scripts/game-engine.js`; the current G4 branch deliberately retains the pinned snapshot while G6 replaces the retired synchronizer.
+- **Zero Hardcoding:** The wiki must never contain hardcoded game values (like base health, damage scalars, or upgrade properties). Modern reference views consume the validated, committed game-reference artifact; the retained JS-era snapshot is comparison material only.
 - **Deep Immersion:** The design language is strictly *Brutalist, High-Contrast, and Mechanical*. Avoid soft rounded corners, pastel gradients, or corporate aesthetics ("AI slop"). Use monospace typography for data and aggressive borders (e.g., `inset 0 0 0 1px`).
 
 ## 2. Architecture Stack
@@ -16,12 +16,12 @@ The TEAR Wiki is not a standard, generic documentation site. It is designed to f
 - **Interactivity:** Svelte. All highly interactive, stateful components (like the Loadout Builder) are built in Svelte for rapid reactivity and clean state management.
 
 ## 3. The Builder Engine (`/src/components/builder/`)
-The **Loadout Builder** is the mechanical heart of the wiki. It allows players to theorycraft builds by directly simulating the game engine's logic.
+The **Loadout Builder** is the mechanical heart of the wiki. It lets players arrange the published upgrade catalog and share a bounded, versioned loadout without claiming to reproduce runtime combat.
 
-- **Data Sourcing (`src/data/abilities.js`):** Abilities are categorized directly from the `UPGRADES` array exported by `game-engine.js`. Specials are filtered via the `u.tiers` property.
-- **Simulation Pipeline (`src/lib/simulate.js`):** The engine clones the game's `BASE_CONFIG` and iterates through the player's selected loadout, executing the exact same `apply({ config, player, mods })` functions the game uses.
-- **Telemetry Dashboard (`StatPanel.svelte`):** This panel reads the output of the simulation and translates it into true mechanical metrics. It tracks deep engine variables like `parrySlowScale`, `deflectDmgMult`, dynamic throw damage, and style meter decay.
-- **Deep Linking (`BuilderDeepLink.astro`):** The Builder supports Base64 URL encoding so players can seamlessly share their loadouts across the internet.
+- **Data Sourcing (`src/data/game-reference.mjs`):** Astro reads and validates the committed artifact, then passes a narrow JSON-safe upgrade projection to the client Builder.
+- **Planner State (`src/stores/loadout.js`):** The client stores only tier, unique, and stack selections. It does not execute game callbacks or mutate runtime configuration.
+- **Reference Rail (`PlannerSummary.svelte` / `TierDeltaPanel.svelte`):** The side rail reports catalog counts and the published tier descriptions; damage, runtime stats, and inferred synergies are intentionally outside this view.
+- **Deep Linking (`BuilderDeepLink.astro` / `src/lib/urlEncoder.js`):** Builder links use a validated, URL-safe v2 payload with a strict catalog allow-list and size/entry bounds.
 
 ## 4. Aesthetic & Styling Rules
 Future developers (Codex or otherwise) must adhere to these strict visual rules:

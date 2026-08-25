@@ -1,7 +1,9 @@
 ---
-// BuilderDeepLink.astro
-// Accepts a partial loadout object: { specials: {id: tier}, uniques: ['id'], stackables: {id: count} }
-// Generates a deep link to the Builder with this loadout.
+// Accepts a partial loadout object and emits the same validated v2 payload as
+// the client planner. The game-reference adapter stays server-only in Astro.
+import { upgrades } from '../data/game-reference.mjs';
+import { encodeLoadout } from '../lib/urlEncoder.js';
+
 export interface Props {
   loadout: {
     specials?: Record<string, number>;
@@ -11,36 +13,18 @@ export interface Props {
   label?: string;
 }
 
-const { loadout, label = "Test this Build in the Engine →" } = Astro.props;
+const { loadout, label = "Open this loadout in the Ability Lab →" } = Astro.props;
 
 // Ensure defaults
+const safeInput = loadout || {};
 const safeLoadout = {
-  specials: loadout.specials || {},
-  uniques: loadout.uniques || [],
-  stackables: loadout.stackables || {}
+  specials: safeInput.specials || {},
+  uniques: safeInput.uniques || [],
+  stackables: safeInput.stackables || {}
 };
 
-// Filter out 0s
-const cleanSpecials = {};
-for (const [k, v] of Object.entries(safeLoadout.specials)) {
-  if (v > 0) cleanSpecials[k] = v;
-}
-const cleanStackables = {};
-for (const [k, v] of Object.entries(safeLoadout.stackables)) {
-  if (v > 0) cleanStackables[k] = v;
-}
-
-const payload = {
-  v: 1,
-  specials: cleanSpecials,
-  uniques: safeLoadout.uniques,
-  stackables: cleanStackables
-};
-
-// Encode for URL safely (use btoa for Cloudflare Workers / web standard)
-const jsonStr = JSON.stringify(payload);
-const b64 = typeof Buffer !== 'undefined' ? Buffer.from(jsonStr).toString('base64') : btoa(jsonStr);
-const href = `/builder?b=${b64}`;
+const encoded = encodeLoadout(safeLoadout, upgrades);
+const href = encoded ? `/builder?b=${encoded}` : '/builder';
 ---
 
 <a href={href} class="builder-deep-link" target="_blank" rel="noopener noreferrer">
