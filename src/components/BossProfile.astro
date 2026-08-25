@@ -1,26 +1,24 @@
 ---
-import { CONFIG } from '../scripts/game-engine.js';
-import gameManifest from '../data/game-manifest.json';
-
+import { bosses, source } from '../data/game-reference.mjs';
 const { name } = Astro.props;
-const bossConfig = CONFIG[name.toLowerCase()] || CONFIG.boss;
-const hiddenKeys = new Set(['w', 'h', 'hp', 'speed', 'contactDmg', 'weight', 'knockbackTaken']);
-const mechanics = Object.entries(bossConfig).filter(([key, value]) => !hiddenKeys.has(key) && typeof value !== 'object');
-const metrics = [['BASE HP', bossConfig.hp], ['MOVE SPEED', bossConfig.speed], ['CONTACT DMG', bossConfig.contactDmg], ['WEIGHT', bossConfig.weight]];
+const boss = bosses.find((item) => item.name === name || item.id === String(name).toLowerCase());
+const stageNames = { grounds: 'The Grounds', undercroft: 'The Undercroft', 'crimson-fields': 'The Crimson Fields', voidspire: 'The Voidspire', tear: 'The Tear' };
+const displayName = boss?.name || name;
+const metrics = boss ? [['STAGE', stageNames[boss.stageId] || boss.stageId], ['PHASE THRESHOLDS', boss.phaseMarks?.length || 0]] : [];
 ---
 
 <section class="boss-terminal" aria-label={`${name} boss data`}>
   <header>
-    <div><span>BOSS DOSSIER / CAPTURED CONFIGURATION</span><h2>{name}</h2></div>
-    <code>{gameManifest.source.commit.slice(0, 7)}</code>
+    <div><span>BOSS DOSSIER / PUBLISHED REFERENCE</span><h2>{displayName}</h2></div>
+    <code>{source.sha.slice(0, 7)}</code>
   </header>
   <div class="boss-metrics">
     {metrics.map(([label, value]) => <div><span>{label}</span><strong>{value}</strong></div>)}
   </div>
   <div class="mechanics">
-    <h3>MECHANICAL PARAMETERS</h3>
+    <h3>PUBLISHED REFERENCE BOUNDARY</h3>
     <dl>
-      {mechanics.map(([key, value]) => <div><dt>{key.replace(/([A-Z])/g, ' $1')}</dt><dd>{typeof value === 'number' ? Math.round(value * 100) / 100 : String(value)}</dd></div>)}
+      {boss?.phaseMarks?.map((mark, index) => <div><dt>PHASE {index + 1} THRESHOLD</dt><dd>{Math.round(mark * 100)}% HP</dd></div>)}
     </dl>
   </div>
 </section>

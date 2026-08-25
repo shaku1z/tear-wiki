@@ -1,16 +1,10 @@
 ---
-import gameManifest from '../data/game-manifest.json';
-import terminology from '../data/wiki-terminology.json';
-
-const sourceCommit = gameManifest.source.commit;
-const snapshot = terminology.snapshot;
-if (sourceCommit !== snapshot.commit) {
-  throw new Error(`Retained wiki snapshot ${sourceCommit} does not match terminology receipt ${snapshot.commit}.`);
-}
+import { source } from '../data/game-reference.mjs';
+const sourceCommit = source.sha;
 ---
 
 <aside class="game-source-status" aria-label="Game data source">
-  <span class="status-mark"></span><span>RETAINED GAME SNAPSHOT</span><code title={sourceCommit}>{sourceCommit}</code><span class="status-date">CAPTURED {snapshot.capturedAt.slice(0, 10)} UTC</span>
+  <span class="status-mark"></span><span>VALIDATED GAME REFERENCE</span><code title={sourceCommit}>{sourceCommit}</code><span class="status-date">RUN {source.runId} · SHA-256 {source.sha256.slice(0, 12)}</span>
 </aside>
 
 <style>
