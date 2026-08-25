@@ -39,8 +39,9 @@ the requested SHA, and locally tracked `refs/remotes/origin/main` equal to the
 same SHA. No remote ref lookup or fetch is performed by this guard.
 
 The verify form validates the remote artifact without changing the wiki. The
-sync form accepts the wrapper's explicit write mode and stores the two verified
-artifact files transactionally. Low-level fetch/store commands remain
+sync form accepts the wrapper's explicit write mode and promotes the verified
+manifest, receipt, and current terminology snapshot together with rollback on
+installation failure. Low-level fetch/store commands remain
 verify-only diagnostics and reject direct write flags.
 
 ## Historical boundary

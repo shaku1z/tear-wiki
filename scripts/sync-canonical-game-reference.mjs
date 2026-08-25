@@ -2,7 +2,9 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { lstat, realpath } from 'node:fs/promises';
 import { dirname, normalize, resolve } from 'node:path';
-import { fetchVerifyAndStore } from './fetch-game-reference-artifact.mjs';
+import { fetchGameReferenceArtifact } from './fetch-game-reference-artifact.mjs';
+import { validateGameReferenceArtifact } from './game-reference-contract.mjs';
+import { promoteGameReference } from './promote-game-reference.mjs';
 
 const WIKI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const CANONICAL_GAME_ROOT = resolve(WIKI_ROOT, '..', 'Tear');
@@ -119,7 +121,9 @@ export function parseArgs(args) {
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const custody = await assertCanonicalGameWorktree({ expectedSha: options.sha });
-  const result = await fetchVerifyAndStore(options);
+  const bytes = await fetchGameReferenceArtifact(options);
+  const result = validateGameReferenceArtifact({ ...bytes, expectedSha: options.sha, expectedRunId: options.runId });
+  if (options.write) await promoteGameReference({ ...bytes, expectedSha: options.sha, expectedRunId: options.runId });
   console.log(`canonical game-reference synced from ${custody.repository}@${custody.head} (${result.manifestSha256.slice(0, 12)})${options.write ? '; stored' : '; verified only'}`);
 }
 

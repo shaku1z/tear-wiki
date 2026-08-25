@@ -40,8 +40,15 @@ test('requires exact SHA and run arguments', () => {
 
 test('rejects every direct low-level write bypass and leaves the snapshot untouched', async () => {
   const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  const fetchTransport = await readFile(new URL('./fetch-game-reference-artifact.mjs', import.meta.url), 'utf8');
+  const artifactVerifier = await readFile(new URL('./store-game-reference.mjs', import.meta.url), 'utf8');
   assert.equal(packageJson.scripts['sync:game-reference-artifact'], undefined);
   assert.match(packageJson.scripts['sync:game-reference'], /sync-canonical-game-reference\.mjs --write/);
+  assert.doesNotMatch(fetchTransport, /storeGameReference/);
+  assert.match(fetchTransport, /--write is not accepted by this transport/);
+  assert.match(packageJson.scripts['verify:artifact-directory'], /store-game-reference\.mjs$/);
+  assert.match(artifactVerifier, /export async function verifyArtifactDirectory/);
+  assert.doesNotMatch(artifactVerifier, /storeGameReference|writeFile|rename|unlink/);
   const manifestPath = new URL('../src/data/game-reference.v1.json', import.meta.url);
   const receiptPath = new URL('../src/data/game-reference.v1.receipt.json', import.meta.url);
   const before = [await readFile(manifestPath), await readFile(receiptPath)];
