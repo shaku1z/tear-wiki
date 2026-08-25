@@ -1,0 +1,76 @@
+name: Deploy wiki preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_wiki_head:
+        description: 'Exact full SHA checked out for this preview build'
+        required: true
+        type: string
+      expected_game_source_sha:
+        description: 'Exact game source SHA bound by the checked-in reference triplet'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tear-wiki-preview
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: Preview
+    steps:
+      - name: Require protected main and exact expected inputs
+        env:
+          EXPECTED_WIKI_HEAD: ${{ inputs.expected_wiki_head }}
+          EXPECTED_GAME_SOURCE_SHA: ${{ inputs.expected_game_source_sha }}
+          ACTUAL_HEAD: ${{ github.sha }}
+          REF: ${{ github.ref }}
+          REF_PROTECTED: ${{ github.ref_protected }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$REF" == 'refs/heads/main' ]] || { echo 'Preview deployment requires refs/heads/main.' >&2; exit 1; }
+          [[ "$REF_PROTECTED" == 'true' ]] || { echo 'Preview deployment requires a protected ref.' >&2; exit 1; }
+          [[ "$EXPECTED_WIKI_HEAD" =~ ^[0-9a-f]{40}$ ]] || { echo 'expected_wiki_head must be a full lowercase SHA.' >&2; exit 1; }
+          [[ "$EXPECTED_GAME_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'expected_game_source_sha must be a full lowercase SHA.' >&2; exit 1; }
+          [[ "$EXPECTED_WIKI_HEAD" == "$ACTUAL_HEAD" ]] || { echo 'The workflow ref does not match expected_wiki_head.' >&2; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validate snapshot and deterministic build provenance
+        env:
+          EXPECTED_WIKI_GIT_COMMIT: ${{ inputs.expected_wiki_head }}
+          EXPECTED_GAME_SOURCE_SHA: ${{ inputs.expected_game_source_sha }}
+        run: npm run check:snapshot
+
+      - name: Require environment-scoped Cloudflare credentials
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "$CLOUDFLARE_ACCOUNT_ID" ]] || { echo 'Preview environment is missing CLOUDFLARE_ACCOUNT_ID.' >&2; exit 1; }
+          [[ -n "$CLOUDFLARE_API_TOKEN" ]] || { echo 'Preview environment is missing CLOUDFLARE_API_TOKEN.' >&2; exit 1; }
+
+      - name: Deploy only the isolated preview Worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx --yes wrangler@4.112.0 deploy --env preview --config wrangler.jsonc
