@@ -66,9 +66,10 @@ jobs:
             existing_pr_json="$(gh pr view "$existing_pr_number" --repo "$GITHUB_REPOSITORY" --json baseRefName,files,headRefName,headRefOid)"
             git fetch --no-tags origin "refs/heads/$branch:refs/remotes/origin/$branch"
             SYNC_PR_BRANCH="$branch" SYNC_PR_JSON="$existing_pr_json" SYNC_GAME_SHA="$GAME_SHA" SYNC_VALIDATION_RUN_ID="$VALIDATION_RUN_ID" node scripts/verify-sync-pr-reference.mjs
+            expected_head="$(git rev-parse "refs/remotes/origin/$branch")"
             successful_checks="$(gh pr checks "$existing_pr_number" --repo "$GITHUB_REPOSITORY" --json name,state --jq '[.[] | select(.name == "check" and .state == "SUCCESS")] | length' 2>/dev/null || printf '0')"
             if [[ "$successful_checks" == '0' ]]; then
-              gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
+              gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch" -f expected_head="$expected_head"
               echo "Dispatched Validate for existing synchronization PR #${existing_pr_number}: $existing_pr"
             else
               echo "An open synchronization PR already has a successful Validate check: $existing_pr"
@@ -95,6 +96,7 @@ jobs:
           fi
           git diff --cached --check
           git commit -m "sync(wiki): game-reference ${GAME_SHA}"
+          expected_head="$(git rev-parse HEAD)"
           git push --set-upstream origin "$branch"
           pr_url="$(gh pr create \
             --repo "$GITHUB_REPOSITORY" \
@@ -102,5 +104,5 @@ jobs:
             --head "$branch" \
             --title "sync: game-reference ${GAME_SHA}" \
             --body "Automated game-reference synchronization from shaku1z/tear@${GAME_SHA}. Public Actions metadata, artifact digest, receipt, and manifest were independently verified; the promoted files are limited to the manifest, receipt, and terminology registry snapshot.")"
-          gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
+          gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch" -f expected_head="$expected_head"
           echo "Created synchronization PR and dispatched Validate for ${pr_url}"

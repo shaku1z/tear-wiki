@@ -171,11 +171,16 @@ test('workflow is repository-dispatch-only, PR-only, and limited to the referenc
   assert.match(workflow, /run:\s*npm ci/u);
   assert.match(workflow, /run:\s*npm run consume:game-reference-dispatch/u);
   assert.equal((workflow.match(/npm run check:snapshot/g) ?? []).length, 1);
-  assert.match(workflow, /gh workflow run validate\.yml --repo "\$GITHUB_REPOSITORY" --ref "\$branch"/u);
+  assert.equal((workflow.match(/gh workflow run validate\.yml --repo "\$GITHUB_REPOSITORY" --ref "\$branch" -f expected_head="\$expected_head"/g) ?? []).length, 2);
   assert.match(workflow, /gh pr view "\$existing_pr_number" --repo "\$GITHUB_REPOSITORY" --json baseRefName,files,headRefName,headRefOid/u);
   assert.match(workflow, /git fetch --no-tags origin "refs\/heads\/\$branch:refs\/remotes\/origin\/\$branch"/u);
   assert.match(workflow, /node scripts\/verify-sync-pr-reference\.mjs/u);
   assert.match(validateWorkflow, /workflow_dispatch:/u);
+  assert.match(validateWorkflow, /expected_head:\s*\n\s*description:/u);
+  assert.match(validateWorkflow, /expected_head:[\s\S]*?required: true[\s\S]*?type: string/u);
+  assert.match(validateWorkflow, /EXPECTED_HEAD: \$\{\{ inputs\.expected_head \}\}/u);
+  assert.match(validateWorkflow, /ACTUAL_HEAD: \$\{\{ github\.sha \}\}/u);
+  assert.match(validateWorkflow, /if \[\[ "\$ACTUAL_HEAD" != "\$EXPECTED_HEAD" \]\]/u);
   assert.match(workflow, /git push --set-upstream origin "\$branch"/u);
   assert.match(workflow, /gh pr create/u);
   assert.doesNotMatch(workflow, /git push[^\n]*\bmain\b|gh pr merge|wrangler|cloudflare|auto-merge/iu);
