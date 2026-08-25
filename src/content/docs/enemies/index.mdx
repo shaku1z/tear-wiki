@@ -1,11 +1,11 @@
 ---
 title: Enemy System
-description: Captured enemy families, variants, affixes, and scaling.
+description: Validated enemy families, variants, affixes, and published difficulty modifiers.
 ---
 import EnemyFamilyDirectory from '../../../components/EnemyFamilyDirectory.astro';
 import RunScalingReadout from '../../../components/RunScalingReadout.astro';
 
-Every enemy is composed from a base family, an optional variant, and optional affixes. The directory below reads family values from the same configuration used by the game.
+Every enemy is composed from a base family, an optional variant, and optional affixes. The directory below reads structural family values from the validated game reference; runtime combat tuning remains outside that public contract.
 
 <EnemyFamilyDirectory />
 

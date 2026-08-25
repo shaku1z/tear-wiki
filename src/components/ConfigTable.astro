@@ -1,8 +1,32 @@
 ---
-import gameManifest from '../data/game-manifest.json';
+import { difficulties, source, weapons } from '../data/game-reference.mjs';
 
-const { title = 'CAPTURED CONFIGURATION', rows = [] } = Astro.props;
-const read = (path) => path.split('.').reduce((value, key) => value?.[key], gameManifest.config);
+const { title = 'PUBLISHED REFERENCE VALUES', rows = [] } = Astro.props;
+const weaponById = new Map(weapons.map((weapon) => [weapon.id, weapon]));
+const difficultyById = new Map(difficulties.map((difficulty) => [difficulty.id, difficulty]));
+
+function resolvePublishedValue(valuePath) {
+  const weaponMatch = /^(?:weapon|weapons)\.([a-z0-9-]+)\.tuning\.([A-Za-z][A-Za-z0-9]*)$/.exec(valuePath ?? '');
+  if (weaponMatch) {
+    const weapon = weaponById.get(weaponMatch[1]);
+    const key = weaponMatch[2];
+    if (weapon && Object.prototype.hasOwnProperty.call(weapon.tuning, key)) {
+      return { value: weapon.tuning[key] };
+    }
+  }
+
+  const difficultyMatch = /^(?:difficulty|difficulties)\.([a-z0-9-]+)\.modifiers\.([A-Za-z][A-Za-z0-9]*)$/.exec(valuePath ?? '');
+  if (difficultyMatch) {
+    const difficulty = difficultyById.get(difficultyMatch[1]);
+    const key = difficultyMatch[2];
+    if (difficulty && Object.prototype.hasOwnProperty.call(difficulty.modifiers, key)) {
+      return { value: difficulty.modifiers[key] };
+    }
+  }
+
+  return null;
+}
+
 const format = (value, row) => {
   if (value == null) return '—';
   if (row.format === 'percent') return `${Math.round(value * 100)}%`;
@@ -13,9 +37,22 @@ const format = (value, row) => {
 ---
 
 <section class="config-table" aria-label={title}>
-  <header><span>{title}</span><code>{gameManifest.source.commit.slice(0, 7)}</code></header>
+  <header><span>{title}</span><code>{source.sha.slice(0, 7)}</code></header>
   <dl>
-    {rows.map((row) => <div><dt>{row.label}<small>{row.path}</small></dt><dd>{format(read(row.path), row)}</dd>{row.note && <p>{row.note}</p>}</div>)}
+    {rows.map((row) => {
+      const result = resolvePublishedValue(row.path);
+      const isPublished = result !== null;
+      return (
+        <div>
+          <dt>{row.label}<small>{row.path}</small></dt>
+          <dd class:list={{ 'is-boundary': !isPublished }}>
+            {isPublished ? format(result.value, row) : 'NOT PUBLISHED IN PUBLIC REFERENCE'}
+          </dd>
+          {row.note && <p>{row.note}</p>}
+          {!isPublished && <p class="boundary-note">This path is outside the validated public reference; no current numeric value is reproduced.</p>}
+        </div>
+      );
+    })}
   </dl>
 </section>
 
@@ -23,5 +60,5 @@ const format = (value, row) => {
   .config-table { border: 1px solid var(--sl-color-hairline); font-family: var(--sl-font-mono); margin: 1.5rem 0; }
   header { background: var(--sl-color-gray-6); border-bottom: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); display: flex; font-size: .65rem; font-weight: 800; justify-content: space-between; letter-spacing: .1em; padding: .65rem .75rem; text-transform: uppercase; }
   code { color: var(--tear-cyan); font: inherit; } header > * { margin: 0; } dl { margin: 0; } dl > div { align-items: center; border-bottom: 1px solid var(--sl-color-hairline); display: grid; gap: .7rem; grid-template-columns: minmax(0, 1fr) auto; margin: 0; min-width: 0; padding: .6rem .75rem; } dl > div:last-child { border-bottom: 0; }
-  dt { color: var(--sl-color-gray-2); font-size: .76rem; text-transform: uppercase; } dt small { color: var(--sl-color-gray-3); display: block; font-size: .61rem; letter-spacing: .04em; margin-top: .2rem; text-transform: none; } dd { color: var(--sl-color-white); font-size: .9rem; font-weight: 800; margin: 0; } p { color: var(--sl-color-gray-3); font-family: var(--sl-font); font-size: .7rem; grid-column: 1 / -1; line-height: 1.4; margin: -.2rem 0 0; }
+  dt { color: var(--sl-color-gray-2); font-size: .76rem; text-transform: uppercase; } dt small { color: var(--sl-color-gray-3); display: block; font-size: .61rem; letter-spacing: .04em; margin-top: .2rem; text-transform: none; } dd { color: var(--sl-color-white); font-size: .9rem; font-weight: 800; margin: 0; text-align: right; } dd.is-boundary { color: var(--sl-color-gray-3); font-size: .64rem; letter-spacing: .03em; max-width: 18rem; } p { color: var(--sl-color-gray-3); font-family: var(--sl-font); font-size: .7rem; grid-column: 1 / -1; line-height: 1.4; margin: -.2rem 0 0; } p.boundary-note { color: var(--sl-color-gray-2); }
 </style>
