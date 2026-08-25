@@ -145,6 +145,17 @@ export default defineConfig({
 					],
 				},
 				{
+					label: '🗡️ Weapons',
+					items: [
+						{ label: 'Final Five Overview', slug: 'weapons' },
+						{ label: 'Sword', slug: 'weapons/sword' },
+						{ label: 'Hammer', slug: 'weapons/hammer' },
+						{ label: 'Greatsword', slug: 'weapons/greatsword' },
+						{ label: 'Chainblade', slug: 'weapons/chainblade' },
+						{ label: 'Riftlock', slug: 'weapons/riftlock' },
+					],
+				},
+				{
 					label: '📖 Reference',
 					items: [
 						{ label: 'Stat Glossary', slug: 'reference/stat-glossary' },

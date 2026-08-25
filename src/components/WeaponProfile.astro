@@ -1,0 +1,127 @@
+---
+import { source, weapons } from '../data/game-reference.mjs';
+
+const { id } = Astro.props;
+const weapon = weapons.find((item) => item.id === id);
+if (!weapon) throw new Error(`Unknown Final Five weapon: ${id}`);
+
+const ratingLabels = { difficulty: 'Difficulty', handling: 'Handling', impact: 'Impact', reach: 'Reach' };
+const tuningEntries = Object.entries(weapon.tuning);
+const formatNumber = (value) => Number.isInteger(value) ? String(value) : String(value);
+---
+
+<article class:list={['weapon-profile', `weapon-${weapon.id}`]} aria-labelledby={`${weapon.id}-title`}>
+  <header class="weapon-hero">
+    <div class="weapon-source-line">
+      <span>VALIDATED WEAPON PROFILE / FINAL FIVE</span>
+      <code>{source.sha.slice(0, 7)}</code>
+    </div>
+    <h2 id={`${weapon.id}-title`}>{weapon.name}</h2>
+    <p class="weapon-blurb">{weapon.blurb}</p>
+    <p class="weapon-description">{weapon.description}</p>
+  </header>
+
+  <div class="weapon-grid">
+    <section class="weapon-panel weapon-panel--wide">
+      <div class="panel-label">PLAYSTYLE</div>
+      <p class="playstyle">{weapon.playstyle}</p>
+      <div class="tags" aria-label={`${weapon.name} tags`}>
+        {weapon.tags.map((tag) => <span>{tag}</span>)}
+      </div>
+    </section>
+
+    <section class="weapon-panel">
+      <div class="panel-label">CURRENT MECHANICS</div>
+      <ul class="mechanics">
+        {weapon.mechanics.map((mechanic) => <li>{mechanic}</li>)}
+      </ul>
+    </section>
+
+    <section class="weapon-panel">
+      <div class="panel-label">THROW IDENTITY</div>
+      <strong class="throw-identity">{weapon.throwIdentity}</strong>
+      <dl class="fact-list">
+        <div><dt>Collision pad</dt><dd>{formatNumber(weapon.throwCollisionPad)}</dd></div>
+      </dl>
+      <p class="boundary-note">The throw name and collision-pad value are published fields; trajectory and units remain defined by the game runtime.</p>
+    </section>
+
+    <section class="weapon-panel">
+      <div class="panel-label">RATINGS / 5</div>
+      <dl class="ratings">
+        {Object.entries(weapon.ratings).map(([key, value]) => <div><dt>{ratingLabels[key] || key}</dt><dd><meter min="1" max="5" value={value}>{value}/5</meter><span>{value}/5</span></dd></div>)}
+      </dl>
+    </section>
+
+    <section class="weapon-panel">
+      <div class="panel-label">PROFILE CHANNELS</div>
+      <dl class="fact-list">
+        {Object.entries(weapon.channels).map(([key, value]) => <div><dt><code>{key}</code></dt><dd>{formatNumber(value)}</dd></div>)}
+      </dl>
+      <p class="boundary-note">Published channel coefficients are shown exactly; they are not a substitute for mutable in-run state.</p>
+    </section>
+
+    <section class="weapon-panel">
+      <div class="panel-label">KNOWN WEAKNESSES</div>
+      <ul class="weaknesses">
+        {weapon.weaknesses.map((weakness) => <li>{weakness}</li>)}
+      </ul>
+    </section>
+
+    <section class="weapon-panel weapon-panel--wide tuning-panel">
+      <div class="panel-label">EXACT AUTHORED TUNING</div>
+      <p class="boundary-note">These are the canonical numeric tuning fields from the validated game reference. Keys and values are shown without rounding or inferred units; runtime upgrades, difficulty, and remote settings are outside this authored base contract.</p>
+      <dl class="tuning-grid">
+        {tuningEntries.map(([key, value]) => <div><dt><code>{key}</code></dt><dd>{formatNumber(value)}</dd></div>)}
+      </dl>
+    </section>
+  </div>
+
+  <footer class="weapon-footnote">Source commit <code>{source.sha}</code> · validated run <code>{source.runId}</code> · active roster only</footer>
+</article>
+
+<style>
+  .weapon-profile { --weapon-accent: var(--tear-cyan); border: 1px solid var(--sl-color-hairline); margin: 1.5rem 0 2.5rem; overflow: hidden; }
+  .weapon-sword { --weapon-accent: #13c4d6; }
+  .weapon-hammer { --weapon-accent: #e08a32; }
+  .weapon-greatsword { --weapon-accent: #d9b34a; }
+  .weapon-chainblade { --weapon-accent: #a86de0; }
+  .weapon-riftlock { --weapon-accent: #ef5520; }
+  .weapon-hero { background: var(--sl-color-gray-6); border-top: 4px solid var(--weapon-accent); padding: 1.15rem 1.2rem 1.35rem; }
+  .weapon-source-line { align-items: center; color: var(--sl-color-gray-3); display: flex; font: 700 .63rem/1.2 var(--sl-font-mono); justify-content: space-between; letter-spacing: .11em; text-transform: uppercase; }
+  .weapon-source-line code, .weapon-footnote code { color: var(--weapon-accent); font: inherit; }
+  h2 { border: 0; color: var(--sl-color-white); font-size: clamp(1.8rem, 6vw, 3.3rem); letter-spacing: .08em; margin: .65rem 0 .35rem; padding: 0; text-transform: uppercase; }
+  .weapon-blurb { color: var(--weapon-accent); font: 700 .72rem/1.4 var(--sl-font-mono); letter-spacing: .1em; margin: 0; text-transform: uppercase; }
+  .weapon-description { color: var(--sl-color-gray-2); font-size: .95rem; line-height: 1.6; margin: .85rem 0 0; max-width: 70ch; }
+  .weapon-grid { display: grid; gap: 1px; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--sl-color-hairline); }
+  .weapon-panel { background: var(--sl-color-bg); margin: 0; min-width: 0; padding: 1rem 1.1rem; }
+  .weapon-panel--wide { grid-column: 1 / -1; }
+  .panel-label { color: var(--sl-color-gray-3); font: 700 .64rem/1.2 var(--sl-font-mono); letter-spacing: .11em; margin-bottom: .7rem; text-transform: uppercase; }
+  .playstyle { color: var(--sl-color-white); font-size: 1rem; line-height: 1.55; margin: 0; }
+  .tags { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .85rem; }
+  .tags span { border: 1px solid color-mix(in srgb, var(--weapon-accent) 55%, var(--sl-color-hairline)); color: var(--weapon-accent); font: 700 .6rem/1 var(--sl-font-mono); letter-spacing: .08em; padding: .35rem .45rem; text-transform: uppercase; }
+  .mechanics, .weaknesses { list-style: none; margin: 0; padding: 0; }
+  .mechanics li, .weaknesses li { border-top: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-2); margin: 0; padding: .52rem 0; }
+  .mechanics li:first-child, .weaknesses li:first-child { border-top: 0; padding-top: 0; }
+  .mechanics li::before { color: var(--weapon-accent); content: '◆'; font-size: .55rem; margin-right: .55rem; vertical-align: .08em; }
+  .weaknesses li::before { color: var(--tear-red); content: '—'; margin-right: .55rem; }
+  .throw-identity { color: var(--sl-color-white); display: block; font: 700 1.25rem/1.3 var(--sl-font-mono); letter-spacing: .05em; text-transform: uppercase; }
+  .fact-list, .ratings { margin: .8rem 0 0; }
+  .fact-list div, .ratings div { align-items: center; border-top: 1px solid var(--sl-color-hairline); display: flex; justify-content: space-between; margin: 0; padding: .5rem 0; }
+  dt { color: var(--sl-color-gray-3); font-size: .72rem; }
+  dd { color: var(--sl-color-white); font-weight: 700; margin: 0; }
+  .boundary-note { color: var(--sl-color-gray-3); font-size: .73rem; line-height: 1.5; margin: .8rem 0 0; }
+  .ratings dd { align-items: center; display: flex; gap: .5rem; }
+  meter { accent-color: var(--weapon-accent); height: .6rem; width: 6rem; }
+  .ratings dd span { color: var(--weapon-accent); font: 700 .7rem var(--sl-font-mono); min-width: 2.2rem; text-align: right; }
+  .tuning-panel { background: color-mix(in srgb, var(--sl-color-gray-6) 18%, var(--sl-color-bg)); }
+  .tuning-grid { border: 1px solid var(--sl-color-hairline); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: .95rem 0 0; }
+  .tuning-grid div { align-items: center; border-bottom: 1px solid var(--sl-color-hairline); display: flex; gap: .8rem; justify-content: space-between; margin: 0; min-width: 0; padding: .5rem .6rem; }
+  .tuning-grid div:nth-child(odd) { border-right: 1px solid var(--sl-color-hairline); }
+  .tuning-grid div:nth-last-child(-n+2) { border-bottom: 0; }
+  .tuning-grid dt { min-width: 0; overflow-wrap: anywhere; }
+  .tuning-grid dt code { color: var(--sl-color-gray-2); font: .7rem var(--sl-font-mono); }
+  .tuning-grid dd { color: var(--weapon-accent); font: 700 .75rem var(--sl-font-mono); }
+  .weapon-footnote { border-top: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-3); font: .62rem/1.5 var(--sl-font-mono); letter-spacing: .04em; padding: .7rem 1.1rem; }
+  @media (max-width: 680px) { .weapon-grid { grid-template-columns: 1fr; } .weapon-panel--wide { grid-column: auto; } .tuning-grid { grid-template-columns: 1fr; } .tuning-grid div:nth-child(odd) { border-right: 0; } .tuning-grid div:nth-last-child(-n+2) { border-bottom: 1px solid var(--sl-color-hairline); } .tuning-grid div:last-child { border-bottom: 0; } }
+</style>
