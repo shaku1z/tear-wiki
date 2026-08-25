@@ -1,0 +1,108 @@
+name: Sync game-reference
+
+on:
+  repository_dispatch:
+    types: [tear-game-deployed]
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-game-reference-${{ github.event.client_payload.game_commit }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.event.action == 'tear-game-deployed'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out protected wiki main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify public game artifact and promote the three reference files
+        run: npm run consume:game-reference-dispatch
+
+      - name: Confirm promotion changed only the reference triplet
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git diff --name-only -- | sort)"
+          status="$(git status --porcelain=v1 --untracked-files=all)"
+          state="$(PROMOTION_STATUS="$status" PROMOTION_DIFF="$actual" node scripts/check-reference-promotion-state.mjs)"
+          printf '%s\n' "$state"
+          printf '%s\n' "$state" >> "$GITHUB_OUTPUT"
+
+      - name: Validate the promoted snapshot once
+        run: npm run check:snapshot
+
+      - name: Create or reuse the protected synchronization pull request
+        if: steps.changes.outputs.no_change != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GAME_SHA: ${{ github.event.client_payload.game_commit }}
+          VALIDATION_RUN_ID: ${{ github.event.client_payload.validation_run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="codex/sync-game-reference-${GAME_SHA}"
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --state open --json number,url --jq '.[0] // empty')"
+          if [[ -n "$existing_pr" ]]; then
+            existing_pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --state open --json number --jq '.[0].number // empty')"
+            existing_pr_json="$(gh pr view "$existing_pr_number" --repo "$GITHUB_REPOSITORY" --json baseRefName,files,headRefName,headRefOid)"
+            git fetch --no-tags origin "refs/heads/$branch:refs/remotes/origin/$branch"
+            SYNC_PR_BRANCH="$branch" SYNC_PR_JSON="$existing_pr_json" SYNC_GAME_SHA="$GAME_SHA" SYNC_VALIDATION_RUN_ID="$VALIDATION_RUN_ID" node scripts/verify-sync-pr-reference.mjs
+            expected_head="$(git rev-parse "refs/remotes/origin/$branch")"
+            successful_checks="$(gh pr checks "$existing_pr_number" --repo "$GITHUB_REPOSITORY" --json name,state --jq '[.[] | select(.name == "check" and .state == "SUCCESS")] | length' 2>/dev/null || printf '0')"
+            if [[ "$successful_checks" == '0' ]]; then
+              gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch" -f expected_head="$expected_head"
+              echo "Dispatched Validate for existing synchronization PR #${existing_pr_number}: $existing_pr"
+            else
+              echo "An open synchronization PR already has a successful Validate check: $existing_pr"
+            fi
+            exit 0
+          fi
+          if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+            echo "Remote branch $branch exists without an open PR; refusing to overwrite it." >&2
+            exit 1
+          fi
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- src/data/game-reference.v1.json src/data/game-reference.v1.receipt.json src/data/wiki-terminology.json
+          expected="$(printf '%s\n' \
+            'src/data/game-reference.v1.json' \
+            'src/data/game-reference.v1.receipt.json' \
+            'src/data/wiki-terminology.json' | sort)"
+          staged="$(git diff --cached --name-only -- | sort)"
+          if [[ "$staged" != "$expected" ]]; then
+            echo 'The synchronization commit did not contain exactly the reference triplet.' >&2
+            printf '%s\n' "$staged" >&2
+            exit 1
+          fi
+          git diff --cached --check
+          git commit -m "sync(wiki): game-reference ${GAME_SHA}"
+          expected_head="$(git rev-parse HEAD)"
+          git push --set-upstream origin "$branch"
+          pr_url="$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "sync: game-reference ${GAME_SHA}" \
+            --body "Automated game-reference synchronization from shaku1z/tear@${GAME_SHA}. Public Actions metadata, artifact digest, receipt, and manifest were independently verified; the promoted files are limited to the manifest, receipt, and terminology registry snapshot.")"
+          gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch" -f expected_head="$expected_head"
+          echo "Created synchronization PR and dispatched Validate for ${pr_url}"
