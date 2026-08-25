@@ -1,0 +1,108 @@
+name: Sync game-reference
+
+on:
+  repository_dispatch:
+    types: [tear-game-deployed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-game-reference-${{ github.event.client_payload.game_commit }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.event.action == 'tear-game-deployed'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out protected wiki main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify public game artifact and promote the three reference files
+        run: npm run consume:game-reference-dispatch
+
+      - name: Confirm promotion changed only the reference triplet
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="$(printf '%s\n' \
+            'src/data/game-reference.v1.json' \
+            'src/data/game-reference.v1.receipt.json' \
+            'src/data/wiki-terminology.json' | sort)"
+          actual="$(git diff --name-only -- | sort)"
+          if [[ -n "$(git status --short --untracked-files=all)" ]]; then
+            echo 'Unexpected worktree state after promotion.' >&2
+            git status --short --untracked-files=all >&2
+            exit 1
+          fi
+          if [[ -z "$actual" ]]; then
+            echo 'No reference changes are required.'
+            echo 'no_change=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$actual" != "$expected" ]]; then
+            echo "Unexpected tracked changes:" >&2
+            printf '%s\n' "$actual" >&2
+            exit 1
+          fi
+          echo 'no_change=false' >> "$GITHUB_OUTPUT"
+
+      - name: Validate the promoted snapshot once
+        run: npm run check:snapshot
+
+      - name: Create or reuse the protected synchronization pull request
+        if: steps.changes.outputs.no_change != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GAME_SHA: ${{ github.event.client_payload.game_commit }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="codex/sync-game-reference-${GAME_SHA}"
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --state open --json number,url --jq '.[0] // empty')"
+          if [[ -n "$existing_pr" ]]; then
+            echo "An open synchronization PR already exists: $existing_pr"
+            exit 0
+          fi
+          if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+            echo "Remote branch $branch exists without an open PR; refusing to overwrite it." >&2
+            exit 1
+          fi
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- src/data/game-reference.v1.json src/data/game-reference.v1.receipt.json src/data/wiki-terminology.json
+          expected="$(printf '%s\n' \
+            'src/data/game-reference.v1.json' \
+            'src/data/game-reference.v1.receipt.json' \
+            'src/data/wiki-terminology.json' | sort)"
+          staged="$(git diff --cached --name-only -- | sort)"
+          if [[ "$staged" != "$expected" ]]; then
+            echo 'The synchronization commit did not contain exactly the reference triplet.' >&2
+            printf '%s\n' "$staged" >&2
+            exit 1
+          fi
+          git diff --cached --check
+          git commit -m "sync(wiki): game-reference ${GAME_SHA}"
+          git push --set-upstream origin "$branch"
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "sync: game-reference ${GAME_SHA}" \
+            --body "Automated game-reference synchronization from shaku1z/tear@${GAME_SHA}. Public Actions metadata, artifact digest, receipt, and manifest were independently verified; the promoted files are limited to the manifest, receipt, and terminology registry snapshot."

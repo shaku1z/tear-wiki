@@ -20,3 +20,28 @@ archive containing only the two published files. Redirected archive downloads
 are constrained to approved storage hosts and never receive the GitHub token.
 No workflow dispatch, direct push, or Cloudflare deployment is performed by
 this repository-side verification flow.
+
+## Protected cross-repository promotion
+
+The protected `sync-game-reference.yml` workflow accepts only the
+`repository_dispatch` action `tear-game-deployed`. Its client payload has
+exactly four fields: `game_commit`, `validation_run_id`, `artifact_id`, and
+`artifact_zip_base64`. The consumer rejects local CLI arguments and runs only
+inside the protected wiki `repository_dispatch` context.
+
+The consumer independently reads the public game `refs/heads/main`, Validate
+run, and run-artifact metadata without a GitHub credential. It requires the
+current main SHA, workflow ID `322540049`, path `.github/workflows/ci.yml`, a
+successful protected-main push, the exact unique unexpired artifact identity,
+and its immutable `sha256:` digest. The decoded event ZIP must be canonical
+base64, no larger than 48 KiB, match the public artifact size and digest, and
+contain only the two hardened reference files before the external SHA/run
+contract and triple promotion are applied.
+
+After `npm ci`, the workflow runs `npm run check:snapshot` once, confirms that
+only the manifest, receipt, and terminology registry changed, and creates or
+reuses `codex/sync-game-reference-<sha>` as a pull request against `main`. It
+never pushes `main`, merges, or deploys. Because the branch and pull request
+are created with the workflow `GITHUB_TOKEN`, GitHub may suppress a separate
+`pull_request` Validate run; the sync workflow's own snapshot gate is the
+validation evidence until a separately authorized check is configured.

@@ -31,7 +31,7 @@ Future developers (Codex or otherwise) must adhere to these strict visual rules:
 4. **Layout:** Eradicate unnecessary vertical scrolling. Use compact CSS Grids (`grid-template-columns: repeat(auto-fit, minmax(X, 1fr))`) to condense information efficiently.
 
 ## 5. Ongoing Work & Next Steps
-- **Data Synchronization:** The checked-in `game-reference.v1.json`, receipt, and terminology registry snapshot are the current gameplay reference state consumed by the wiki. Run `npm run verify:game-reference-artifact` for the bounded offline source/receipt/registry gate. Explicit canonical promotion remains guarded by `sync-canonical-game-reference.mjs`; it requires an exact externally validated source SHA and run before the rollback-transactional three-file write.
+- **Data Synchronization:** The checked-in `game-reference.v1.json`, receipt, and terminology registry snapshot are the current gameplay reference state consumed by the wiki. Run `npm run verify:game-reference-artifact` for the bounded offline source/receipt/registry gate. Explicit local promotion remains guarded by `sync-canonical-game-reference.mjs`; the protected cross-repository `tear-game-deployed` consumer independently verifies public game metadata and the artifact digest before opening a SHA-named PR with the rollback-transactional three-file write.
 - **Historical provenance:** `G4_WIKI_TERMINOLOGY_RECEIPT.md` preserves the original G4 snapshot as immutable history. It is not a current gameplay source and must not be regenerated.
 - **Component Expansion:** Continue migrating static markdown pages to use dynamic Astro components (`BossProfile.astro`, `EnemyStats.astro`, `StageEnvironment.astro`).
 

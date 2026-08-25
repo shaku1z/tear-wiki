@@ -44,6 +44,13 @@ manifest, receipt, and current terminology snapshot together with rollback on
 installation failure. Low-level fetch/store commands remain
 verify-only diagnostics and reject direct write flags.
 
+The protected cross-repository path is the `repository_dispatch` action
+`tear-game-deployed`. It accepts only the exact game SHA, validation run,
+artifact ID, and canonical base64 ZIP fields; public game ref/run/artifact
+metadata supplies the digest authority before the same triple promotion. The
+workflow checks the promoted snapshot once and opens a SHA-named PR containing
+only the three reference files. It does not write `main`, merge, or deploy.
+
 ## Historical boundary
 
 The former JavaScript-era snapshot pipeline and its disabled automatic
