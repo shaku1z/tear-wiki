@@ -23,4 +23,11 @@ assert.match(enemyPage, /CANONICAL FAMILY ID/);
 assert.match(enemyPage, /PUBLISHED CONTRACT BOUNDARY/);
 assert.doesNotMatch(enemyPage, /BASE HP|MOVE SPEED|CONTACT DMG/);
 
-console.log('Verified modern reference pages: hidden achievement data is suppressed and structural stage/enemy views render.');
+const rosterPage = await readFile(new URL('../dist/reference/weapon-roster/index.html', import.meta.url), 'utf8');
+assert.match(rosterPage, /Final Five/);
+for (const [id, label] of [['greatsword', 'Greatsword'], ['chainblade', 'Chainblade'], ['riftlock', 'Riftlock']]) {
+  const weaponPage = await readFile(new URL(`../dist/weapons/${id}/index.html`, import.meta.url), 'utf8');
+  assert.match(weaponPage, new RegExp(label));
+}
+
+console.log('Verified modern reference pages: hidden achievement data is suppressed, structural stage/enemy views render, and the Final Five weapon routes are built.');
