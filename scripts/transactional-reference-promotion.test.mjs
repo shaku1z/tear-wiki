@@ -5,12 +5,13 @@ import { mkdtemp } from 'node:fs/promises';
 import test from 'node:test';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { readCurrentReferenceFixture } from './current-reference-fixture.mjs';
 import { promoteGameReference } from './promote-game-reference.mjs';
 import { verifyGameReferenceSnapshot } from './verify-game-reference-snapshot.mjs';
 
 const SOURCE_ROOT = new URL('../', import.meta.url);
-const CURRENT_SHA = '9ddd8f20a9c7d1830a2e043d9e558e259f738d02';
-const CURRENT_RUN = '32785864315';
+const current = await readCurrentReferenceFixture();
+const { sourceSha: CURRENT_SHA, runId: CURRENT_RUN } = current;
 
 async function makeFixture() {
   const root = await mkdtemp(join(tmpdir(), 'tear-reference-promotion-'));
@@ -29,7 +30,7 @@ async function removeFixture(root) {
 async function futureArtifact() {
   const manifest = JSON.parse((await readFile(new URL('src/data/game-reference.v1.json', SOURCE_ROOT))).toString('utf8'));
   const receipt = JSON.parse((await readFile(new URL('src/data/game-reference.v1.receipt.json', SOURCE_ROOT))).toString('utf8'));
-  const sourceSha = 'a'.repeat(40);
+  const sourceSha = CURRENT_SHA === 'a'.repeat(40) ? 'b'.repeat(40) : 'a'.repeat(40);
   const runId = '987654321';
   manifest.source.sha = sourceSha;
   const manifestBytes = Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
@@ -50,6 +51,7 @@ test('promotion follows the externally supplied artifact and changes only the cu
   try {
     const before = await fileSet(fixture.data);
     const incoming = await futureArtifact();
+    assert.notEqual(incoming.expectedSha, CURRENT_SHA, 'regression fixture must use a different valid source SHA');
     const result = await promoteGameReference({
       ...incoming,
       root: fixture.root,

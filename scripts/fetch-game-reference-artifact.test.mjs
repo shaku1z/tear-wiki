@@ -1,12 +1,10 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { readCurrentReferenceFixture } from './current-reference-fixture.mjs';
 import { extractArtifactZip, fetchGameReferenceArtifact } from './fetch-game-reference-artifact.mjs';
 
-const SHA = '9ddd8f20a9c7d1830a2e043d9e558e259f738d02';
-const RUN = '32785864315';
-const manifest = await readFile(new URL('../src/data/game-reference.v1.json', import.meta.url));
-const receipt = await readFile(new URL('../src/data/game-reference.v1.receipt.json', import.meta.url));
+const current = await readCurrentReferenceFixture();
+const { sourceSha: SHA, runId: RUN, manifestBytes: manifest, receiptBytes: receipt } = current;
 
 function zip(entries) {
   const locals = []; const centrals = []; let offset = 0;

@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { deflateRawSync } from 'node:zlib';
+import { readCurrentReferenceFixture } from './current-reference-fixture.mjs';
 import {
   assertDispatchRuntime,
   consumeGameReferenceDispatch,
@@ -14,11 +15,9 @@ import {
 import { assertReferencePromotionState, REFERENCE_PROMOTION_FILES } from './check-reference-promotion-state.mjs';
 import { assertSyncPrIdentity, assertSyncPrSnapshot } from './verify-sync-pr-reference.mjs';
 
-const SOURCE_SHA = '9ddd8f20a9c7d1830a2e043d9e558e259f738d02';
-const RUN_ID = '32785864315';
+const current = await readCurrentReferenceFixture();
+const { sourceSha: SOURCE_SHA, runId: RUN_ID, manifestBytes: manifest, receiptBytes: receipt } = current;
 const ARTIFACT_ID = '9541725277';
-const manifest = await readFile(new URL('../src/data/game-reference.v1.json', import.meta.url));
-const receipt = await readFile(new URL('../src/data/game-reference.v1.receipt.json', import.meta.url));
 const workflow = await readFile(new URL('../.github/workflows/sync-game-reference.yml', import.meta.url), 'utf8');
 const validateWorkflow = await readFile(new URL('../.github/workflows/validate.yml', import.meta.url), 'utf8');
 const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
