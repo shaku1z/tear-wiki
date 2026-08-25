@@ -11,6 +11,7 @@ import {
   parseDispatchEvent,
   WIKI_REPOSITORY,
 } from './consume-game-reference-dispatch.mjs';
+import { assertReferencePromotionState, REFERENCE_PROMOTION_FILES } from './check-reference-promotion-state.mjs';
 
 const SOURCE_SHA = '9ddd8f20a9c7d1830a2e043d9e558e259f738d02';
 const RUN_ID = '32785864315';
@@ -18,6 +19,7 @@ const ARTIFACT_ID = '9541725277';
 const manifest = await readFile(new URL('../src/data/game-reference.v1.json', import.meta.url));
 const receipt = await readFile(new URL('../src/data/game-reference.v1.receipt.json', import.meta.url));
 const workflow = await readFile(new URL('../.github/workflows/sync-game-reference.yml', import.meta.url), 'utf8');
+const validateWorkflow = await readFile(new URL('../.github/workflows/validate.yml', import.meta.url), 'utf8');
 const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
 function zip(entries) {
@@ -161,12 +163,15 @@ test('rejects wrong run provenance, expired artifacts, and replayed duplicate me
 
 test('workflow is repository-dispatch-only, PR-only, and limited to the reference triplet', () => {
   assert.match(workflow, /repository_dispatch:\s*\n\s*types:\s*\[tear-game-deployed\]/u);
+  assert.match(workflow, /actions:\s*write/u);
   assert.match(workflow, /contents:\s*write/u);
   assert.match(workflow, /pull-requests:\s*write/u);
   assert.match(workflow, /ref:\s*main/u);
   assert.match(workflow, /run:\s*npm ci/u);
   assert.match(workflow, /run:\s*npm run consume:game-reference-dispatch/u);
   assert.equal((workflow.match(/npm run check:snapshot/g) ?? []).length, 1);
+  assert.match(workflow, /gh workflow run validate\.yml --repo "\$GITHUB_REPOSITORY" --ref "\$branch"/u);
+  assert.match(validateWorkflow, /workflow_dispatch:/u);
   assert.match(workflow, /git push --set-upstream origin "\$branch"/u);
   assert.match(workflow, /gh pr create/u);
   assert.doesNotMatch(workflow, /git push[^\n]*\bmain\b|gh pr merge|wrangler|cloudflare|auto-merge/iu);
@@ -189,4 +194,15 @@ test('the event consumer rejects local writer-style CLI bypasses', () => {
   });
   assert.notEqual(result.status, 0);
   assert.match(`${result.stdout}\n${result.stderr}`, /CLI accepts no arguments/);
+});
+
+test('promotion state accepts exactly the intended modified files and rejects bypass paths', () => {
+  const diffText = `${REFERENCE_PROMOTION_FILES.join('\n')}\n`;
+  const statusText = `${REFERENCE_PROMOTION_FILES.map((file) => ` M ${file}`).join('\n')}\n`;
+  assert.deepEqual(assertReferencePromotionState({ statusText, diffText }), { noChange: false });
+  assert.deepEqual(assertReferencePromotionState({ statusText: '', diffText: '' }), { noChange: true });
+  assert.throws(() => assertReferencePromotionState({ statusText: '', diffText }), /status|exactly/);
+  assert.throws(() => assertReferencePromotionState({ statusText: `${statusText}?? unexpected.txt\n`, diffText }), /only unstaged|exactly/);
+  assert.throws(() => assertReferencePromotionState({ statusText: statusText.replace(' M ', 'M  '), diffText }), /only unstaged/);
+  assert.throws(() => assertReferencePromotionState({ statusText, diffText: `${diffText}src/extra.txt\n` }), /exactly/);
 });

@@ -5,6 +5,7 @@ on:
     types: [tear-game-deployed]
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -40,27 +41,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          expected="$(printf '%s\n' \
-            'src/data/game-reference.v1.json' \
-            'src/data/game-reference.v1.receipt.json' \
-            'src/data/wiki-terminology.json' | sort)"
           actual="$(git diff --name-only -- | sort)"
-          if [[ -n "$(git status --short --untracked-files=all)" ]]; then
-            echo 'Unexpected worktree state after promotion.' >&2
-            git status --short --untracked-files=all >&2
-            exit 1
-          fi
-          if [[ -z "$actual" ]]; then
-            echo 'No reference changes are required.'
-            echo 'no_change=true' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [[ "$actual" != "$expected" ]]; then
-            echo "Unexpected tracked changes:" >&2
-            printf '%s\n' "$actual" >&2
-            exit 1
-          fi
-          echo 'no_change=false' >> "$GITHUB_OUTPUT"
+          status="$(git status --porcelain=v1 --untracked-files=all)"
+          state="$(PROMOTION_STATUS="$status" PROMOTION_DIFF="$actual" node scripts/check-reference-promotion-state.mjs)"
+          printf '%s\n' "$state"
+          printf '%s\n' "$state" >> "$GITHUB_OUTPUT"
 
       - name: Validate the promoted snapshot once
         run: npm run check:snapshot
@@ -76,7 +61,14 @@ jobs:
           branch="codex/sync-game-reference-${GAME_SHA}"
           existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --state open --json number,url --jq '.[0] // empty')"
           if [[ -n "$existing_pr" ]]; then
-            echo "An open synchronization PR already exists: $existing_pr"
+            existing_pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --state open --json number --jq '.[0].number // empty')"
+            successful_checks="$(gh pr checks "$existing_pr_number" --repo "$GITHUB_REPOSITORY" --json name,state --jq '[.[] | select(.name == "check" and .state == "SUCCESS")] | length' 2>/dev/null || printf '0')"
+            if [[ "$successful_checks" == '0' ]]; then
+              gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
+              echo "Dispatched Validate for existing synchronization PR #${existing_pr_number}: $existing_pr"
+            else
+              echo "An open synchronization PR already has a successful Validate check: $existing_pr"
+            fi
             exit 0
           fi
           if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
@@ -100,9 +92,11 @@ jobs:
           git diff --cached --check
           git commit -m "sync(wiki): game-reference ${GAME_SHA}"
           git push --set-upstream origin "$branch"
-          gh pr create \
+          pr_url="$(gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base main \
             --head "$branch" \
             --title "sync: game-reference ${GAME_SHA}" \
-            --body "Automated game-reference synchronization from shaku1z/tear@${GAME_SHA}. Public Actions metadata, artifact digest, receipt, and manifest were independently verified; the promoted files are limited to the manifest, receipt, and terminology registry snapshot."
+            --body "Automated game-reference synchronization from shaku1z/tear@${GAME_SHA}. Public Actions metadata, artifact digest, receipt, and manifest were independently verified; the promoted files are limited to the manifest, receipt, and terminology registry snapshot.")"
+          gh workflow run validate.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
+          echo "Created synchronization PR and dispatched Validate for ${pr_url}"

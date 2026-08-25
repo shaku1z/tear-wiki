@@ -42,6 +42,7 @@ After `npm ci`, the workflow runs `npm run check:snapshot` once, confirms that
 only the manifest, receipt, and terminology registry changed, and creates or
 reuses `codex/sync-game-reference-<sha>` as a pull request against `main`. It
 never pushes `main`, merges, or deploys. Because the branch and pull request
-are created with the workflow `GITHUB_TOKEN`, GitHub may suppress a separate
-`pull_request` Validate run; the sync workflow's own snapshot gate is the
-validation evidence until a separately authorized check is configured.
+are created with the workflow `GITHUB_TOKEN`, it explicitly dispatches the
+existing Validate workflow against that exact branch after creating or
+reusing the PR. This uses only the narrowly scoped `actions: write` permission
+needed for `workflow_dispatch`; it does not bypass the Validate gate.
