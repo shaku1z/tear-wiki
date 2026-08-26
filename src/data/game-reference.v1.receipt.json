@@ -1,17 +1,17 @@
 {
   "format": "tear-game-reference-artifact-receipt.v1",
   "repository": "shaku1z/tear",
-  "sourceSha": "a8a476c6171d913581c01bb0e4432f53cf44f9e4",
+  "sourceSha": "91706363b80fb56a18df4d973b424bbce94a279e",
   "gameReferenceFormat": "game-reference.v1",
   "gameReferenceSchemaVersion": 2,
   "terminologyVersion": "g4-terminology-v1",
-  "artifactName": "tear-game-reference-v1-a8a476c6171d913581c01bb0e4432f53cf44f9e4",
+  "artifactName": "tear-game-reference-v1-91706363b80fb56a18df4d973b424bbce94a279e",
   "manifestFilename": "game-reference.v1.json",
-  "manifestSha256": "77e6b07f1b15fa1b898c5d1de4bbd792e31c7d4e6e90a4a7d82e41c9eff257db",
+  "manifestSha256": "38d0adf8770ab3cd9e6f9461d562b9752bd42e11db5440ea2d84e8e2d2e87e4f",
   "receiptFilename": "game-reference.v1.receipt.json",
   "retentionDays": 90,
   "generatedBy": "pnpm publish:game-reference",
-  "validationRunId": "32821064971",
+  "validationRunId": "32957141293",
   "validationEvent": "push",
   "validationRef": "refs/heads/main"
 }
