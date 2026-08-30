@@ -67,15 +67,32 @@ test('rejects wrong trust envelope values and digest', () => {
   invalid({ receiptBytes: Buffer.from(`${JSON.stringify(badDigest, null, 2)}\n`) });
 });
 
-test('rejects collection omissions, extras, incompleteness, and catalog drift', () => {
-  invalidManifest((manifest) => { delete manifest.collections.bosses; }, /collections keys/);
-  invalidManifest((manifest) => { manifest.collections.extra = {}; }, /collections keys/);
+test('rejects collection omissions, incompleteness, malformed ids, duplicates, and broken references', () => {
+  invalidManifest((manifest) => { delete manifest.collections.bosses; }, /collections\.bosses is required/);
   invalidManifest((manifest) => { manifest.collections.bosses.status = 'partial'; }, /bosses\.status/);
-  invalidManifest((manifest) => { manifest.collections.bosses.items[1].id = 'warden'; }, /bosses ids/);
-  invalidManifest((manifest) => { manifest.collections.bosses.items.reverse(); }, /bosses ids/);
+  invalidManifest((manifest) => { manifest.collections.bosses.items[1].id = 'warden'; }, /bosses ids must be unique/);
+  invalidManifest((manifest) => { manifest.collections.bosses.items[1].id = 'Not Canonical'; }, /canonical content id/);
+  invalidManifest((manifest) => { manifest.collections.stages.items[0].boss = 'missing'; }, /unknown boss/);
+  invalidManifest((manifest) => { manifest.collections.bosses.items[0].stageId = 'undercroft'; }, /do not reference each other/);
   invalidManifest((manifest) => { manifest.roster.activeWeaponIds[0] = 'spear'; }, /active weapon ids/);
-  invalidManifest((manifest) => { manifest.collections.enemies.items.affixes[0].extra = true; }, /enemy affix record keys/);
-  invalidManifest((manifest) => { manifest.collections.enemies.items.presets[0].familyId = ''; }, /enemy preset ids/);
+  invalidManifest((manifest) => { manifest.collections.enemies.items.affixes[0].color = ''; }, /enemy affix record is malformed/);
+  invalidManifest((manifest) => { manifest.collections.enemies.items.presets[0].familyId = 'missing'; }, /unknown family/);
+  invalidManifest((manifest) => { manifest.collections.enemies.items.presets[0].affixIds[0] = 'missing'; }, /unknown affix/);
+});
+
+test('accepts authenticated source-owned content growth without mirrored counts or ids', () => {
+  const manifestBytes = mutatedManifest((manifest) => {
+    manifest.collections.extraFutureCollection = { items: [], status: 'complete' };
+    manifest.collections.achievements.items.splice(1, 0, { ...manifest.collections.achievements.items[0], id: 'future_biome_clear' });
+    manifest.collections.stages.items.splice(1, 0, { ...manifest.collections.stages.items[0], id: 'future-biome', boss: 'future-boss' });
+    manifest.collections.bosses.items.splice(1, 0, { ...manifest.collections.bosses.items[0], id: 'future-boss', stageId: 'future-biome' });
+    manifest.collections.upgrades.items.push({ ...manifest.collections.upgrades.items[0], id: 'future_upgrade' });
+    manifest.collections.enemies.items.families.push({ id: 'future-family', variants: [{ id: 'future-variant' }] });
+    manifest.collections.enemies.items.affixes.push({ id: 'future-affix', color: '#ffffff' });
+    manifest.collections.enemies.items.presets.push({ familyId: 'future-family', affixIds: ['future-affix'] });
+    manifest.collections['public-tuning'].items.difficultyCatalog.push({ id: 'future-difficulty' });
+  });
+  assert.doesNotThrow(() => validateGameReferenceArtifact(valid({ manifestBytes, receiptBytes: receiptFor(manifestBytes) })));
 });
 
 test('offline directory verifier rejects extra files and symlinks where supported', async (t) => {

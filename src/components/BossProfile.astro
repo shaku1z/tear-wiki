@@ -1,10 +1,10 @@
 ---
-import { bosses, source } from '../data/game-reference.mjs';
+import { bosses, source, stages } from '../data/game-reference.mjs';
 const { name } = Astro.props;
 const boss = bosses.find((item) => item.name === name || item.id === String(name).toLowerCase());
-const stageNames = { grounds: 'The Grounds', undercroft: 'The Undercroft', 'crimson-fields': 'The Crimson Fields', voidspire: 'The Voidspire', tear: 'The Tear' };
 const displayName = boss?.name || name;
-const metrics = boss ? [['STAGE', stageNames[boss.stageId] || boss.stageId], ['PHASE THRESHOLDS', boss.phaseMarks?.length || 0]] : [];
+const stageName = stages.find((stage) => stage.id === boss?.stageId)?.name || boss?.stageId;
+const metrics = boss ? [['STAGE', stageName], ['PHASE THRESHOLDS', boss.phaseMarks?.length || 0]] : [];
 ---
 
 <section class="boss-terminal" aria-label={`${name} boss data`}>
