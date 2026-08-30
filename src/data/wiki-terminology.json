@@ -5,9 +5,9 @@
   "scope": "Permanent public terminology for authored wiki copy, bound to the validated current game-reference artifact.",
   "snapshot": {
     "repository": "shaku1z/tear",
-    "sourceSha": "91706363b80fb56a18df4d973b424bbce94a279e",
-    "validationRunId": "32957141293",
-    "manifestSha256": "38d0adf8770ab3cd9e6f9461d562b9752bd42e11db5440ea2d84e8e2d2e87e4f",
+    "sourceSha": "81a7facfc3f0ab5aa3b1525af10991682cb7c991",
+    "validationRunId": "33292065009",
+    "manifestSha256": "a7e0b8e8fce972ea532a2f51d9106af1ddca68fc1ab1f511413a3002bc1b59f9",
     "manifestSchemaVersion": 2,
     "format": "game-reference.v1",
     "terminologyVersion": "g4-terminology-v1",
