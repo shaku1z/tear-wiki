@@ -1,30 +1,40 @@
-// Explicit bridge between historical ModelViewer props and the canonical
-// game-reference IDs. This file contains no game runtime imports or inferred
-// combat data.
-export const MODEL_REFERENCES = Object.freeze({
-  charger: Object.freeze({ kind: 'enemy', canonicalId: 'charger', assetId: 'charger' }),
-  ranged: Object.freeze({ kind: 'enemy', canonicalId: 'ranged', assetId: 'ranged' }),
-  flyer: Object.freeze({ kind: 'enemy', canonicalId: 'flyer', assetId: 'flyer' }),
-  bomber: Object.freeze({ kind: 'enemy', canonicalId: 'bomber', assetId: 'bomber' }),
-  armored: Object.freeze({ kind: 'enemy', canonicalId: 'armored', assetId: 'armored' }),
-  priest: Object.freeze({ kind: 'enemy', canonicalId: 'priest', assetId: null }),
-  mender: Object.freeze({ kind: 'enemy', canonicalId: 'mender', assetId: null }),
-  herald: Object.freeze({ kind: 'enemy', canonicalId: 'herald', assetId: null }),
-  anchor: Object.freeze({ kind: 'enemy', canonicalId: 'anchor', assetId: null }),
-  wraith: Object.freeze({ kind: 'enemy', canonicalId: 'wraith', assetId: 'wraith' }),
-  chimera: Object.freeze({ kind: 'enemy', canonicalId: 'chimera', assetId: 'chimera' }),
-  warden: Object.freeze({ kind: 'boss', canonicalId: 'warden', assetId: 'warden' }),
-  colossus: Object.freeze({ kind: 'boss', canonicalId: 'colossus', assetId: 'iron-colossus' }),
-  'iron-colossus': Object.freeze({ kind: 'boss', canonicalId: 'colossus', assetId: 'iron-colossus' }),
-  aldric: Object.freeze({ kind: 'boss', canonicalId: 'aldric', assetId: 'aldric' }),
-  echo: Object.freeze({ kind: 'boss', canonicalId: 'echo', assetId: 'the-echo' }),
-  'the-echo': Object.freeze({ kind: 'boss', canonicalId: 'echo', assetId: 'the-echo' }),
-  source: Object.freeze({ kind: 'boss', canonicalId: 'source', assetId: 'the-source' }),
-  'the-source': Object.freeze({ kind: 'boss', canonicalId: 'source', assetId: 'the-source' }),
-  // These props exist in older MDX, but neither is a canonical family ID.
-  support: Object.freeze({ kind: 'legacy-label', canonicalId: null, assetId: 'support', label: 'Support (legacy label)' }),
-  elite: Object.freeze({ kind: 'unsupported', canonicalId: null, assetId: null, label: 'Elite (unpublished record)' }),
+import artifact from './game-reference.v1.json' with { type: 'json' };
+
+// Historical silhouettes are presentation assets, not a second gameplay
+// roster. Canonical family and boss identities are projected from the
+// authenticated game-reference artifact below; new records automatically get
+// an honest metadata-only exhibit until artwork is deliberately retained.
+const ARCHIVAL_ASSET_BY_CANONICAL_ID = Object.freeze({
+  charger: 'charger',
+  ranged: 'ranged',
+  flyer: 'flyer',
+  bomber: 'bomber',
+  armored: 'armored',
+  wraith: 'wraith',
+  chimera: 'chimera',
+  warden: 'warden',
+  colossus: 'iron-colossus',
+  aldric: 'aldric',
+  echo: 'the-echo',
+  source: 'the-source',
 });
+
+const references = {};
+for (const family of artifact.collections.enemies.items.families) {
+  references[family.id] = Object.freeze({ kind: 'enemy', canonicalId: family.id, assetId: ARCHIVAL_ASSET_BY_CANONICAL_ID[family.id] ?? null });
+}
+for (const boss of artifact.collections.bosses.items) {
+  references[boss.id] = Object.freeze({ kind: 'boss', canonicalId: boss.id, assetId: ARCHIVAL_ASSET_BY_CANONICAL_ID[boss.id] ?? null });
+}
+
+// Compatibility props used by retained hand-authored pages.
+if (references.colossus) references['iron-colossus'] = references.colossus;
+if (references.echo) references['the-echo'] = references.echo;
+if (references.source) references['the-source'] = references.source;
+references.support = Object.freeze({ kind: 'legacy-label', canonicalId: null, assetId: 'support', label: 'Support (legacy label)' });
+references.elite = Object.freeze({ kind: 'unsupported', canonicalId: null, assetId: null, label: 'Elite (unpublished record)' });
+
+export const MODEL_REFERENCES = Object.freeze(references);
 
 export const ARCHIVAL_ASSET_ALLOWLIST = Object.freeze([
   'aldric',

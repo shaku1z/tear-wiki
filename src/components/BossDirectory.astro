@@ -1,0 +1,39 @@
+---
+import { bosses, source, stages } from '../data/game-reference.mjs';
+
+const pageSlugs = new Map([
+  ['warden', 'warden'],
+  ['colossus', 'iron-colossus'],
+  ['aldric', 'aldric'],
+  ['rootbound', 'rootbound'],
+  ['echo', 'the-echo'],
+  ['source', 'the-source'],
+]);
+const stageNames = new Map(stages.map((stage) => [stage.id, stage.name]));
+---
+
+<section class="boss-directory" aria-label="Published boss directory">
+  <header><span>BOSS DIRECTORY / PUBLISHED REFERENCE</span><code>{source.sha.slice(0, 7)}</code></header>
+  <div class="boss-grid">
+    {bosses.map((boss) => {
+      const slug = pageSlugs.get(boss.id);
+      const content = <><b>{boss.name}</b><span>{stageNames.get(boss.stageId) || boss.stageId}</span><em>{boss.phaseMarks.length} published phase thresholds</em></>;
+      return slug
+        ? <a class="boss-entry" href={`/bosses/${slug}`}>{content}</a>
+        : <div class="boss-entry boss-entry--unlinked" title="No dedicated wiki page yet">{content}</div>;
+    })}
+  </div>
+</section>
+
+<style>
+  .boss-directory { border: 1px solid var(--sl-color-hairline); border-top: 4px solid var(--tear-red); margin: 1.5rem 0; }
+  header { align-items: center; background: var(--sl-color-gray-6); display: flex; font: 800 .64rem/1 var(--sl-font-mono); justify-content: space-between; letter-spacing: .1em; padding: .8rem; }
+  header code { color: var(--tear-red); font: inherit; }
+  .boss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+  .boss-entry { border-bottom: 1px solid var(--sl-color-hairline); border-right: 1px solid var(--sl-color-hairline); color: inherit; display: grid; gap: .35rem; padding: .9rem; text-decoration: none; }
+  .boss-entry:hover { background: color-mix(in srgb, var(--tear-red) 10%, transparent); }
+  .boss-entry b { color: var(--sl-color-white); font: 800 .86rem/1.2 var(--sl-font-mono); text-transform: uppercase; }
+  .boss-entry span, .boss-entry em { color: var(--sl-color-gray-3); font: 700 .62rem/1.3 var(--sl-font-mono); }
+  .boss-entry em { font-style: normal; text-transform: uppercase; }
+  .boss-entry--unlinked { opacity: .78; }
+</style>

@@ -19,11 +19,13 @@ function encodedPayload(payload) {
   return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
 }
 
-test('planner artifact exposes the exact current 60-upgrade catalog', () => {
-  assert.equal(catalog.length, 60);
-  assert.equal(tiered.length, 18);
-  assert.equal(catalog.filter((upgrade) => upgrade.rule.kind === 'unique').length, 18);
-  assert.equal(catalog.filter((upgrade) => upgrade.rule.kind === 'stackable').length, 24);
+test('planner consumes the complete source-owned upgrade catalog without a mirrored count', () => {
+  assert.ok(catalog.length > 0);
+  assert.equal(new Set(catalog.map((upgrade) => upgrade.id)).size, catalog.length);
+  assert.ok(tiered.length > 0);
+  assert.ok(catalog.some((upgrade) => upgrade.rule.kind === 'unique'));
+  assert.ok(catalog.some((upgrade) => upgrade.rule.kind === 'stackable'));
+  assert.ok(catalog.every((upgrade) => ['tiered', 'unique', 'stackable'].includes(upgrade.rule.kind)));
   assert.ok(fortune && fortune.maxStacks === 5);
   assert.ok(unlimitedStackable && unlimitedStackable.maxStacks === null);
 });
